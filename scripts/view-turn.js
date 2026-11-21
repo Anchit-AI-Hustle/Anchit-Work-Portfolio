@@ -192,6 +192,60 @@ const check = (ok, label, detail) => {
     await pg.close();
   }
 
+  // The flight deck: orbit, warp, command deck, rail. Each is checked for what
+  // it does, not that it exists: the orbit once had all four nodes pinned to
+  // one point by another script's fill mode, and looked fine in the markup.
+  for (const [name, width, height] of [['phone', 390, 844], ['tablet', 820, 1180], ['desktop', 1440, 900]]) {
+    const pg = await browser.newPage({ viewport: { width, height } });
+    const errors = [];
+    pg.on('pageerror', e => errors.push(e.message));
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(6500);
+    const orbit = await pg.evaluate(() => {
+      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2) }; });
+      return { n: ns.length, spread: new Set(ns.map(n => n.x)).size, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
+        clean: ns.every(n => n.t.length < 14), overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
+    check(orbit.inside, `${name}: every orbit node is on screen`);
+    check(orbit.clean, `${name}: orbit labels are the nav names, not name plus caption`);
+    check(orbit.overflow <= 1, `${name}: the orbit causes no horizontal overflow`, String(orbit.overflow));
+    const near = await pg.evaluate(() => {
+      for (const n of document.querySelectorAll('.fd-node:not(.is-far)')) {
+        const r = n.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+        if (document.elementFromPoint(x, y) === n) return { x, y, h: r.height };
+      }
+      return null;
+    });
+    check(!!near, `${name}: a near orbit node is the topmost thing where it sits`);
+    if (near) {
+      await pg.mouse.click(near.x, near.y);
+      await pg.waitForTimeout(250);
+      const mid = await pg.evaluate(() => ({ view: document.querySelector('.view.active').id, warp: getComputedStyle(document.getElementById('fdWarp')).display }));
+      check(mid.view !== 'view-home', `${name}: clicking an orbit node changes the route`, mid.view);
+      check(mid.warp === 'block', `${name}: the warp fires on the route change`, mid.warp);
+      await pg.waitForTimeout(900);
+      check(await pg.evaluate(() => getComputedStyle(document.getElementById('fdWarp')).display) === 'none', `${name}: the warp is gone once it has played`);
+    }
+    await pg.keyboard.press('Control+k');
+    await pg.waitForTimeout(300);
+    const deck = await pg.evaluate(() => ({ open: document.getElementById('fdDeck').classList.contains('is-open'), focus: document.activeElement.id,
+      groups: [...document.querySelectorAll('.fd-group')].map(g => g.textContent), items: document.querySelectorAll('.fd-item').length }));
+    check(deck.open && deck.focus === 'fdInput', `${name}: Ctrl+K opens the command deck with the field focused`, JSON.stringify(deck));
+    check(deck.groups.length === 3 && deck.items > 10, `${name}: the deck lists pages, projects and contact channels`, JSON.stringify(deck));
+    await pg.keyboard.type('now');
+    await pg.keyboard.press('Enter');
+    await pg.waitForTimeout(800);
+    const went = await pg.evaluate(() => ({ open: document.getElementById('fdDeck').classList.contains('is-open'), view: document.querySelector('.view.active').id,
+      sector: document.querySelector('[data-fd-sector]').textContent }));
+    check(!went.open && went.view === 'view-now', `${name}: typing and Enter in the deck opens that page`, JSON.stringify(went));
+    check(/Now/i.test(went.sector), `${name}: the rail names the current sector`, went.sector);
+    await pg.keyboard.press('Control+k'); await pg.waitForTimeout(200); await pg.keyboard.press('Escape'); await pg.waitForTimeout(150);
+    check(!(await pg.evaluate(() => document.getElementById('fdDeck').classList.contains('is-open'))), `${name}: Escape closes the deck`);
+    check(errors.length === 0, `${name}: the flight deck throws nothing`, errors.slice(0, 2).join(' | '));
+    await pg.close();
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {

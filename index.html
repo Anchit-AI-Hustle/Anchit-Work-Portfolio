@@ -14661,6 +14661,452 @@
   if (document.getElementById('view-projects') && document.getElementById('view-projects').classList.contains('active')) armOpen();
 })();
 </script>
+<!-- ═══ FLIGHT DECK ═══════════════════════════════════════════════════════════
+     Brief: for a recruiter or hiring manager landing cold; the goal is that the
+     site itself is remembered as an instrument a product person built; the feel
+     is precise, alive, navigable.
+
+     Four pieces, one idea (the portfolio is a console you fly, not a page you
+     read):
+       orbit    the main destinations circle the portrait and can be spun
+       warp     a burst of light on every route change
+       deck     Cmd/Ctrl+K (or /) opens a command deck that jumps anywhere
+       rail     a telemetry rail on the screen edge: sector, depth, IST time
+
+     Rules it keeps (DESIGN.md): tokens only; transform and opacity only;
+     nothing loops at rest (the orbit coasts to a stop, the warp is one shot,
+     the rail writes on scroll); every label is read from copy already on this
+     page, so nothing here states a fact the site did not already state. -->
+<style id="flight-deck-css">
+  /* ── orbit ── */
+  .cine-mark { isolation: isolate; }
+  .fd-orbit { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s cubic-bezier(.22,1,.36,1); }
+  html.cine-settled .fd-orbit, .fd-orbit.is-on { opacity: 1; }
+  .fd-node {
+    position: absolute; left: 50%; top: 50%; margin: -18px 0 0 0;
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    min-height: 36px; padding: 0 var(--sp-3);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink); white-space: nowrap; cursor: pointer; pointer-events: auto;
+    background: color-mix(in srgb, var(--bg-deep) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent);
+    border-radius: var(--r-pill);
+    appearance: none; -webkit-appearance: none;
+  }
+  .fd-node::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; flex: none;
+    background: var(--primary);
+  }
+  .fd-node:hover, .fd-node:focus-visible { border-color: var(--primary); color: var(--accent-warm); }
+  .fd-node:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .fd-node.is-far { pointer-events: none; }
+  .fd-node, .fd-k { animation: none !important; transition: border-color .2s ease, color .2s ease !important; }
+  .fd-track {
+    position: absolute; left: 50%; top: 50%; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 30%, transparent);
+    border-radius: 50%; z-index: -1;
+  }
+  @media (max-width: 560px) {
+    .fd-node { font-size: var(--fs-micro); letter-spacing: .08em; padding: 0 var(--sp-2); gap: var(--sp-1); min-height: 32px; margin-top: -16px; }
+  }
+
+  /* ── warp ── */
+  #fdWarp { position: fixed; inset: 0; z-index: 59; pointer-events: none; display: none; width: 100%; height: 100%; }
+  html[data-motion="off"] #fdWarp { display: none !important; }
+
+  /* ── rail ── */
+  .fd-rail {
+    position: fixed; right: var(--sp-3); top: 50%; z-index: 40; pointer-events: none;
+    width: 16px; height: 44vh; margin-top: -22vh; display: none;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  @media (min-width: 1280px) { .fd-rail { display: block; } }
+  .fd-rail-line {
+    position: absolute; right: 7px; top: 0; bottom: 0; width: 1px;
+    background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--accent-warm) 55%, transparent) 0 1px, transparent 1px 12px);
+  }
+  .fd-rail-mark {
+    position: absolute; right: 2px; top: 0; width: 11px; height: 2px;
+    background: var(--primary); transform-origin: 100% 50%;
+  }
+  .fd-rail-txt {
+    position: absolute; right: 22px; white-space: nowrap;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+  }
+  .fd-rail-sector { bottom: calc(100% + var(--sp-3)); right: 0; color: var(--accent-warm); }
+  .fd-rail-time { top: calc(100% + var(--sp-3)); right: 0; }
+  .fd-rail-depth { top: 0; color: var(--ink); writing-mode: horizontal-tb; transform: none; right: 22px; margin-top: -6px; }
+  body.sidebar-open .fd-rail, body.view-chat .fd-rail, body.chat-guide-open .fd-rail { visibility: hidden; }
+
+  /* ── deck ── */
+  .fd-k {
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; flex: none;
+    min-height: 32px; padding: 0 var(--sp-3); cursor: pointer;
+    color: var(--accent-warm); background: transparent;
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent); border-radius: var(--r-pill);
+  }
+  .fd-k:hover, .fd-k:focus-visible { border-color: var(--primary); color: var(--ink); }
+  .fd-k:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .fd-k kbd { font: inherit; color: var(--ink-dim); }
+  .fd-deck {
+    position: fixed; inset: 0; z-index: 10050; display: none;
+    align-items: flex-start; justify-content: center;
+    padding: 12vh var(--sp-4) var(--sp-4);
+    background: color-mix(in srgb, var(--bg-deep) 86%, transparent);
+  }
+  .fd-deck.is-open { display: flex; }
+  .fd-panel {
+    position: relative; width: min(640px, 100%); max-height: 70vh; display: flex; flex-direction: column;
+    background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    animation: fdIn .26s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes fdIn { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.985); } to { opacity: 1; transform: none; } }
+  html[data-motion="off"] .fd-panel { animation: none; }
+  .fd-panel::before, .fd-panel::after {
+    content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+    border: 0 solid var(--accent-warm);
+  }
+  .fd-panel::before { top: -6px; left: -6px; border-top-width: 2px; border-left-width: 2px; }
+  .fd-panel::after { bottom: -6px; right: -6px; border-bottom-width: 2px; border-right-width: 2px; }
+  .fd-input {
+    width: 100%; padding: var(--sp-4) var(--sp-5); font-family: var(--font-body); font-size: var(--fs-lead);
+    color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule);
+    outline: none; border-radius: var(--r-lg) var(--r-lg) 0 0;
+  }
+  .fd-input::placeholder { color: var(--ink-mute); }
+  .fd-input:focus-visible { border-bottom-color: var(--primary); }
+  .fd-list { list-style: none; margin: 0; padding: var(--sp-2); overflow-y: auto; overscroll-behavior: contain; }
+  .fd-group {
+    padding: var(--sp-3) var(--sp-3) var(--sp-1);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .fd-item {
+    display: flex; align-items: center; gap: var(--sp-3); min-height: 44px;
+    padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); cursor: pointer;
+    font-family: var(--font-body); font-size: var(--fs-body); color: var(--ink);
+  }
+  .fd-item .fd-code { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .1em; color: var(--ink-dim); flex: none; width: 3ch; }
+  .fd-item[aria-selected="true"] { background: var(--primary-soft); box-shadow: inset 2px 0 0 var(--primary); }
+  .fd-item[aria-selected="true"] .fd-code { color: var(--primary); }
+  .fd-empty { padding: var(--sp-5); color: var(--ink-dim); font-size: var(--fs-sm); }
+  .fd-foot {
+    display: flex; gap: var(--sp-4); flex-wrap: wrap; padding: var(--sp-3) var(--sp-5);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim);
+  }
+</style>
+<canvas id="fdWarp" aria-hidden="true"></canvas>
+<div class="fd-rail" id="fdRail" aria-hidden="true">
+  <span class="fd-rail-txt fd-rail-sector" data-fd-sector></span>
+  <span class="fd-rail-line"></span>
+  <span class="fd-rail-mark" data-fd-mark></span>
+  <span class="fd-rail-txt fd-rail-depth" data-fd-depth>000</span>
+  <span class="fd-rail-txt fd-rail-time" data-fd-time></span>
+</div>
+<div class="fd-deck" id="fdDeck" role="dialog" aria-modal="true" aria-label="Command deck">
+  <div class="fd-panel">
+    <input class="fd-input" id="fdInput" type="text" autocomplete="off" spellcheck="false"
+           role="combobox" aria-expanded="true" aria-controls="fdList" aria-autocomplete="list"
+           placeholder="Where to?" aria-label="Jump to a page, project or contact channel">
+    <ul class="fd-list" id="fdList" role="listbox" aria-label="Destinations"></ul>
+    <div class="fd-foot"><span>&uarr;&darr; move</span><span>Enter open</span><span>Esc close</span></div>
+  </div>
+</div>
+<script id="flight-deck-js">
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var motionOff = function () { return root.getAttribute('data-motion') === 'off'; };
+  var css = function (name) { return getComputedStyle(root).getPropertyValue(name).trim(); };
+  var go = function (view) { if (window.switchView) window.switchView(view); };
+  // A sidebar label holds two strings, the name and the caption it morphs to
+  // on hover. The name is the label; reading textContent glued them together.
+  var labelOf = function (host) {
+    if (!host) return '';
+    var el = host.querySelector('.ml-default') || host.querySelector('.sidebar-label') || host;
+    return el.textContent.replace(/\s+/g, ' ').trim();
+  };
+  var navLabel = function (view) { return labelOf(document.querySelector('.sidebar-item[data-view="' + view + '"]')); };
+
+  /* ── orbit: the main destinations circle the portrait ─────────────────── */
+  (function orbit() {
+    var mark = document.getElementById('cineMark');
+    if (!mark) return;
+    var views = ['experience', 'projects', 'about', 'contact'];
+    var labels = { contact: labelOf(document.getElementById('sidebarContactToggle')) };
+    var nodes = [];
+    var wrap = document.createElement('div');
+    wrap.className = 'fd-orbit';
+    // The shared motion runtime gives every button inside an arriving block a
+    // rise-in whose fill mode then holds `transform: none` on it for good,
+    // which pinned all four nodes to the centre. This is opted out of that.
+    wrap.setAttribute('data-no-motion', '');
+    var track = document.createElement('span');
+    track.className = 'fd-track';
+    wrap.appendChild(track);
+    views.forEach(function (v) {
+      var text = (navLabel(v) || labels[v] || '').trim();
+      if (!text) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fd-node'; b.textContent = text;
+      // The stage this lives in is decorative (aria-hidden); the sidebar and
+      // the command deck are the keyboard routes to the same places.
+      b.tabIndex = -1;
+      b.addEventListener('click', function () { if (!dragged) go(v); });
+      wrap.appendChild(b); nodes.push(b);
+    });
+    if (!nodes.length) return;
+    mark.appendChild(wrap);
+
+    var rot = -0.5, vel = 0, raf = 0, dragging = false, dragged = false, lastX = 0;
+    function place() {
+      var w = mark.offsetWidth, rx = w * 0.86, ry = w * 0.2;
+      // Keep the widest label on screen on a phone.
+      rx = Math.min(rx, (window.innerWidth - 110) / 2);
+      track.style.width = (rx * 2) + 'px'; track.style.height = (ry * 2) + 'px';
+      // The ring sits low on the portrait, so the nearest node crosses under
+      // the chin line rather than across the face.
+      var drop = w * 0.2;
+      track.style.margin = (drop - ry) + 'px 0 0 ' + (-rx) + 'px';
+      for (var i = 0; i < nodes.length; i++) {
+        var a = rot + i * (Math.PI * 2 / nodes.length);
+        var depth = Math.sin(a);                         // +1 nearest, -1 behind the portrait
+        var x = Math.cos(a) * rx, y = drop + depth * ry;
+        var s = 0.84 + 0.16 * (depth + 1) / 2;
+        var n = nodes[i];
+        n.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translateX(-50%) scale(' + s.toFixed(3) + ')';
+        n.style.opacity = (0.34 + 0.66 * (depth + 1) / 2).toFixed(2);
+        n.style.zIndex = depth > -0.15 ? 6 : -1;
+        n.classList.toggle('is-far', depth < -0.15);
+      }
+    }
+    function tick() {
+      raf = 0;
+      rot += vel;
+      vel *= dragging ? 0.6 : 0.94;
+      place();
+      if (Math.abs(vel) > 0.0006 || dragging) raf = requestAnimationFrame(tick);
+    }
+    function kick(v) {
+      if (motionOff()) return;
+      vel = Math.max(-0.16, Math.min(0.16, vel + v));
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+    place();
+    // It moves while the visitor does, and coasts to a stop when they stop.
+    var stage = mark.closest('.cine-stage') || mark;
+    stage.addEventListener('pointerdown', function (e) { dragging = true; dragged = false; lastX = e.clientX; });
+    addEventListener('pointerup', function () { dragging = false; setTimeout(function () { dragged = false; }, 0); });
+    stage.addEventListener('pointermove', function (e) {
+      var dx = e.clientX - lastX; lastX = e.clientX;
+      if (dragging) { if (Math.abs(dx) > 2) dragged = true; kick(-dx * 0.0042); }
+      else if (e.pointerType === 'mouse') kick(-dx * 0.00028);
+    }, { passive: true });
+    addEventListener('resize', place, { passive: true });
+    // One spin on arrival, so it is seen to be a thing that turns.
+    var spun = false;
+    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); kick(0.11); }
+    if (root.classList.contains('cine-settled')) arrive(); else setTimeout(arrive, 2600);
+    document.addEventListener('viewChanged', function (e) { if (e.detail === 'home') { place(); kick(0.07); } });
+  })();
+
+  /* ── warp: one burst of light per route change ────────────────────────── */
+  (function warp() {
+    var cv = document.getElementById('fdWarp');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), raf = 0, t0 = 0, stars = [], cols = null, W = 0, H = 0, cx = 0, cy = 0;
+    var D = 520;
+    function frame(now) {
+      var p = Math.min(1, (now - t0) / D);
+      ctx.clearRect(0, 0, W, H);
+      // Fast out, then gone: the streaks stretch and thin as they leave.
+      var e = 1 - Math.pow(1 - p, 3), fade = p < 0.2 ? p / 0.2 : 1 - (p - 0.2) / 0.8;
+      ctx.lineCap = 'round';
+      for (var i = 0; i < stars.length; i++) {
+        var s = stars[i];
+        var r1 = s.r + e * s.v, r0 = s.r + Math.max(0, e - 0.16 - s.l) * s.v;
+        ctx.strokeStyle = cols[s.c]; ctx.globalAlpha = fade * s.a; ctx.lineWidth = s.w;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(s.t) * r0, cy + Math.sin(s.t) * r0);
+        ctx.lineTo(cx + Math.cos(s.t) * r1, cy + Math.sin(s.t) * r1);
+        ctx.stroke();
+      }
+      if (p < 1) raf = requestAnimationFrame(frame);
+      else { raf = 0; ctx.clearRect(0, 0, W, H); cv.style.display = 'none'; }
+    }
+    document.addEventListener('viewChanged', function () {
+      if (motionOff()) return;
+      if (raf) cancelAnimationFrame(raf);
+      cols = cols || [css('--accent-warm') || '#FFB736', css('--primary') || '#FF6940', css('--ink') || '#FBF5EC'];
+      W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+      var main = document.querySelector('main'), mr = main ? main.getBoundingClientRect() : { left: 0, width: W };
+      cx = mr.left + mr.width / 2; cy = H * 0.46;
+      var n = W < 700 ? 60 : 130, reach = Math.hypot(W, H) * 0.62;
+      stars = [];
+      for (var i = 0; i < n; i++) stars.push({
+        t: Math.random() * Math.PI * 2, r: 30 + Math.random() * 160, v: reach * (0.5 + Math.random() * 0.7),
+        l: Math.random() * 0.2, a: 0.25 + Math.random() * 0.6, w: Math.random() < 0.2 ? 2 : 1, c: (Math.random() * 3) | 0 });
+      cv.style.display = 'block';
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    });
+  })();
+
+  /* ── rail: sector, depth, time ────────────────────────────────────────── */
+  (function rail() {
+    var el = document.getElementById('fdRail');
+    if (!el) return;
+    var sector = el.querySelector('[data-fd-sector]'), mark = el.querySelector('[data-fd-mark]');
+    var depth = el.querySelector('[data-fd-depth]'), time = el.querySelector('[data-fd-time]');
+    var order = [].map.call(document.querySelectorAll('.sidebar-item[data-view]'), function (a) { return a.getAttribute('data-view'); });
+    function setSector(view) {
+      var parent = /^project-/.test(view) ? 'projects' : view;
+      var i = order.indexOf(parent), label = navLabel(parent) || parent;
+      sector.textContent = (i < 0 ? '--' : ('0' + (i + 1)).slice(-2)) + ' / ' + label;
+    }
+    var raf = 0;
+    function measure() {
+      raf = 0;
+      var max = Math.max(1, root.scrollHeight - window.innerHeight);
+      var p = Math.max(0, Math.min(1, (window.scrollY || 0) / max));
+      var travel = el.offsetHeight - 2;
+      mark.style.transform = 'translate3d(0,' + (p * travel).toFixed(1) + 'px,0)';
+      depth.style.transform = 'translate3d(0,' + (p * travel).toFixed(1) + 'px,0)';
+      depth.textContent = ('00' + Math.round(p * 100)).slice(-3);
+    }
+    function onScroll() { if (!raf) raf = requestAnimationFrame(measure); }
+    function clock() {
+      try {
+        time.textContent = 'IST ' + new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+      } catch (e) { time.textContent = 'IST'; }
+    }
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll, { passive: true });
+    document.addEventListener('viewChanged', function (e) { setSector(e.detail); setTimeout(measure, 60); });
+    var active = document.querySelector('.view.active');
+    setSector(active ? active.id.replace('view-', '') : 'home');
+    measure(); clock();
+    setInterval(clock, 30000);
+  })();
+
+  /* ── deck: jump anywhere ──────────────────────────────────────────────── */
+  (function deck() {
+    var dlg = document.getElementById('fdDeck'), input = document.getElementById('fdInput'), list = document.getElementById('fdList');
+    var bar = document.querySelector('.top-bar-links');
+    if (!dlg || !input || !list) return;
+    var items = [], shown = [], sel = 0, lastFocus = null;
+    var mac = /Mac|iPhone|iPad/.test(navigator.platform || '');
+
+    function collect() {
+      items = [];
+      var code = 0;
+      // Pages: the sidebar's own entries, in its order, with its labels.
+      [].forEach.call(document.querySelectorAll('.sidebar-item[data-view]'), function (a) {
+        var label = labelOf(a), v = a.getAttribute('data-view');
+        if (label) items.push({ group: 'Pages', label: label, run: function () { go(v); } });
+      });
+      var ct = labelOf(document.getElementById('sidebarContactToggle'));
+      if (ct) items.push({ group: 'Pages', label: ct, run: function () { go('contact'); } });
+      // Projects: each card's own heading, opening that card's own case study.
+      [].forEach.call(document.querySelectorAll('#view-projects .builds-grid > .build-card'), function (card) {
+        var h = card.querySelector('h3'), link = card.querySelector('[data-view^="project-"], a.btn.primary, a.btn');
+        if (!h || !link) return;
+        items.push({ group: 'Projects', label: h.textContent.replace(/\s+/g, ' ').trim(), run: function () { link.click(); } });
+      });
+      // Reach me: the top bar's own channels.
+      [].forEach.call(document.querySelectorAll('.top-bar-link:not(.fd-k)'), function (b) {
+        var l = b.querySelector('.tb-label');
+        if (l) items.push({ group: 'Reach me', label: l.textContent.trim(), run: function () { b.click(); } });
+      });
+      items.forEach(function (it) { it.code = ('0' + (++code)).slice(-2); it.hay = (it.label + ' ' + it.group).toLowerCase(); });
+    }
+    function match(hay, q) {
+      // Every typed word has to appear; order does not matter.
+      return q.split(/\s+/).every(function (w) { return !w || hay.indexOf(w) !== -1; });
+    }
+    function render() {
+      var q = input.value.trim().toLowerCase();
+      shown = items.filter(function (it) { return match(it.hay, q); });
+      sel = Math.max(0, Math.min(sel, shown.length - 1));
+      list.textContent = '';
+      if (!shown.length) {
+        var none = document.createElement('li');
+        none.className = 'fd-empty'; none.textContent = 'Nothing here by that name.';
+        list.appendChild(none); input.removeAttribute('aria-activedescendant'); return;
+      }
+      var group = '';
+      shown.forEach(function (it, i) {
+        if (it.group !== group) {
+          group = it.group;
+          var g = document.createElement('li');
+          g.className = 'fd-group'; g.setAttribute('role', 'presentation'); g.textContent = group;
+          list.appendChild(g);
+        }
+        var li = document.createElement('li');
+        li.className = 'fd-item'; li.id = 'fdItem' + i; li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', i === sel ? 'true' : 'false');
+        var c = document.createElement('span'); c.className = 'fd-code'; c.textContent = it.code;
+        var t = document.createElement('span'); t.textContent = it.label;
+        li.appendChild(c); li.appendChild(t);
+        li.addEventListener('click', function () { run(i); });
+        li.addEventListener('pointermove', function () { if (sel !== i) { sel = i; mark(); } });
+        list.appendChild(li);
+      });
+      input.setAttribute('aria-activedescendant', 'fdItem' + sel);
+    }
+    function mark() {
+      [].forEach.call(list.querySelectorAll('.fd-item'), function (li, i) { li.setAttribute('aria-selected', i === sel ? 'true' : 'false'); });
+      input.setAttribute('aria-activedescendant', 'fdItem' + sel);
+      var cur = document.getElementById('fdItem' + sel);
+      if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+    }
+    function open() {
+      if (dlg.classList.contains('is-open')) return;
+      lastFocus = document.activeElement;
+      collect(); input.value = ''; sel = 0; render();
+      dlg.classList.add('is-open');
+      input.focus();
+    }
+    function close(restore) {
+      if (!dlg.classList.contains('is-open')) return;
+      dlg.classList.remove('is-open');
+      if (restore !== false && lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    function run(i) { var it = shown[i]; if (!it) return; close(false); it.run(); }
+    window.openCommandDeck = open;
+
+    input.addEventListener('input', function () { sel = 0; render(); });
+    dlg.addEventListener('pointerdown', function (e) { if (e.target === dlg) close(); });
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); sel = Math.min(shown.length - 1, sel + 1); mark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); sel = Math.max(0, sel - 1); mark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); run(sel); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+      else if (e.key === 'Tab') { e.preventDefault(); }          // one field: focus stays in the deck
+      else e.stopPropagation();                                   // typing here is not a page shortcut
+    });
+    document.addEventListener('keydown', function (e) {
+      var typing = e.target && (/input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); dlg.classList.contains('is-open') ? close() : open(); }
+      else if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); open(); }
+    });
+    if (bar) {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'fd-k';
+      btn.setAttribute('aria-label', 'Open the command deck');
+      btn.setAttribute('aria-haspopup', 'dialog');
+      var lab = document.createElement('span'); lab.textContent = 'Jump to';
+      var kbd = document.createElement('kbd'); kbd.textContent = mac ? '⌘K' : 'Ctrl K';
+      btn.appendChild(lab); btn.appendChild(kbd);
+      btn.addEventListener('click', open);
+      bar.insertBefore(btn, bar.firstChild);
+    }
+  })();
+})();
+</script>
 </body>
 </html>
 
