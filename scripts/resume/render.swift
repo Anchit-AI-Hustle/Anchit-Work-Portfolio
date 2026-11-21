@@ -41,20 +41,26 @@ func bullet(_ s:String,_ y:inout CGFloat,_ size:CGFloat=10){text("•",M+1,y,8,s
 func heading(_ title:String,_ dates:String,_ y:inout CGFloat){y+=4;text(dates,W-M-108,y+1,108,8.1,false,muted);y+=text(title,M,y,CW-115,10.3,true)+2}
 
 start()
-var y:CGFloat=31
-y+=text("Anchit Tandon",M,y,CW,29,true)+3
-y+=text("SENIOR PRODUCT MANAGER & AI BUILDER",M,y,CW,10.8,true,teal)+4
-y+=text("Technical Product Management · AI Agents · D2C Growth",M,y,CW,9.1,false,muted)+6
-y+=text("Delhi, India  |  +91 98739 45238  |  anchit.tandon@gmail.com",M,y,CW,8.7)+3
-y+=text("Open to full-time Senior PM roles  ·  Remote or Delhi NCR  ·  Available to join immediately",M,y,CW,8.4,false,muted)+3
-text("anchit-tandon.com",M,y,140,8.7,false,teal,"https://anchit-tandon.com")
-y+=text("linkedin.com/in/anchit-tandon",M+143,y,300,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+10
-NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:89)).fill()
+var y:CGFloat=24
+func textWidth(_ s:String,_ size:CGFloat)->CGFloat{let f=NSFont(name:"ArialMT",size:size)!;return ceil(NSAttributedString(string:s,attributes:[.font:f]).size().width)}
+y+=text("Anchit Tandon",M,y,CW,29,true)+1
+y+=text("SENIOR PRODUCT MANAGER & AI BUILDER",M,y,CW,10.8,true,teal)+3
+y+=text("Technical Product Management · AI Agents · D2C Growth",M,y,CW,9.1,false,muted)+4
+let contact="Delhi, India  |  +91 98739 45238  |  anchit.tandon@gmail.com  |  "
+text(contact,M,y,CW,8.7)
+var lx=M+textWidth(contact,8.7)
+text("anchit-tandon.com",lx,y,textWidth("anchit-tandon.com",8.7)+2,8.7,false,teal,"https://anchit-tandon.com")
+lx+=textWidth("anchit-tandon.com",8.7);text("  |  ",lx,y,30,8.7);lx+=textWidth("  |  ",8.7)
+y+=text("linkedin.com/in/anchit-tandon",lx,y,textWidth("linkedin.com/in/anchit-tandon",8.7)+2,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+2
+y+=text("Open to full-time Senior PM roles  ·  Remote or Delhi NCR  ·  Available to join immediately",M,y,CW,8.4,false,muted)+7
+let bandH:CGFloat=48
+NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:bandH)).fill()
 let projectCount=(content["projects"] as! [[String:String]]).count
-let metrics=[("5×","ET Prime · ₹15L to ₹80L/mo"),("400%+","ROI · ET Prime · Six months"),("₹3Cr+","Annual revenue · ET Markets"),("+27%","Engagement · ET Markets"),("+25%","Daily active users · ET Markets"),("150+","Qualified leads/day · from ~30"),("18K+","Runners · Delhi Half Marathon"),("\(projectCount)","Products built")]
-for col in 1...3 {let x=M+CGFloat(col)*(CW/4);line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+10));p.line(to:NSPoint(x:x,y:y+79));p.lineWidth=0.45;p.stroke()}
-for (i,m) in metrics.enumerated(){let centerX=M+(CGFloat(i%4)+0.5)*(CW/4);let rowY=y+CGFloat(i/4)*44.5;metricText(m.0,centerX,rowY+20,14.2,true,ink);metricText(m.1,centerX,rowY+35,7.2,false,muted)}
-y+=96
+let metrics=[("5×","ET Prime revenue","₹15L to ₹80L/mo"),("400%+","ROI in 6 months","ET Prime"),("₹3Cr+","Annual revenue","ET Markets"),("+27%","Engagement","ET Markets"),("150+","Qualified leads/day","from ~30"),("18K+","Runners","Delhi Half Marathon"),("\(projectCount)","Products built","AI & consumer")]
+let colW7=CW/CGFloat(metrics.count)
+for col in 1..<metrics.count {let x=M+CGFloat(col)*colW7;line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+8));p.line(to:NSPoint(x:x,y:y+bandH-8));p.lineWidth=0.45;p.stroke()}
+for (i,m) in metrics.enumerated(){let cx=M+(CGFloat(i)+0.5)*colW7;metricText(m.0,cx,y+19,13.6,true,ink);metricText(m.1,cx,y+31,6.9,false,muted);metricText(m.2,cx,y+40,6.9,false,muted)}
+y+=bandH+3
 section("PROFILE",&y)
 y+=text(content["profile"] as! String,M,y,CW,10.1)+2
 section("PROFESSIONAL EXPERIENCE",&y)
