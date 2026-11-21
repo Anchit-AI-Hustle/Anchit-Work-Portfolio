@@ -52,7 +52,7 @@ func section(_ s:String,_ y:inout CGFloat){
 }
 func heading(_ title:String,_ dates:String,_ y:inout CGFloat){
  y+=4
- text(dates,W-M-110,y+1.5,110,.mono,7.6,dim)
+ text(dates,W-M-110,y+1.5,110,.sans,8,dim)
  y+=text(title,M,y,CW-118,.sansBold,10.4)+2
 }
 func richBullet(_ lead:String,_ rest:String,_ y:inout CGFloat,_ size:CGFloat=9.5,_ draws:Bool=true)->CGFloat{
@@ -98,7 +98,7 @@ y=bandH+12
 
 // signature wins
 let wins=content["wins"] as! [[String:String]]
-let gap:CGFloat=12, cardW=(CW-gap*2)/3, cardH:CGFloat=60
+let gap:CGFloat=12, cardW=(CW-gap*2)/3, cardH:CGFloat=66
 for (i,w) in wins.enumerated(){
  let x=M+CGFloat(i)*(cardW+gap)
  fill(paper,CGRect(x:x,y:y,width:cardW,height:cardH))
