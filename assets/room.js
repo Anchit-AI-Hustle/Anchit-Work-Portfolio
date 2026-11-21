@@ -171,7 +171,7 @@
   // pauses during a scroll and stops with Motion off or on a light theme.
   var CARD = '.nav-card,.work-stat,.work-item,.contact-card,.device-card,.study-card,.project-hero,.project-section,' +
     '.now-role-card,.now-metrics-card,.now-stack-card,.now-focus-item,.about-value-item,.meta-block,.cw-panel,[class*="card"]';
-  var liveSeen = typeof WeakSet === 'function' ? new WeakSet() : null, liveIO = null, liveCount = 0;
+  var liveSeen = typeof WeakSet === 'function' ? new WeakSet() : null, liveIO = null, liveCount = 0, liveCards = [], liveSerial = 0, liveIn = new Set();
   function liveCss() {
     if (document.getElementById('lv-css')) return;
     var A = 'var(--accent-warm, var(--accent, #FFB736))';
@@ -194,7 +194,16 @@
     liveCss();
     if (!liveIO) {
       liveIO = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { e.target.classList.toggle('is-live', e.isIntersecting); });
+        // Every lit card is one more masked, turning layer for the GPU to
+        // blend, so only a handful run at once however many are in view: fewer
+        // on a phone. The rest wait their turn as others scroll away.
+        es.forEach(function (e) { if (e.isIntersecting) liveIn.add(e.target); else liveIn.delete(e.target); });
+        var cap = (innerWidth < 821 || matchMedia('(pointer: coarse)').matches) ? 3 : 6, lit = 0;
+        liveCards.forEach(function (c) {
+          var on = liveIn.has(c) && c.isConnected && lit < cap;
+          if (on) lit++;
+          c.classList.toggle('is-live', on);
+        });
       }, { rootMargin: '-6% 0px -6% 0px' });
     }
     // What counts as a card is decided by how it is drawn, not what it is
@@ -202,6 +211,15 @@
     // not at all. A card is a box of card size with a visible border on at
     // least three sides, that is not already inside a card.
     var list = document.querySelectorAll(CARD + ',main div,main a,main article,main li,main section,main figure,body>div div,body>section div,article');
+    // Pages that rebuild their content (the course swaps a whole chapter) take
+    // decorated cards with them. Give those back, or the budget below fills up
+    // with cards that no longer exist and new ones never get an edge.
+    liveCards = liveCards.filter(function (c) {
+      if (c.isConnected) return true;
+      liveIO.unobserve(c); liveIn.delete(c);
+      return false;
+    });
+    liveCount = liveCards.length;
     var looked = 0;
     for (var i = 0; i < list.length && liveCount < 70 && looked < 5000; i++) {
       var el = list[i];
@@ -230,9 +248,10 @@
       // somewhere different on its lap.
       var per = Math.max(7, Math.min(16, (w + h) / 70));
       beam.style.setProperty('--lv-t', per.toFixed(1) + 's');
-      beam.style.setProperty('--lv-d', (-((liveCount * 2.7) % per)).toFixed(1) + 's');
+      beam.style.setProperty('--lv-d', (-((liveSerial++ * 2.7) % per)).toFixed(1) + 's');
       el.appendChild(beam);
       liveIO.observe(el);
+      liveCards.push(el);
       liveCount++;
     }
   }

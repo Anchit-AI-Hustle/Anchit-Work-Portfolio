@@ -248,6 +248,22 @@ const check = (ok, label, detail) => {
       check(mid.warp === 'block', `${name}: the warp fires on the route change`, mid.warp);
       await pg.waitForTimeout(900);
       check(await pg.evaluate(() => getComputedStyle(document.getElementById('fdWarp')).display) === 'none', `${name}: the warp is gone once it has played`);
+      // The arrival: the destination's name is written in dust, then leaves
+      // nothing behind. Drawing is counted at the source (a WebGL canvas read
+      // back is blank), and a held frame is asked for, since a software
+      // renderer is too slow to catch one mid-air.
+      const form = await pg.evaluate(() => ({ ...window.__form }));
+      check(form.plays >= 1 && form.word.length > 1 && form.points >= 500, `${name}: the destination's name is written in dust on arrival`, JSON.stringify(form));
+      await pg.waitForTimeout(1300);
+      const after = await pg.evaluate(() => ({ cv: getComputedStyle(document.getElementById('fdForm')).display, dim: getComputedStyle(document.getElementById('fdFormDim')).display, draws: window.__form.draws }));
+      check(after.cv === 'none' && after.dim === 'none' && after.draws >= 2, `${name}: the word and its dimmer are gone once it has played`, JSON.stringify(after));
+      const held = await pg.evaluate(() => {
+        const ok = window.__formAt('now', 0.5), dim = document.getElementById('fdFormDim');
+        const r = { ok, word: window.__form.word, dim: +getComputedStyle(dim).opacity, hit: document.elementFromPoint(innerWidth / 2, innerHeight * 0.44).id };
+        window.__formStop();
+        return r;
+      });
+      check(held.ok && /now/i.test(held.word) && held.dim > 0.9 && held.hit !== 'fdForm' && held.hit !== 'fdFormDim', `${name}: mid-flight the page is dimmed behind the word and still takes clicks`, JSON.stringify(held));
     }
     await pg.keyboard.press('Control+k');
     await pg.waitForTimeout(300);
@@ -327,6 +343,46 @@ const check = (ok, label, detail) => {
     await pg.mouse.wheel(0, 400);
     await pg.waitForTimeout(1500);
     check(await pg.evaluate(() => !document.querySelector('.fd-reticle')), 'no reading reticle: no brackets or block counter follow the content');
+    // Asked for a second time, and for everywhere: no corner brackets on cards
+    // or on the book, no serial stamps, and no "05 / 08" style counter in any
+    // view, at rest or after a scroll.
+    const views = await pg.evaluate(() => [...document.querySelectorAll('section.view')].map(v => v.id.replace('view-', '')));
+    const stray = [];
+    for (const v of views) {
+      await pg.evaluate(v => window.switchView(v), v);
+      await pg.waitForTimeout(500);
+      await pg.mouse.wheel(0, 600);
+      await pg.waitForTimeout(350);
+      const got = await pg.evaluate(() => {
+        const out = [];
+        if (document.querySelector('.dc-corner, .cw-corner, .dc-stamp, .folio-hud, .fd-reticle')) out.push('bracket markup');
+        document.querySelectorAll('body *').forEach(e => {
+          if (e.children.length > 4) return;
+          const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+          if (t.length > 14 || !/^\[?\s*\d{1,2}\s*\/\s*(\d{1,2}|[A-Za-z]+)\s*\]?$/.test(t)) return;
+          const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+          if (r.width > 0 && cs.visibility !== 'hidden' && +cs.opacity > 0.05) out.push(t);
+        });
+        return out;
+      });
+      got.forEach(g => stray.push(v + ': ' + g));
+    }
+    // The frame governor: a device that drops frames is stepped down, and
+    // each step really removes layers.
+    const gov = await pg.evaluate(() => {
+      const vis = sel => [...document.querySelectorAll(sel)].filter(e => getComputedStyle(e).display !== 'none').length;
+      const a = window.__ambientStep(), lite = { tier: document.documentElement.dataset.ambient, ring2: vis('.lux-r2') };
+      const b = window.__ambientStep(), lean = { lean: document.documentElement.hasAttribute('data-lean'), dust: vis('.lux-dust'), beams: vis('.lv-beam'), glow: vis('.lux-glow') };
+      return { a, b, c: window.__ambientStep(), lite, lean };
+    });
+    check(gov.a === 'lite' && gov.lite.tier === 'lite' && gov.lite.ring2 === 0, 'governor: the first step down is the lite tier', JSON.stringify(gov.lite));
+    const jd = await pg.evaluate(() => { const J = window.__ambientJudge, rep = (v, n) => Array(n).fill(v);
+      return { smooth: J(rep(16.7, 120)), slow: J(rep(40, 120)), stalls: J(rep(300, 13)), mixed: J(rep(16.7, 70).concat(rep(300, 50))), few: J(rep(300, 3)) }; });
+    check(!jd.smooth && jd.slow && jd.stalls && jd.mixed && !jd.few, 'governor: smooth frames pass; slow frames and long stalls both step the page down', JSON.stringify(jd));
+    await pg.waitForTimeout(200);
+    check(await pg.evaluate(() => window.__floatBgStopped === true), 'governor: the particle canvas stops drawing at lean, not only hides');
+    check(gov.b === 'lean' && gov.lean.lean && gov.lean.dust === 0 && gov.lean.beams === 0 && gov.lean.glow >= 1 && gov.c === '', 'governor: the second step drops dust and edges, keeps the light, and is the last', JSON.stringify(gov.lean));
+    check(stray.length === 0, 'no brackets or numbered counter tags in any view', [...new Set(stray)].slice(0, 4).join(' | '));
     await pg.close();
   }
 
@@ -468,8 +524,10 @@ const check = (ok, label, detail) => {
       return { moving: on.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
         phases: new Set(on.map(i => getComputedStyle(i).animationDelay)).size,
         offscreenRunning: off.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
+        lit: document.querySelectorAll('.is-live').length, cap: innerWidth < 821 ? 3 : 6,
         overflow: document.documentElement.scrollWidth - innerWidth };
     });
+    check(live.lit <= live.cap, `${name}: no more than ${live.cap} edges run at once`, String(live.lit));
     check(live.moving >= 2, `${name}: light is lapping the edges of the cards on screen`, JSON.stringify(live));
     check(live.phases >= 2, `${name}: the cards are not all in step`, String(live.phases));
     check(live.offscreenRunning === 0, `${name}: no card animates while it is off screen`, String(live.offscreenRunning));
@@ -488,6 +546,7 @@ const check = (ok, label, detail) => {
     await po.evaluate(() => window.switchView('contact'));
     await po.waitForTimeout(3500);
     check(await po.evaluate(() => [...document.querySelectorAll('.lv-beam > i')].every(i => i.getAnimations().length === 0)), 'live edges: nothing animates with Motion off');
+    check(await po.evaluate(() => window.__form.plays === 0 && getComputedStyle(document.getElementById('fdForm')).display === 'none'), 'arrival word: never plays with Motion off');
     await off.close();
     for (const [href, want] of [['/freelancer', true], ['/growth-school', true], ['/deli-chic/', false]]) {
       const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -496,6 +555,25 @@ const check = (ok, label, detail) => {
       const n = await p2.evaluate(() => [...document.querySelectorAll('.is-live > .lv-beam > i')].filter(i => i.getAnimations().some(a => a.playState === 'running')).length);
       if (want) check(n >= 1, `${href}: cards on screen have live edges`, String(n));
       else check(n === 0 && !(await p2.evaluate(() => !!document.querySelector('.lv-beam'))), `${href}: a storefront gets no live edges`);
+      if (href === '/growth-school') {
+        // The course replaces a chapter's cards on every turn. Cards that have
+        // left the page must give their place back, or a long session stops
+        // getting edges on new ones.
+        const fresh = await p2.evaluate(() => {
+          const host = document.querySelector('main') || document.body;
+          let last = false;
+          for (let k = 0; k < 90; k++) {
+            const d = document.createElement('div');
+            d.style.cssText = 'width:320px;height:160px;border:1px solid rgba(255,255,255,.3)';
+            host.appendChild(d);
+            window.__roomScan();
+            last = !!d.querySelector(':scope > .lv-beam');
+            d.remove();
+          }
+          return last;
+        });
+        check(fresh, `${href}: a card added after ninety others came and went still gets an edge`);
+      }
       await p2.close();
     }
   }
