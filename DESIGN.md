@@ -175,6 +175,29 @@ thing a route change can ask for.
 element into an offscreen surface that is composited every frame, at rest.
 Over a near-black panel `screen` and plain alpha are the same picture.
 
+### The book (Projects)
+
+The Projects folio turns a real page. Forward, the right-hand page lifts off
+the spine and comes over; its back is the next left-hand page. The leaf and
+the cover that hides the seam are clones of the actual pages, made for one
+turn and removed after it. 780ms two-up, 520ms one-up, transform and opacity
+only, under `perspective: 2400px` on the stage.
+
+The surface is holographic, not paper: scanlines and the two brand hues on
+the leaf in flight, a hot leading edge, a scan band across the spread, a line
+of light down the spine when the page lands, HUD corner brackets, and a lean
+of at most 3 degrees toward the pointer (variables on the stage element).
+Measure pages with layout offsets, never `getBoundingClientRect`: the lean
+rotates the stage, and a rotated box reports a rect that is not its size.
+
+### Entrances are never switched off on a timer
+
+`assets/cinematic.js` once ran `setTimeout(bail, 4000)`. `bail()` forces every
+`.cin` on the page to its final state, so four seconds after load every
+entrance below the fold was dead before anyone scrolled to it, on every page.
+The deadline now rescues only what is unrevealed AND on screen. `bail()` is
+for a thrown error or a missing IntersectionObserver.
+
 ### Runtime budget
 
 The three concept storefronts were reported as "laggy" and "broken" on a laptop
@@ -223,6 +246,39 @@ and repainting SVG loops. These rules are what fixed it, and
 - **Canvas backing store and CSS box share an aspect ratio.** A one-screen
   backing store stretched over a 1,516px hero is a smear. Soft effects render at
   1x on phones and at most 1.25x on large screens.
+
+### The room (continuous backdrop)
+
+The owner's explicit exception to "nothing decorative runs forever". The
+backdrop moves all the time, slowly: pools of champagne, ember and gold light,
+dust rising in two depths, a foil sheen every 17s, two orbit lines. Loops run
+16 to 180 seconds and none shares a period with another.
+
+It is held to the part of the motion rule that matters: static paint moved by
+`transform` or faded by `opacity`, no script per frame, no layout, no repaint.
+It leaves the compositor during a scroll, thins out on phones
+(`data-ambient="lite"`), and holds still with Motion off.
+
+- `index.html`: `.lux`, styled in `<style id="lux-css">`. The orbit around the
+  portrait also turns on its own while it is on screen.
+- Every other dark page: `assets/room.js`, loaded by `assets/cinematic.js` or
+  directly. Same light, dust and sheen, plus one 3D piece per page so no two
+  feel alike: `horizon` (a floor grid to a vanishing point), `gyro` (three
+  rings on three axes) or `veil` (curtains of light). Named pages are mapped;
+  the rest are assigned by path.
+- Not built on light pages, behind a full-screen app shell, or on the concept
+  storefronts, which keep their own idle budget (`test:storefront-motion`).
+
+**Live edges.** On the same pages, a point of light laps the border of each
+card that is on screen, one lap every 7 to 16 seconds depending on the card's
+size, each card on its own phase. A masked child holds a square with one bright
+arc painted on it; the square turns, which is a compositor transform over
+static paint. `assets/room.js` finds cards by how they are drawn (a box of card
+size with a border on three sides or more), because the pages name their
+panels a dozen different ways. A card animates only while it is in view; the
+layer pauses during a scroll, and is off with Motion off, on a light theme, in
+the Projects book (it has its own frame) and on the storefronts. Put
+`data-no-live` on anything that should never get one.
 
 ### Arrival choreography
 

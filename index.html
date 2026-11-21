@@ -120,6 +120,14 @@
 <script defer src="/assets/vendor/ScrollTrigger.min.js"></script>
 
 <style>
+  /* Needed before the rest of this file has arrived. The sidebar is parsed
+     near the top; the rules that collapse its Contact submenu and size its
+     icons live thousands of lines below. On a slow load the submenu rendered
+     open with its icons at full width, the first of which is a circle with an
+     exclamation mark, 200px across, which reads as an error. */
+  .sidebar-subnav { display: none; }
+  .sidebar-subitem svg, .sidebar-item svg, .sidebar-caret { width: 16px; height: 16px; flex: 0 0 auto; }
+
   /* ============ DESIGN TOKENS ============ */
   :root[data-theme="light"] {
     --bg: #FBF5EC;
@@ -1135,7 +1143,6 @@
      containing block for every fixed descendant, forever. */
   .view.active { display: block; animation: viewIn 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
   html[data-motion="off"] .view.active { animation: none; }
-  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
   #view-home { padding-top: 0; }
   @keyframes viewIn {
     from { opacity: 0; transform: translate3d(0, 14px, 0); }
@@ -3514,6 +3521,15 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
+<!-- LUX: the room itself moves. Slow light, dust in depth, a foil sheen, two
+     orbit lines. Every piece is a static paint moved by a compositor-only
+     transform or faded by opacity, so it costs no script and no repaint. -->
+<div class="lux" aria-hidden="true">
+  <i class="lux-glow lux-a"></i><i class="lux-glow lux-b"></i><i class="lux-glow lux-c"></i>
+  <i class="lux-ring lux-r1"></i><i class="lux-ring lux-r2"></i>
+  <i class="lux-dust lux-d1"></i><i class="lux-dust lux-d2"></i>
+  <i class="lux-sheen"></i>
+</div>
 <!-- Energy orb wallpaper: glowing core + revolving orbital rings, faint, behind
      everything (no solid nodes over content) -->
 <div class="energy-orb" aria-hidden="true">
@@ -3544,11 +3560,11 @@
   .float-aura{ inset:-22%;
     background:
       /* Subtle pointer-following atmospheric light + faint architectural grid */
-      radial-gradient(38% 28% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(201,169,110,.075), transparent 60%),
-      radial-gradient(40% 36% at 18% 22%, rgba(255,105,64,.045), transparent 64%),
-      radial-gradient(44% 40% at 84% 74%, rgba(201,169,110,.04), transparent 66%),
-      linear-gradient(to right, rgba(251,245,236,.022) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(251,245,236,.022) 1px, transparent 1px);
+      radial-gradient(38% 28% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(201,169,110,.15), transparent 60%),
+      radial-gradient(40% 36% at 18% 22%, rgba(255,105,64,.1), transparent 64%),
+      radial-gradient(44% 40% at 84% 74%, rgba(201,169,110,.085), transparent 66%),
+      linear-gradient(to right, rgba(251,245,236,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(251,245,236,.045) 1px, transparent 1px);
     background-size: auto, auto, auto, 72px 72px, 72px 72px;
     animation:floatAura 26s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-1%,-0.5%,0)} to{transform:translate3d(1.5%,1%,0)} }
@@ -3626,7 +3642,7 @@
   var x=c.getContext('2d');
   var W,H,ps=[];
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
-  function seed(){ ps=[]; var n=Math.min(44,Math.floor(W/32)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.4,v:Math.random()*.24+.08,a:Math.random()*.18+.08}); }
+  function seed(){ ps=[]; var n=Math.min(96,Math.floor(W/15)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.4,v:Math.random()*.24+.08,a:Math.random()*.18+.08}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
   // Defer to the ambient tier resolved before the first paint, rather than
   // reading the preference again and risking a different answer. At the `still`
@@ -3799,7 +3815,7 @@
       </button>
       <div class="sidebar-subnav" id="sidebarContactSub">
         <a class="sidebar-subitem" href="#contact" data-view="contact" data-c="page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
           <span>Contact page</span>
         </a>
         <button type="button" class="sidebar-subitem" data-wa-choice data-c="whatsapp">
@@ -4083,7 +4099,7 @@
   };
 
   window.anchitHardNarrate = function() {
-    var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
+    var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering an eighteen thousand plus runner experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
     var caption = document.getElementById('chatCaption');
     var words = text.trim().split(/\s+/);
     function cleanup() {
@@ -4320,7 +4336,7 @@
         <!-- EXPERIENCE TILE (spans 2 cols) -->
         <div class="md:col-span-2 lg:col-span-2 rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center hover:border-[var(--primary)] transition-colors">
           <p class="text-base text-[var(--ink-dim)] leading-relaxed mb-3 narrate-span" data-n-idx="5">
-            I also led the launch of the inaugural <strong class="text-[var(--ink)] font-semibold">Times Internet Delhi Half Marathon 2026</strong>, establishing a new IP end-to-end, tech, marketing and on-ground, for 15,000+ participants.
+            I also led the launch of the inaugural <strong class="text-[var(--ink)] font-semibold">Times Internet Delhi Half Marathon 2026</strong>, establishing a new IP end-to-end, tech, marketing and on-ground, for 18K+ runners.
           </p>
           <p class="text-base text-[var(--ink-dim)] leading-relaxed narrate-span" data-n-idx="6">
             Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, and creating scalable pathways to sustainable growth.
@@ -4837,7 +4853,7 @@
             <h3>Times Internet <em>Half Marathon</em></h3>
             <p>Built a 0→1 consumer product, owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP.</p>
             <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span><span class="tag">Acquisition</span></div>
-            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">15,000+ participants</span><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
+            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">18K+ runners</span><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
             <div class="work-links" style="margin-top: 16px;">
               <a href="/TimesHealth_Study" class="btn primary" style="padding: 8px 18px; font-size: 13px;">Times Health Study: Why Users Stop &rarr;</a>
               <a href="https://www.timesinternet.in/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
@@ -5020,6 +5036,7 @@
       <div class="folio-toolbar" data-no-motion>
         <button type="button" class="folio-nav" data-folio-dir="-1" aria-label="Previous spread">&#8249;</button>
         <p class="folio-progress" data-folio-progress aria-live="polite">Introduction</p>
+        <p class="folio-hint">Arrow keys or swipe to turn the page</p>
         <ol class="folio-toc" data-folio-toc aria-label="Jump to a spread"></ol>
         <button type="button" class="folio-nav" data-folio-dir="1" aria-label="Next spread">&#8250;</button>
       </div>
@@ -5027,7 +5044,14 @@
       <div class="folio-stage" data-no-motion>
         <div class="folio-bind" aria-hidden="true"></div>
         <div class="folio-spine" aria-hidden="true"></div>
-        <div class="folio-hint">Arrow keys or swipe to turn the page</div>
+        <button type="button" class="folio-nav folio-side is-prev" data-folio-dir="-1" aria-label="Previous spread">&#8249;</button>
+        <button type="button" class="folio-nav folio-side is-next" data-folio-dir="1" aria-label="Next spread">&#8250;</button>
+        <div class="folio-edge is-left" aria-hidden="true"></div>
+        <div class="folio-edge is-right" aria-hidden="true"></div>
+        <div class="folio-ribbon" aria-hidden="true"></div>
+        <div class="folio-hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="folio-pulse" aria-hidden="true"></div>
+        <div class="folio-sweep" aria-hidden="true"></div>
         <button type="button" class="folio-curl" data-folio-dir="1" aria-label="Turn the page"></button>
       <div class="builds-grid reveal-stagger" data-no-rail data-folio="1">
 
@@ -7575,7 +7599,7 @@
       response: "ET Markets is the stock market and financial tracking arm of The Economic Times (India's leading business daily), serving as one of the country's highest-traffic financial platforms with real-time market data. I led the end-to-end product revamp of ET Markets across Web, mobile Web, Android, and iOS. By restructuring the information architecture and testing relentlessly, we achieved a +27% boost in user engagement, +25% in DAUs, and added ₹3Cr+ in incremental ARR. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about Assisted Sales","What about Times Health+?","Your engineering background?","Show me a side build"] },
     { keywords: ['biggest','win','wins','proudest','proud','greatest','career win','biggest career win','most proud','achievement','top achievement'],
-      response: "Two wins stand out equally, both from Times Internet. First, I scaled ET Prime's Assisted Sales 5× from ₹15L to ₹80L MRR in about six months, building an AI telesuite, live call transcription, pitch scoring and conversion assists, that delivered 400%+ ROI and won the Times Internet Team Award. Second, I launched the Times Internet Delhi Half Marathon 2026 from 0→1: a brand-new consumer IP at Dhyan Chand National Stadium, 15,000+ participants and a new revenue stream. One is a growth win, the other a 0→1 product launch. <a data-nav='experience'>Full work view →</a>",
+      response: "Two wins stand out equally, both from Times Internet. First, I scaled ET Prime's Assisted Sales 5× from ₹15L to ₹80L MRR in about six months, building an AI telesuite, live call transcription, pitch scoring and conversion assists, that delivered 400%+ ROI and won the Times Internet Team Award. Second, I launched the Times Internet Delhi Half Marathon 2026 from 0→1: a brand-new consumer IP at Dhyan Chand National Stadium, 18K+ runners and a new revenue stream. One is a growth win, the other a 0→1 product launch. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about the marathon","What's the AI telesuite?","What are you building now?","How do I reach you?"] },
     { keywords: ['et prime','prime','assisted sales','sales','subscription','conversion','roi','growth'],
       response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award. <a data-nav='project-assisted-sales'>Read the case study →</a>",
@@ -8236,7 +8260,7 @@
       hints.push(`Honestly? Curiosity, and not being satisfied with a surface-level answer. I keep digging until I actually understand the system underneath, then I start testing until the outcome moves. That's the whole method.`);
     }
     if (/\b(team|lead|stakeholder|cross[- ]?functional|manage|people)\b/.test(q)) {
-      hints.push("The clearest examples are the Delhi Half Marathon launch, the ET Markets revamp across iOS, Android and web, ET Prime Assisted Sales, and the D2C work at Vahdam. Each one needed product, engineering, marketing, sales and ops pointing the same way, the marathon especially, because it also had a hard date and 15,000 people showing up.");
+      hints.push("The clearest examples are the Delhi Half Marathon launch, the ET Markets revamp across iOS, Android and web, ET Prime Assisted Sales, and the D2C work at Vahdam. Each one needed product, engineering, marketing, sales and ops pointing the same way, the marathon especially, because it also had a hard date and 18,000 runners showing up.");
     }
     if (/\b(fail|mistake|learn|lesson|improve)\b/.test(q)) {
       hints.push("My pattern is pretty consistent: start from the engineering, get closer to the customer and the business, ship something small, then read the funnel honestly. The hard part is fixing the system instead of defending the first idea, I've had to unlearn that more than once.");
@@ -9052,7 +9076,7 @@
       about:      "I started as a backend engineer. Live sports commentary, e-commerce, consumer apps, the kind of code that touches a million people over a weekend. Then I moved to product, and what I really fell for was the funnel. It tells you the unfiltered truth about every decision you make. So now I think in systems and ship in experiments. B Tech in Computer Science from V.I.T., and I still build things end to end myself, most weekends.",
       now:        "Right now I'm building Par-wah: one app for the whole family, with your parents at the centre. Daily check-in, S.O.S., booking anything for them, sending money safely. Reassurance, never surveillance. The website is live. Before this, from April to September twenty twenty six, I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, where I helped build a lifecycle and retention O.S. and lift U.K. marketing revenue.",
       chat:       "This is the part where you get to interrogate me. Ask about Vah-dahm, or Times Internet, or the numbers behind any of it. Ask why I left engineering for product, or what I'm building on weekends. The guide answers in my voice, using everything on this site. And if it doesn't know something, it will say so and point you straight at me.",
-      experience: "Five years, one fairly clear arc. Backend engineer at Tuple Technologies and City Mall, then Times Internet from twenty twenty two to twenty twenty six, A.P.M. to P.M. to Senior P.M. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees in monthly recurring revenue, in eight to ten months. I rebuilt E.T. Markets for three crore plus in new annual revenue. And I took the Delhi Half Marathon from zero to one, fifteen thousand runners.",
+      experience: "Five years, one fairly clear arc. Backend engineer at Tuple Technologies and City Mall, then Times Internet from twenty twenty two to twenty twenty six, A.P.M. to P.M. to Senior P.M. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees in monthly recurring revenue, in eight to ten months. I rebuilt E.T. Markets for three crore plus in new annual revenue. And I took the Delhi Half Marathon from zero to one, eighteen thousand plus runners.",
       projects:   "I build on evenings and weekends because I can't sit still. They're all A.I. first, all consumer. LifeCycle O.S. is the big one, type in any D to C brand and it benchmarks the category, then designs the entire lifecycle live. The Third Eye is a personal A.I. operating system. Music Gen A.I. writes whole songs from a prompt. Job Hunt pulls live openings from four job boards. This portfolio counts too.",
       resume:     "The full resume is right here as a P.D.F. Open it, download it, send it on to whoever needs it. It's the two page version of everything on this site, Vah-dahm, Times Internet, the engineering years before that, and the numbers attached to each one. And if you'd rather ask than read, the chat knows all of it.",
       contact:    "If any of this is useful to you, just reach out. WhatsApp is fastest. A call works. Or book a thirty minute Google Meet if you want a proper conversation. Email me at anchit dot tandon at gmail dot com. I'm looking for my next full-time Senior Product Manager role, and always up for an honest conversation about funnels, subscriptions and consumer product. No pitch required."
@@ -9524,7 +9548,7 @@
       const activeEl = document.querySelector('.view.active');
       const viewName = activeEl ? activeEl.id.replace('view-', '') : 'home';
       const fallbackText = viewName === 'home'
-        ? "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth."
+        ? "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering an eighteen thousand plus runner experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth."
         : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
       const caption = document.getElementById('chatCaption');
       const words = fallbackText.trim().split(/\s+/);
@@ -12240,7 +12264,7 @@
     var camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 260);
     camera.position.z = 30;
 
-    var COUNT = isMobile ? 90 : 220, SPREAD = 90;
+    var COUNT = isMobile ? 320 : 1100, SPREAD = 90;
     var geo = new THREE.BufferGeometry();
     var pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
     for (var i = 0; i < COUNT; i++) {
@@ -12250,7 +12274,7 @@
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.24 : 0.22, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.34, sizeAttenuation: true });
+    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.34 : 0.32, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.34, sizeAttenuation: true });
     var points = new THREE.Points(geo, mat);
     scene.add(points);
 
@@ -12292,7 +12316,7 @@
     // backdrops while the WebGL canvas was still empty, and anyone whose first
     // render was slow got a bare background in the gap.
     function reveal() {
-      canvas.style.opacity = '0.36';
+      canvas.style.opacity = '0.62';
       // Announce it, so the CSS can retire the other backdrops. The quality
       // guard clears it again if this machine cannot keep up, and the 2D field
       // comes straight back.
@@ -14014,6 +14038,9 @@
     border-radius: var(--r-xl);
     box-shadow: var(--shadow-lg), inset 0 1px 0 color-mix(in srgb, var(--accent) 16%, transparent);
     transform-origin: left center;
+    /* The camera. Without it rotateY is not a turn, it is a horizontal squash:
+       the old flap "rotated" with no perspective anywhere above it. */
+    perspective: 2400px;
   }
   #view-projects .folio-stage.folio-can-open {
     animation: folioOpen .42s cubic-bezier(.16,1,.3,1) both;
@@ -14041,10 +14068,10 @@
         transparent);
     box-shadow: 0 0 24px rgba(0,0,0,.45);
   }
-  #view-projects .folio-hint {
-    position: absolute; top: 12px; right: var(--sp-5); z-index: 4;
-    color: var(--ink-mute); pointer-events: none;
-  }
+  /* In the toolbar, not on the page. It used to be pinned inside the stage and
+     printed straight across the top edge of the right-hand page. */
+  #view-projects .folio-hint { margin: 0; color: var(--ink-mute); flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 1100px) { #view-projects .folio-hint { display: none; } }
   #view-projects .builds-grid[data-folio] {
     display: flex !important;
     gap: 0 !important;
@@ -14094,7 +14121,7 @@
     mix-blend-mode: normal;
   }
   #view-projects .folio .build-card:hover {
-    transform: translateY(-2px) !important;
+    transform: none !important;
     border-color: var(--rule-strong) !important;
     box-shadow: none !important;
   }
@@ -14112,7 +14139,6 @@
   }
   #view-projects .folio .tilt-card,
   #view-projects .folio .tilt-card:hover { transform: none !important; }
-  #view-projects .folio .build-card:hover { transform: translateY(-2px) !important; }
   #view-projects .folio-curl {
     position: absolute; right: 8px; bottom: 8px; z-index: 5;
     width: 40px; height: 40px; padding: 0; border: 0; cursor: pointer;
@@ -14124,8 +14150,6 @@
   #view-projects .folio-curl:hover { transform: scale(1.12); }
   #view-projects .folio-curl:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   #view-projects .folio-curl:disabled { opacity: 0; pointer-events: none; }
-  #view-projects .folio-stage.is-turning-next .folio-flip,
-  #view-projects .folio-stage.is-turning-prev .folio-flip { will-change: transform, opacity; }
   #view-projects .builds-grid[data-folio] .build-card:first-child { grid-column: auto !important; }
   #view-projects .folio-preface,
   #view-projects .folio-colophon {
@@ -14153,28 +14177,215 @@
     margin: 0; color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6;
     max-width: 36ch;
   }
-  #view-projects .folio-flip {
-    position: absolute; top: var(--sp-3); bottom: var(--sp-3); left: 50%; right: var(--sp-3);
-    z-index: 6; pointer-events: none; transform-origin: left center;
-    opacity: 0; border-radius: 0 var(--r-md) var(--r-md) 0;
+  /* ── The page turn ───────────────────────────────────────────────────────
+     A real leaf, not a flap. Turning forward, the right-hand page lifts off
+     the spine and comes over; its back IS the next left-hand page, so what
+     lands is what you read next. Underneath, the next right-hand page is
+     already there and the old left-hand page stays put until it is covered.
+     The leaf and the cover are clones of the actual pages, built for the
+     length of one turn and removed after it.
+
+     What it replaced: a blank rectangle rotating 90deg with no perspective
+     above it while the real pages slid sideways underneath, in 260ms. Books
+     do not slide. Transform and opacity only, per DESIGN.md. */
+  #view-projects .folio-flip { display: none; }
+  #view-projects .folio-leaf,
+  #view-projects .folio-cover,
+  #view-projects .folio-cast { position: absolute; pointer-events: none; }
+  #view-projects .folio-cover { z-index: 6; overflow: hidden; }
+  #view-projects .folio-cast {
+    z-index: 6; opacity: 0;
+    background: linear-gradient(var(--cast-dir, 90deg), rgba(0,0,0,.6), transparent 70%);
+  }
+  #view-projects .folio-leaf { z-index: 7; transform-style: preserve-3d; will-change: transform; }
+  #view-projects .folio-face {
+    position: absolute; inset: 0; overflow: hidden;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
     background: var(--bg-elev);
-    box-shadow: var(--shadow-md);
   }
-  #view-projects .folio-stage.is-turning-next .folio-flip {
-    animation: folioFlipNext .26s cubic-bezier(.16,1,.3,1) both;
+  #view-projects .folio-face.is-back { transform: rotateY(180deg); }
+  #view-projects .folio-face > *,
+  #view-projects .folio-cover > * {
+    flex: none !important; width: 100% !important; max-width: none !important;
+    height: 100% !important; margin: 0 !important;
   }
-  #view-projects .folio-stage.is-turning-prev .folio-flip {
-    left: var(--sp-3); right: 50%; transform-origin: right center;
-    animation: folioFlipPrev .26s cubic-bezier(.16,1,.3,1) both;
+  /* ── Holographic, not paper ──────────────────────────────────────────────
+     The mechanics are a book's. The surface is not: the leaf in flight is a
+     lit panel (scanlines, the brand's two hues washing across it, a hot
+     leading edge), the spine fires a line of light when a page lands, a scan
+     band crosses the spread, and the whole object leans toward the pointer.
+     Every one of these is a static paint moved by transform or faded by
+     opacity; none of it runs unless a page is turning or a pointer is over it. */
+  #view-projects .folio-face::before {
+    content: ''; position: absolute; inset: 0; z-index: 8; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, color-mix(in srgb, var(--accent-warm) 9%, transparent) 0 1px, transparent 1px 4px),
+      linear-gradient(115deg, color-mix(in srgb, var(--primary) 16%, transparent), transparent 42%,
+        color-mix(in srgb, var(--accent) 14%, transparent));
   }
-  @keyframes folioFlipNext {
-    from { transform: rotateY(0deg); opacity: 1; }
-    to { transform: rotateY(-90deg); opacity: 0; }
+  /* Corner brackets: the frame of an instrument, drawn once. */
+  #view-projects .folio-hud { position: absolute; inset: -7px; z-index: 5; pointer-events: none; }
+  #view-projects .folio-hud > i {
+    position: absolute; width: 22px; height: 22px;
+    border: 0 solid color-mix(in srgb, var(--accent-warm) 78%, transparent);
   }
-  @keyframes folioFlipPrev {
-    from { transform: rotateY(0deg); opacity: 1; }
-    to { transform: rotateY(90deg); opacity: 0; }
+  #view-projects .folio-hud > i:nth-child(1) { top: 0; left: 0; border-top-width: 2px; border-left-width: 2px; }
+  #view-projects .folio-hud > i:nth-child(2) { top: 0; right: 0; border-top-width: 2px; border-right-width: 2px; }
+  #view-projects .folio-hud > i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 2px; border-left-width: 2px; }
+  #view-projects .folio-hud > i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 2px; border-right-width: 2px; }
+  /* The spine's light: fired by script when a page lands. */
+  #view-projects .folio-pulse {
+    position: absolute; top: 16px; bottom: 16px; left: 50%; width: 2px; margin-left: -1px;
+    z-index: 8; pointer-events: none; opacity: 0; transform: scaleY(0);
+    background: linear-gradient(180deg, transparent, var(--accent-warm) 30%, var(--primary) 70%, transparent);
   }
+  /* One scan band across the spread per turn. */
+  #view-projects .folio-sweep {
+    position: absolute; top: 8px; bottom: 8px; left: 0; width: 18%;
+    z-index: 8; pointer-events: none; opacity: 0;
+    background: linear-gradient(90deg, transparent,
+      color-mix(in srgb, var(--accent-warm) 14%, transparent) 80%,
+      color-mix(in srgb, var(--accent-warm) 70%, transparent) 99%, transparent);
+  }
+  /* The lean. --tx/--ty are written on the stage itself, never on :root. */
+  @media (hover: hover) and (pointer: fine) {
+    #view-projects .folio-stage.is-leaning {
+      transform: perspective(1800px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+      transition: transform .32s cubic-bezier(.22,1,.36,1);
+      transform-origin: 50% 50%;
+    }
+  }
+  @media (max-width: 820px) { #view-projects .folio-pulse { display: none; } }
+  html[data-motion="off"] #view-projects .folio-hud,
+  html[data-motion="off"] #view-projects .folio-pulse,
+  html[data-motion="off"] #view-projects .folio-sweep { display: none !important; }
+
+  /* A facsimile is a still. Cloning a page re-inserts it, which restarts any
+     entrance it carries: the cover faded and slid in over the page it was
+     meant to be hiding, and the heading showed twice. */
+  #view-projects .folio-face > *, #view-projects .folio-cover > *,
+  #view-projects .folio-face > * *, #view-projects .folio-cover > * * {
+    animation: none !important; transition: none !important;
+  }
+  #view-projects .folio-face > *, #view-projects .folio-cover > * {
+    opacity: 1 !important; transform: none !important;
+  }
+
+  /* The row is moved by the book, never by the browser: a native sideways
+     scroll is exactly the slide-with-no-flip this replaced. Vertical touches
+     still scroll the page. Motion off restores the plain grid further down. */
+  #view-projects .builds-grid[data-folio] { overflow-x: hidden; touch-action: pan-y; }
+  #view-projects .folio-inside { background: var(--bg-deep); }
+  #view-projects .folio-front {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-4);
+    background: var(--bg-deep);
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent);
+  }
+  #view-projects .folio-front-kicker {
+    font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent-warm); position: relative; z-index: 11;
+  }
+  #view-projects .folio-front-title {
+    font-family: var(--font-display); font-size: var(--fs-display); line-height: 1; color: var(--ink);
+    position: relative; z-index: 11;
+  }
+  #view-projects .folio-front-rule {
+    width: 88px; height: 2px; position: relative; z-index: 11;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  }
+
+  /* ── It is a book ────────────────────────────────────────────────────────
+     Two flat panels with a line between them do not read as one. A book is a
+     cover board larger than its pages, a block of page edges at each side, a
+     gutter the pages fall into, and a ribbon. All static paint. */
+  #view-projects .folio-stage {
+    padding: var(--sp-4) var(--sp-5);
+    background:
+      linear-gradient(90deg, transparent 49.2%, rgba(0,0,0,.5) 50%, transparent 50.8%),
+      linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, var(--bg-deep)), var(--bg-deep) 46%, color-mix(in srgb, var(--primary) 8%, var(--bg-deep)));
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lg),
+      inset 0 0 0 4px var(--bg-deep),
+      inset 0 0 0 5px color-mix(in srgb, var(--accent-warm) 34%, transparent);
+  }
+  /* The page block: the edges of every page not yet (or already) turned. */
+  #view-projects .folio-edge {
+    position: absolute; top: var(--sp-5); bottom: var(--sp-5); width: 9px; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--ink) 30%, var(--bg-elev)) 0 1px, var(--bg-elev) 1px 3px);
+  }
+  #view-projects .folio-edge.is-left { left: var(--sp-3); border-radius: 2px 0 0 2px; }
+  #view-projects .folio-edge.is-right { right: var(--sp-3); border-radius: 0 2px 2px 0; }
+  /* Pages fall away into the gutter. */
+  #view-projects .builds-grid[data-folio] > :nth-child(odd) {
+    background-image: linear-gradient(90deg, transparent 82%, rgba(0,0,0,.42)) !important;
+  }
+  #view-projects .builds-grid[data-folio] > :nth-child(even) {
+    background-image: linear-gradient(270deg, transparent 82%, rgba(0,0,0,.42)) !important;
+  }
+  #view-projects .folio-ribbon {
+    position: absolute; top: -6px; left: calc(50% + 28px); width: 14px; height: 38px; z-index: 6; pointer-events: none;
+    background: linear-gradient(180deg, var(--primary-deep), var(--primary));
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  }
+  /* The arrows sit on the book, at the middle of each side, where a hand
+     would turn the page. They were in a row above it. */
+  #view-projects .folio-side {
+    position: absolute; top: 50%; z-index: 9; width: 44px; height: 44px; margin-top: -22px;
+    font-size: var(--fs-body);
+    background: var(--bg-deep);
+    border-color: color-mix(in srgb, var(--accent-warm) 60%, transparent);
+    color: var(--accent-warm);
+  }
+  #view-projects .folio-side.is-prev { left: -22px; }
+  #view-projects .folio-side.is-next { right: -22px; }
+  #view-projects .folio-side:hover { transform: scale(1.08); border-color: var(--primary); color: var(--ink); }
+  #view-projects .folio-side[disabled] { opacity: 0; pointer-events: none; }
+  #view-projects .folio-toolbar .folio-nav { display: none; }
+  @media (max-width: 820px) {
+    /* One page to a spread. It is still a book: the same cover board, page
+       edges, ribbon, brackets and side arrows, scaled to the gutter a phone
+       has. The arrows sit just inside the screen edge, over the page's own
+       padding, so they stay 44px without causing a sideways scroll. */
+    #view-projects .folio-stage { padding: var(--sp-3) var(--sp-2); }
+    #view-projects .folio-edge { width: 4px; top: var(--sp-4); bottom: var(--sp-4); display: block; }
+    #view-projects .folio-edge.is-left { left: 2px; }
+    #view-projects .folio-edge.is-right { right: 2px; }
+    #view-projects .folio-ribbon { left: auto; right: var(--sp-8); height: 30px; }
+    /* 32px to look at, 44px to hit: at full size they sat on the first
+       character of every line at mid-height. */
+    #view-projects .folio-side { width: 32px; height: 32px; margin-top: -16px; font-size: var(--fs-body); }
+    #view-projects .folio-side::after { content: ''; position: absolute; inset: -6px; }
+    #view-projects .folio-side.is-prev { left: -10px; }
+    #view-projects .folio-side.is-next { right: -10px; }
+    #view-projects .folio-hud { display: block; inset: -4px; }
+    #view-projects .folio-hud > i { width: 14px; height: 14px; }
+    #view-projects .builds-grid[data-folio] > :nth-child(odd),
+    #view-projects .builds-grid[data-folio] > :nth-child(even) {
+      background-image: linear-gradient(270deg, transparent 90%, rgba(0,0,0,.3)) !important;
+    }
+  }
+  html[data-motion="off"] #view-projects .folio-side,
+  html[data-motion="off"] #view-projects .folio-edge,
+  html[data-motion="off"] #view-projects .folio-ribbon { display: none !important; }
+
+  /* The light falls off a page as it leaves the flat. */
+  #view-projects .folio-shade {
+    position: absolute; inset: 0; z-index: 9; opacity: 0;
+    background: linear-gradient(var(--shade-dir, 90deg), rgba(0,0,0,.72), rgba(0,0,0,.18));
+  }
+  /* A hairline of the brand's light along the lifting edge: the one piece of
+     this that is not paper. */
+  #view-projects .folio-face::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 2px; z-index: 10;
+    background: linear-gradient(180deg, transparent, var(--accent-warm), transparent);
+    opacity: 1;
+  }
+  #view-projects .folio-leaf[data-side="right"] .folio-face:not(.is-back)::after,
+  #view-projects .folio-leaf[data-side="left"] .folio-face.is-back::after { right: 0; }
+  #view-projects .folio-leaf[data-side="left"] .folio-face:not(.is-back)::after,
+  #view-projects .folio-leaf[data-side="right"] .folio-face.is-back::after { left: 0; }
   @media (max-width: 820px) {
     #view-projects .folio-spine, #view-projects .folio-bind, #view-projects .folio-hint { display: none; }
     #view-projects .builds-grid[data-folio] > .build-card,
@@ -14187,10 +14398,6 @@
     #view-projects .folio .folio-colophon,
     #view-projects .folio .folio-preface {
       border-color: var(--rule) !important; box-shadow: none !important;
-    }
-    #view-projects .folio-stage.is-turning-prev .folio-flip,
-    #view-projects .folio-stage.is-turning-next .folio-flip {
-      left: var(--sp-3); right: var(--sp-3);
     }
     #view-projects .folio-toc { display: none; }
   }
@@ -14231,9 +14438,7 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    #view-projects .folio-stage.folio-can-open,
-    #view-projects .folio-stage.is-turning-next .folio-flip,
-    #view-projects .folio-stage.is-turning-prev .folio-flip { animation: none; }
+    #view-projects .folio-stage.folio-can-open { animation: none; }
     #view-projects .folio-nav, #view-projects .folio-curl { transition: none; }
   }
   html[data-motion="off"] #view-projects .folio-toolbar,
@@ -14289,7 +14494,11 @@
   var nextBtns = root.querySelectorAll('[data-folio-dir="1"]');
   var cards = [].slice.call(grid.querySelectorAll('.build-card'));
   var motionOff = document.documentElement.getAttribute('data-motion') === 'off';
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Motion follows the site's one authority (data-motion), the same as every
+  // other effect here; see the head script. It used to follow the OS setting
+  // as well, so on a machine with Reduce Motion on the book never turned.
+  var reduce = false;
+  var pending = null;
   var turning = false;
   var snapping = false;
   var leafIndex = 0;
@@ -14365,25 +14574,256 @@
       sync();
     }, instant ? 40 : 280);
   }
+  var EASE = 'cubic-bezier(.45,.05,.2,1)';
+  var pulse = root.querySelector('.folio-pulse');
+  var sweep = root.querySelector('.folio-sweep');
+
+  // The lean: the book tips a couple of degrees toward the pointer. One write
+  // per frame, on the stage element, and it settles flat when the pointer goes.
+  if (stage && !motionOff && window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var leanRaf = 0, leanX = 0, leanY = 0;
+    stage.addEventListener('pointermove', function (e) {
+      var r = stage.getBoundingClientRect();
+      leanY = ((e.clientX - r.left) / r.width - 0.5) * 3.2;
+      leanX = -((e.clientY - r.top) / r.height - 0.5) * 2.2;
+      if (leanRaf) return;
+      leanRaf = requestAnimationFrame(function () {
+        leanRaf = 0;
+        stage.classList.remove('folio-can-open');
+        stage.classList.add('is-leaning');
+        stage.style.setProperty('--tx', leanX.toFixed(2) + 'deg');
+        stage.style.setProperty('--ty', leanY.toFixed(2) + 'deg');
+      });
+    }, { passive: true });
+    stage.addEventListener('pointerleave', function () {
+      stage.style.setProperty('--tx', '0deg');
+      stage.style.setProperty('--ty', '0deg');
+    }, { passive: true });
+  }
+  function facsimile(src) {
+    // A stand-in for a page for the length of one turn: same markup, no ids,
+    // out of the accessibility tree, cannot take focus or a click.
+    if (!src) return null;
+    var c = src.cloneNode(true);
+    c.removeAttribute('id');
+    c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+    c.setAttribute('aria-hidden', 'true');
+    c.inert = true;
+    return c;
+  }
+  function box(el, rect, sr) {
+    el.style.left = (rect.left - sr.left - stage.clientLeft) + 'px';
+    el.style.top = (rect.top - sr.top - stage.clientTop) + 'px';
+    el.style.width = rect.width + 'px';
+    el.style.height = rect.height + 'px';
+  }
+  // Layout offsets, not getBoundingClientRect: the stage leans toward the
+  // pointer, and a rotated box reports a bounding rect that is not its size.
+  function spreadRects(firstIndex, per) {
+    var first = grid.children[firstIndex];
+    var inStage = first.offsetParent === stage;
+    var gx = grid.offsetLeft + stage.clientLeft;
+    var top = (inStage ? 0 : grid.offsetTop) + first.offsetTop + stage.clientTop;
+    var gw = grid.clientWidth, h = first.offsetHeight;
+    var half = { left: gx, top: top, width: gw / per, height: h };
+    return { half: half, left: half, right: { left: gx + gw / 2, top: top, width: gw / 2, height: h } };
+  }
+  function face(src, back) {
+    var f = document.createElement('div');
+    f.className = 'folio-face' + (back ? ' is-back' : '');
+    var c = facsimile(src);
+    if (c) f.appendChild(c);
+    var sh = document.createElement('div');
+    sh.className = 'folio-shade';
+    f.appendChild(sh);
+    return f;
+  }
   function go(i) {
     if (motionOff) return;
     var n = pageCount();
     i = Math.max(0, Math.min(n - 1, i));
     var now = currentPage();
-    if (i === now || turning) return;
+    if (turning) { pending = i; return; }
+    if (i === now) return;
     var dir = i > now ? 1 : -1;
-    if (reduce || !stage) { scrollToPage(i, false); return; }
+    if (reduce || !stage || !stage.animate) { scrollToPage(i, false); return; }
+
+    var per = perSpread(), kids = grid.children;
+    var sr = { left: 0, top: 0 };
+    var g = spreadRects(now * per, per), half = g.half, rectL = g.left, rectR = g.right;
+    var made = [];
+    var leaf = document.createElement('div');
+    leaf.className = 'folio-leaf';
+    var frontSrc, backSrc, coverSrc, leafRect, coverRect, castRect, to;
+
+    if (per === 2) {
+      var oldL = kids[now * 2], oldR = kids[now * 2 + 1], newL = kids[i * 2], newR = kids[i * 2 + 1];
+      if (dir > 0) { frontSrc = oldR; backSrc = newL; coverSrc = oldL; leafRect = rectR; coverRect = rectL; castRect = rectL; to = -180; }
+      else         { frontSrc = oldL; backSrc = newR; coverSrc = oldR; leafRect = rectL; coverRect = rectR; castRect = rectR; to = 180; }
+      leaf.dataset.side = dir > 0 ? 'right' : 'left';
+      leaf.style.transformOrigin = dir > 0 ? 'left center' : 'right center';
+    } else {
+      // One page to a spread: the page peels away from the binding edge.
+      frontSrc = kids[now]; backSrc = null; coverSrc = null; leafRect = half; castRect = half;
+      to = dir > 0 ? -104 : 104;
+      leaf.dataset.side = dir > 0 ? 'right' : 'left';
+      leaf.style.transformOrigin = dir > 0 ? 'left center' : 'right center';
+    }
+
+    var front = face(frontSrc, false), back = face(backSrc, true);
+    front.style.setProperty('--shade-dir', dir > 0 ? '270deg' : '90deg');
+    back.style.setProperty('--shade-dir', dir > 0 ? '90deg' : '270deg');
+    leaf.appendChild(front);
+    if (per === 2) leaf.appendChild(back);
+    box(leaf, leafRect, sr);
+
+    var cover = null;
+    if (coverSrc) {
+      cover = document.createElement('div');
+      cover.className = 'folio-cover';
+      cover.appendChild(facsimile(coverSrc));
+      box(cover, coverRect, sr);
+      stage.appendChild(cover); made.push(cover);
+    }
+    var cast = document.createElement('div');
+    cast.className = 'folio-cast';
+    cast.style.setProperty('--cast-dir', (per === 2 ? dir > 0 : dir < 0) ? '270deg' : '90deg');
+    box(cast, castRect, sr);
+    stage.appendChild(cast); made.push(cast);
+    stage.appendChild(leaf); made.push(leaf);
+
     turning = true;
-    stage.classList.remove('is-turning-next', 'is-turning-prev');
-    void stage.offsetWidth;
     stage.classList.add(dir > 0 ? 'is-turning-next' : 'is-turning-prev');
-    scrollToPage(i, false);
-    setTimeout(function () {
+    // The real pages change underneath at once; the facsimiles hide the seam.
+    scrollToPage(i, true);
+
+    var D = per === 2 ? 780 : 520;
+    var fShade = front.querySelector('.folio-shade'), bShade = back.querySelector('.folio-shade');
+    var turn = leaf.animate(
+      per === 2
+        ? [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(' + to + 'deg)' }]
+        : [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(' + (to * 0.7) + 'deg)', opacity: 1, offset: 0.7 }, { transform: 'rotateY(' + to + 'deg)', opacity: 0 }],
+      { duration: D, easing: EASE, fill: 'forwards' });
+    fShade.animate([{ opacity: 0 }, { opacity: 0.4 }], { duration: D / 2, easing: 'ease-in', fill: 'forwards' });
+    if (per === 2) bShade.animate([{ opacity: 0.4 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], { duration: D, easing: 'ease-out', fill: 'forwards' });
+    cast.animate([{ opacity: 0 }, { opacity: 0.55, offset: 0.55 }, { opacity: 0 }], { duration: D, easing: 'linear' });
+    // The scan band crosses with the page, in the direction it is turning.
+    if (sweep) {
+      var sw = stage.clientWidth;
+      sweep.animate(dir > 0
+        ? [{ transform: 'translateX(' + sw + 'px)', opacity: 0 }, { opacity: 0.9, offset: 0.2 }, { transform: 'translateX(' + (-sweep.offsetWidth) + 'px)', opacity: 0 }]
+        : [{ transform: 'translateX(' + (-sweep.offsetWidth) + 'px) scaleX(-1)', opacity: 0 }, { opacity: 0.9, offset: 0.2 }, { transform: 'translateX(' + sw + 'px) scaleX(-1)', opacity: 0 }],
+        { duration: D + 120, easing: 'cubic-bezier(.4,0,.2,1)' });
+    }
+
+    var done = false;
+    function finish() {
+      if (done) return; done = true;
+      made.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
       stage.classList.remove('is-turning-next', 'is-turning-prev');
+      // The page has landed: the spine fires.
+      if (pulse && per === 2) pulse.animate(
+        [{ opacity: 0, transform: 'scaleY(0)' }, { opacity: 1, transform: 'scaleY(1)', offset: 0.35 }, { opacity: 0, transform: 'scaleY(1)' }],
+        { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)' });
       turning = false;
-    }, 280);
+      sync();
+      if (pending != null) { var q = pending; pending = null; if (q !== currentPage()) go(q); }
+    }
+    turn.onfinish = finish;
+    turn.oncancel = finish;
+    setTimeout(finish, D + 200);        // a tab put to sleep mid-turn still lands
   }
   function step(dir) { go(currentPage() + dir); }
+
+  // The cover. Arriving at Projects, the book is closed: a cover lies over the
+  // right-hand page and opens across the spine, and what is on its back is the
+  // first left-hand page. Its words are the masthead's own (the heading and
+  // the project count), so the cover says nothing the page does not.
+  function openCover() {
+    if (motionOff || !stage || !stage.animate || turning) return;
+    if (currentPage() !== 0 || !grid.children.length) return;
+    var per = perSpread();
+    var g = spreadRects(0, per), sr = { left: 0, top: 0 }, made = [], D = per === 2 ? 1100 : 900;
+    var inside = document.createElement('div');
+    inside.className = 'folio-cover folio-inside';
+    box(inside, g.left, sr);
+    var leaf = document.createElement('div');
+    leaf.className = 'folio-leaf'; leaf.dataset.side = 'right';
+    leaf.style.transformOrigin = 'left center';
+    var front = document.createElement('div');
+    front.className = 'folio-face folio-front';
+    var head = root.querySelector('.folio-masthead h2, .folio-masthead .display-lg');
+    var kick = document.createElement('span'); kick.className = 'folio-front-kicker';
+    kick.textContent = countEl ? countEl.textContent : '';
+    var title = document.createElement('span'); title.className = 'folio-front-title';
+    title.textContent = head ? head.textContent.replace(/\s+/g, ' ').trim() : '';
+    var rule = document.createElement('span'); rule.className = 'folio-front-rule';
+    front.appendChild(kick); front.appendChild(title); front.appendChild(rule);
+    var fShade = document.createElement('div'); fShade.className = 'folio-shade';
+    fShade.style.setProperty('--shade-dir', '270deg'); front.appendChild(fShade);
+    var back = face(grid.children[0], true);
+    back.style.setProperty('--shade-dir', '90deg');
+    leaf.appendChild(front);
+    if (per === 2) leaf.appendChild(back);
+    box(leaf, per === 2 ? g.right : g.half, sr);
+    // Two pages: the cover lands on the left and its back is that page. One
+    // page (phones): the cover lifts off the page and is gone.
+    (per === 2 ? [inside, leaf] : [leaf]).forEach(function (el) { stage.appendChild(el); made.push(el); });
+    turning = true;
+    var turn = leaf.animate(per === 2
+      ? [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(0deg)', offset: 0.18 }, { transform: 'rotateY(-180deg)' }]
+      : [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(0deg)', opacity: 1, offset: 0.2 }, { transform: 'rotateY(-78deg)', opacity: 1, offset: 0.75 }, { transform: 'rotateY(-104deg)', opacity: 0 }],
+      { duration: D, easing: EASE, fill: 'forwards' });
+    fShade.animate([{ opacity: 0 }, { opacity: 0, offset: 0.18 }, { opacity: 0.5 }], { duration: D * 0.6, easing: 'ease-in', fill: 'forwards' });
+    back.querySelector('.folio-shade').animate([{ opacity: 0.45 }, { opacity: 0.45, offset: 0.55 }, { opacity: 0 }], { duration: D, easing: 'ease-out', fill: 'forwards' });
+    var done = false;
+    function finish() {
+      if (done) return; done = true;
+      made.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+      turning = false;
+      if (pulse) pulse.animate(
+        [{ opacity: 0, transform: 'scaleY(0)' }, { opacity: 1, transform: 'scaleY(1)', offset: 0.35 }, { opacity: 0, transform: 'scaleY(1)' }],
+        { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)' });
+      if (pending != null) { var q = pending; pending = null; if (q !== currentPage()) go(q); }
+    }
+    turn.onfinish = finish; turn.oncancel = finish;
+    setTimeout(finish, D + 200);
+  }
+
+  // Every way of moving through the book turns a page. A two-finger swipe on
+  // a trackpad used to scroll the row natively, so the pages slid sideways
+  // with no leaf at all, which is the one gesture the hint asks for.
+  if (stage && !motionOff) {
+    var wheelArmed = true, wheelQuiet = 0, wheelSum = 0, wheelLock = 0;
+    stage.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;       // vertical: the page scrolls as usual
+      e.preventDefault();
+      clearTimeout(wheelQuiet);
+      // A trackpad keeps sending inertia after the fingers lift. One gesture is
+      // one page: re-arm only once the stream has gone quiet.
+      wheelQuiet = setTimeout(function () { wheelArmed = true; wheelSum = 0; }, 180);
+      // Three locks, because any one alone lets a second page through: the
+      // quiet gap covers the inertia tail, `turning` covers a stream slow
+      // enough to look quiet between events, and the clock covers a tail that
+      // outlasts the turn itself.
+      if (!wheelArmed || turning || performance.now() < wheelLock) { wheelSum = 0; return; }
+      wheelSum += e.deltaX;
+      if (Math.abs(wheelSum) < 36) return;
+      wheelArmed = false;
+      wheelLock = performance.now() + 1150;
+      step(wheelSum > 0 ? 1 : -1);
+    }, { passive: false });
+    var tx = 0, ty = 0, touching = false;
+    stage.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { touching = false; return; }
+      touching = true; tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+    }, { passive: true });
+    stage.addEventListener('touchend', function (e) {
+      if (!touching) return; touching = false;
+      var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+      if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
 
   root.querySelectorAll('[data-folio-dir]').forEach(function (btn) {
     btn.addEventListener('click', function () { step(parseInt(btn.getAttribute('data-folio-dir'), 10)); });
@@ -14425,12 +14865,597 @@
     }
   }
   document.addEventListener('viewChanged', function (ev) {
-    if (ev.detail === 'projects') { buildToc(); sync(); armOpen(); }
+    if (ev.detail === 'projects') { buildToc(); sync(); armOpen(); setTimeout(openCover, 420); }
   });
 
   buildToc();
   sync();
-  if (document.getElementById('view-projects') && document.getElementById('view-projects').classList.contains('active')) armOpen();
+  if (document.getElementById('view-projects') && document.getElementById('view-projects').classList.contains('active')) { armOpen(); setTimeout(openCover, 900); }
+})();
+</script>
+<!-- ═══ FLIGHT DECK ═══════════════════════════════════════════════════════════
+     Brief: for a recruiter or hiring manager landing cold; the goal is that the
+     site itself is remembered as an instrument a product person built; the feel
+     is precise, alive, navigable.
+
+     Four pieces, one idea (the portfolio is a console you fly, not a page you
+     read):
+       orbit    the main destinations circle the portrait and can be spun
+       warp     a burst of light on every route change
+       deck     Cmd/Ctrl+K (or /) opens a command deck that jumps anywhere
+       rail     a telemetry rail on the screen edge: sector, depth, IST time
+
+     Rules it keeps (DESIGN.md): tokens only; transform and opacity only;
+     nothing loops at rest (the orbit coasts to a stop, the warp is one shot,
+     the rail writes on scroll); every label is read from copy already on this
+     page, so nothing here states a fact the site did not already state. -->
+<style id="lux-css">
+  /* ── LUX: continuous, slow, expensive-looking ────────────────────────────
+     The backdrop was static dust on black: correct, and dead. Luxury motion is
+     slow and never stops, like light across lacquer, so these loops run 16 to
+     180 seconds each and none of them shares a period with another; the room
+     never repeats on a scale anyone can see.
+
+     The site's own rule is that nothing decorative runs forever. This is the
+     owner's explicit exception for the backdrop, and it is held to the part of
+     that rule that matters: transform and opacity only, no script, no layout,
+     no paint. It leaves the compositor during a scroll like every other
+     ambient layer, stops when Motion is off, and thins out on phones. */
+  .lux { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; contain: strict; transition: opacity .4s ease; }
+  .lux > i { position: absolute; display: block; will-change: transform; }
+
+  /* Light: three pools of champagne, ember and gold, drifting across each other. */
+  .lux-glow { width: 78vmax; height: 78vmax; border-radius: 50%; }
+  .lux-a { left: -18vmax; top: -30vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-warm) 9%, transparent), transparent 70%);
+    animation: luxA 47s ease-in-out infinite alternate; }
+  .lux-b { right: -26vmax; top: 8vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 7%, transparent), transparent 68%);
+    animation: luxB 61s ease-in-out infinite alternate; }
+  .lux-c { left: 18vmax; bottom: -46vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%);
+    animation: luxC 73s ease-in-out infinite alternate; }
+  @keyframes luxA { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(22vmax, 16vmax, 0) scale(1.18); } }
+  @keyframes luxB { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-26vmax, 14vmax, 0) scale(.9); } }
+  @keyframes luxC { from { transform: translate3d(-10vmax, 0, 0) scale(.92); } to { transform: translate3d(18vmax, -20vmax, 0) scale(1.14); } }
+
+  /* Orbit lines: two hairline rings, one carrying a point of light. */
+  .lux-ring { left: 58%; top: 44%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent-warm) 13%, transparent); }
+  .lux-r1 { width: 96vmin; height: 96vmin; margin: -48vmin 0 0 -48vmin; animation: luxSpin 120s linear infinite; }
+  .lux-r1::after { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%;
+    background: var(--accent-warm); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--accent-warm) 70%, transparent); }
+  .lux-r2 { width: 132vmin; height: 132vmin; margin: -66vmin 0 0 -66vmin; border-style: dashed;
+    border-color: color-mix(in srgb, var(--accent-warm) 9%, transparent); animation: luxSpin 180s linear infinite reverse; }
+  @keyframes luxSpin { to { transform: rotate(360deg); } }
+
+  /* Dust in depth: far dust is small and slow, near dust larger and quicker.
+     Each sheet is exactly one tile taller than the screen and rises by exactly
+     one tile, so the loop has no seam. */
+  .lux-dust { left: 0; right: 0; top: 0; }
+  /* The specks are scattered by script into one sprite per sheet (see
+     lux-dust in the flight deck script). Tiled CSS dots sat in a visible
+     lattice, which is the cheapest-looking thing a backdrop can do. */
+  .lux-d1 { height: calc(100% + 1024px); opacity: .55; background-size: 1024px 1024px;
+    animation: luxRise1 120s linear infinite; }
+  .lux-d2 { height: calc(100% + 1024px); background-size: 1024px 1024px;
+    animation: luxRise2 70s linear infinite, luxTwinkle 9s ease-in-out infinite alternate; }
+  @keyframes luxRise1 { to { transform: translate3d(0, -1024px, 0); } }
+  @keyframes luxRise2 { to { transform: translate3d(0, -1024px, 0); } }
+  @keyframes luxTwinkle { from { opacity: .3; } to { opacity: .75; } }
+
+  /* Foil: a band of light crosses the room, then the room rests. */
+  .lux-sheen { top: -30vh; left: 0; width: 10vw; height: 160vh; opacity: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-warm) 5%, transparent) 44%,
+      color-mix(in srgb, var(--accent-warm) 22%, transparent) 50%, color-mix(in srgb, var(--accent-warm) 5%, transparent) 56%, transparent);
+    animation: luxSheen 23s cubic-bezier(.45, 0, .2, 1) infinite; }
+  @keyframes luxSheen {
+    0% { transform: translate3d(-60vw, 0, 0) rotate(16deg); opacity: 0; }
+    8% { opacity: 1; }
+    46% { opacity: 1; }
+    54%, 100% { transform: translate3d(150vw, 0, 0) rotate(16deg); opacity: 0; }
+  }
+
+  /* The page is moving: leave the compositor, like every other ambient layer. */
+  body.is-scrolling .lux { opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s .12s; }
+  body.is-scrolling .lux > i, body.is-scrolling .lux-r1::after { animation-play-state: paused !important; }
+  /* Phones: the light, the far dust and the foil. Fewer sheets to blend. */
+  html[data-ambient="lite"] .lux-c, html[data-ambient="lite"] .lux-d2, html[data-ambient="lite"] .lux-r2 { display: none; }
+  /* Calm or off: the room holds still, lit. */
+  html[data-ambient="still"] .lux > i, html[data-motion="off"] .lux > i { animation: none !important; will-change: auto; }
+  html[data-ambient="still"] .lux-sheen, html[data-motion="off"] .lux-sheen,
+  html[data-ambient="still"] .lux-dust, html[data-motion="off"] .lux-dust { display: none; }
+  html[data-motion="off"] .lux { visibility: visible !important; opacity: 1; transition: none; }
+  body.view-chat .lux-sheen, body.chat-guide-open .lux-sheen { display: none; }
+</style>
+<style id="flight-deck-css">
+  /* ── orbit ── */
+  .cine-mark { isolation: isolate; }
+  .fd-orbit { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s cubic-bezier(.22,1,.36,1); }
+  html.cine-settled .fd-orbit, .fd-orbit.is-on { opacity: 1; }
+  .fd-node {
+    position: absolute; left: 50%; top: 50%; margin: -18px 0 0 0;
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    min-height: 36px; padding: 0 var(--sp-3);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink); white-space: nowrap; cursor: pointer; pointer-events: auto;
+    background: color-mix(in srgb, var(--bg-deep) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent);
+    border-radius: var(--r-pill);
+    appearance: none; -webkit-appearance: none;
+  }
+  .fd-node::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; flex: none;
+    background: var(--primary);
+  }
+  .fd-node:hover, .fd-node:focus-visible { border-color: var(--primary); color: var(--accent-warm); }
+  .fd-node:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .fd-node.is-far { pointer-events: none; }
+  .fd-node, .fd-k { animation: none !important; transition: border-color .2s ease, color .2s ease !important; }
+  .fd-track {
+    position: absolute; left: 50%; top: 50%; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 30%, transparent);
+    border-radius: 50%; z-index: -1;
+  }
+  @media (max-width: 560px) {
+    .fd-node { font-size: var(--fs-micro); letter-spacing: .08em; padding: 0 var(--sp-2); gap: var(--sp-1); min-height: 32px; margin-top: -16px; }
+  }
+
+  /* ── warp ── */
+  #fdWarp { position: fixed; inset: 0; z-index: 59; pointer-events: none; display: none; width: 100%; height: 100%; }
+  html[data-motion="off"] #fdWarp { display: none !important; }
+
+  /* ── rail ── */
+  .fd-rail {
+    position: fixed; right: var(--sp-3); top: 50%; z-index: 40; pointer-events: none;
+    width: 16px; height: 44vh; margin-top: -22vh; display: none;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  @media (min-width: 1280px) { .fd-rail { display: block; } }
+  /* Below that there is no margin for the words, so the rail is the gauge
+     alone: a hairline and its marker on the screen edge. */
+  @media (max-width: 1279px) {
+    .fd-rail { display: block; right: 2px; width: 6px; height: 36vh; margin-top: -18vh; }
+    .fd-rail-txt { display: none; }
+    .fd-rail-line { right: 2px; }
+    .fd-rail-mark { right: 0; width: 6px; }
+  }
+  .fd-rail-line {
+    position: absolute; right: 7px; top: 0; bottom: 0; width: 1px;
+    background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--accent-warm) 55%, transparent) 0 1px, transparent 1px 12px);
+  }
+  .fd-rail-mark {
+    position: absolute; right: 2px; top: 0; width: 11px; height: 2px;
+    background: var(--primary); transform-origin: 100% 50%;
+  }
+  .fd-rail-txt {
+    position: absolute; right: 22px; white-space: nowrap;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+  }
+  .fd-rail-sector { bottom: calc(100% + var(--sp-3)); right: 0; color: var(--accent-warm); }
+  .fd-rail-time { top: calc(100% + var(--sp-3)); right: 0; }
+  .fd-rail-depth { top: 0; color: var(--ink); writing-mode: horizontal-tb; transform: none; right: 22px; margin-top: -6px; }
+  body.sidebar-open .fd-rail, body.view-chat .fd-rail, body.chat-guide-open .fd-rail { visibility: hidden; }
+
+  /* ── deck ── */
+  .fd-k {
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; flex: none;
+    min-height: 32px; padding: 0 var(--sp-3); cursor: pointer;
+    color: var(--accent-warm); background: transparent;
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent); border-radius: var(--r-pill);
+  }
+  .fd-k:hover, .fd-k:focus-visible { border-color: var(--primary); color: var(--ink); }
+  .fd-k:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .fd-k kbd { font: inherit; color: var(--ink-dim); }
+  /* A keyboard shortcut is no use to a thumb. */
+  @media (hover: none) { .fd-k kbd { display: none; } }
+  .fd-deck {
+    position: fixed; inset: 0; z-index: 10050; display: none;
+    align-items: flex-start; justify-content: center;
+    padding: 12vh var(--sp-4) var(--sp-4);
+    background: color-mix(in srgb, var(--bg-deep) 86%, transparent);
+  }
+  .fd-deck.is-open { display: flex; }
+  .fd-panel {
+    position: relative; width: min(640px, 100%); max-height: 70vh; display: flex; flex-direction: column;
+    background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    animation: fdIn .26s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes fdIn { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.985); } to { opacity: 1; transform: none; } }
+  html[data-motion="off"] .fd-panel { animation: none; }
+  .fd-panel::before, .fd-panel::after {
+    content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+    border: 0 solid var(--accent-warm);
+  }
+  .fd-panel::before { top: -6px; left: -6px; border-top-width: 2px; border-left-width: 2px; }
+  .fd-panel::after { bottom: -6px; right: -6px; border-bottom-width: 2px; border-right-width: 2px; }
+  .fd-input {
+    width: 100%; padding: var(--sp-4) var(--sp-5); font-family: var(--font-body); font-size: var(--fs-lead);
+    color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule);
+    outline: none; border-radius: var(--r-lg) var(--r-lg) 0 0;
+  }
+  .fd-input::placeholder { color: var(--ink-mute); }
+  .fd-input:focus-visible { border-bottom-color: var(--primary); }
+  .fd-list { list-style: none; margin: 0; padding: var(--sp-2); overflow-y: auto; overscroll-behavior: contain; }
+  .fd-group {
+    padding: var(--sp-3) var(--sp-3) var(--sp-1);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .fd-item {
+    display: flex; align-items: center; gap: var(--sp-3); min-height: 44px;
+    padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); cursor: pointer;
+    font-family: var(--font-body); font-size: var(--fs-body); color: var(--ink);
+  }
+  .fd-item .fd-code { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .1em; color: var(--ink-dim); flex: none; width: 3ch; }
+  .fd-item[aria-selected="true"] { background: var(--primary-soft); box-shadow: inset 2px 0 0 var(--primary); }
+  .fd-item[aria-selected="true"] .fd-code { color: var(--primary); }
+  .fd-empty { padding: var(--sp-5); color: var(--ink-dim); font-size: var(--fs-sm); }
+  .fd-foot {
+    display: flex; gap: var(--sp-4); flex-wrap: wrap; padding: var(--sp-3) var(--sp-5);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim);
+  }
+</style>
+<canvas id="fdWarp" aria-hidden="true"></canvas>
+<div class="fd-rail" id="fdRail" aria-hidden="true">
+  <span class="fd-rail-txt fd-rail-sector" data-fd-sector></span>
+  <span class="fd-rail-line"></span>
+  <span class="fd-rail-mark" data-fd-mark></span>
+  <span class="fd-rail-txt fd-rail-depth" data-fd-depth>000</span>
+  <span class="fd-rail-txt fd-rail-time" data-fd-time></span>
+</div>
+<div class="fd-deck" id="fdDeck" role="dialog" aria-modal="true" aria-label="Command deck">
+  <div class="fd-panel">
+    <input class="fd-input" id="fdInput" type="text" autocomplete="off" spellcheck="false"
+           role="combobox" aria-expanded="true" aria-controls="fdList" aria-autocomplete="list"
+           placeholder="Where to?" aria-label="Jump to a page, project or contact channel">
+    <ul class="fd-list" id="fdList" role="listbox" aria-label="Destinations"></ul>
+    <div class="fd-foot"><span>&uarr;&darr; move</span><span>Enter open</span><span>Esc close</span></div>
+  </div>
+</div>
+<script id="flight-deck-js">
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var motionOff = function () { return root.getAttribute('data-motion') === 'off'; };
+  var css = function (name) { return getComputedStyle(root).getPropertyValue(name).trim(); };
+  var go = function (view) { if (window.switchView) window.switchView(view); };
+  // A sidebar label holds two strings, the name and the caption it morphs to
+  // on hover. The name is the label; reading textContent glued them together.
+  var labelOf = function (host) {
+    if (!host) return '';
+    var el = host.querySelector('.ml-default') || host.querySelector('.sidebar-label') || host;
+    return el.textContent.replace(/\s+/g, ' ').trim();
+  };
+  var navLabel = function (view) { return labelOf(document.querySelector('.sidebar-item[data-view="' + view + '"]')); };
+
+  /* ── lux-dust: scatter the specks once ────────────────────────────────── */
+  // One 1024px sprite per sheet, drawn a single time. Positions are random
+  // and wrap at the edges, so the tile has no seam and no lattice.
+  window.__dustSprite = function (count, maxR, tones, seed) {
+    var c = document.createElement('canvas'); c.width = c.height = 1024;
+    var x = c.getContext('2d'); if (!x) return '';
+    var r = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (var i = 0; i < count; i++) {
+      var px = r() * 1024, py = r() * 1024, rad = 0.35 + r() * r() * maxR, al = 0.25 + r() * 0.75;
+      x.fillStyle = tones[(r() * tones.length) | 0]; x.globalAlpha = al;
+      for (var dx = -1024; dx <= 1024; dx += 1024) for (var dy = -1024; dy <= 1024; dy += 1024) {
+        if (px + dx < -4 || px + dx > 1028 || py + dy < -4 || py + dy > 1028) continue;
+        x.beginPath(); x.arc(px + dx, py + dy, rad, 0, 6.2832); x.fill();
+      }
+    }
+    try { return 'url(' + c.toDataURL('image/png') + ')'; } catch (e) { return ''; }
+  };
+  (function dust() {
+    var d1 = document.querySelector('.lux-d1'), d2 = document.querySelector('.lux-d2');
+    if (!d1 || motionOff()) return;
+    var gold = css('--accent-warm') || '#FFB736', ink = css('--ink') || '#FBF5EC', champ = css('--accent') || '#c9a96e';
+    d1.style.backgroundImage = window.__dustSprite(150, 1.0, [champ, ink, gold], 7);
+    if (d2) d2.style.backgroundImage = window.__dustSprite(46, 1.9, [gold, champ], 131);
+  })();
+
+  /* ── orbit: the main destinations circle the portrait ─────────────────── */
+  (function orbit() {
+    var mark = document.getElementById('cineMark');
+    if (!mark) return;
+    var views = ['experience', 'projects', 'about', 'contact'];
+    var labels = { contact: labelOf(document.getElementById('sidebarContactToggle')) };
+    var nodes = [];
+    var wrap = document.createElement('div');
+    wrap.className = 'fd-orbit';
+    // The shared motion runtime gives every button inside an arriving block a
+    // rise-in whose fill mode then holds `transform: none` on it for good,
+    // which pinned all four nodes to the centre. This is opted out of that.
+    wrap.setAttribute('data-no-motion', '');
+    var track = document.createElement('span');
+    track.className = 'fd-track';
+    wrap.appendChild(track);
+    views.forEach(function (v) {
+      var text = (navLabel(v) || labels[v] || '').trim();
+      if (!text) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fd-node'; b.textContent = text;
+      // The stage this lives in is decorative (aria-hidden); the sidebar and
+      // the command deck are the keyboard routes to the same places.
+      b.tabIndex = -1;
+      b.addEventListener('click', function () { if (!dragged) go(v); });
+      wrap.appendChild(b); nodes.push(b);
+    });
+    if (!nodes.length) return;
+    mark.appendChild(wrap);
+
+    var rot = -0.5, vel = 0, raf = 0, dragging = false, dragged = false, lastX = 0;
+    function place() {
+      var w = mark.offsetWidth, rx = w * 0.86, ry = w * 0.2;
+      // Every label stays on screen at every point of the turn. A node sits
+      // centred on the ring, so the ring may reach the nearer screen edge less
+      // half the widest label. This used a fixed 110px guess, which held while
+      // the orbit rested in one place and failed once it turned on its own: on
+      // a phone a label swung past the edge and was cut off.
+      var mr = mark.getBoundingClientRect(), mid = mr.left + mr.width / 2, widest = 0;
+      for (var k = 0; k < nodes.length; k++) widest = Math.max(widest, nodes[k].offsetWidth);
+      rx = Math.max(40, Math.min(rx, Math.min(mid, window.innerWidth - mid) - widest / 2 - 8));
+      track.style.width = (rx * 2) + 'px'; track.style.height = (ry * 2) + 'px';
+      // The ring sits low on the portrait, so the nearest node crosses under
+      // the chin line rather than across the face.
+      var drop = w * 0.2;
+      track.style.margin = (drop - ry) + 'px 0 0 ' + (-rx) + 'px';
+      for (var i = 0; i < nodes.length; i++) {
+        var a = rot + i * (Math.PI * 2 / nodes.length);
+        var depth = Math.sin(a);                         // +1 nearest, -1 behind the portrait
+        var x = Math.cos(a) * rx, y = drop + depth * ry;
+        var s = 0.84 + 0.16 * (depth + 1) / 2;
+        var n = nodes[i];
+        n.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translateX(-50%) scale(' + s.toFixed(3) + ')';
+        n.style.opacity = (0.34 + 0.66 * (depth + 1) / 2).toFixed(2);
+        n.style.zIndex = depth > -0.15 ? 6 : -1;
+        n.classList.toggle('is-far', depth < -0.15);
+      }
+    }
+    // It turns on its own, slowly, for as long as it is on screen and the
+    // visitor has not asked for calm; a drag or a flick adds to that and then
+    // settles back to it. Off screen, in a hidden tab, during a scroll or with
+    // Motion off, the loop is not running at all.
+    var DRIFT = 0.0026, visible = true;
+    function alive() {
+      return visible && !document.hidden && !motionOff() && !window.__scrolling &&
+        root.getAttribute('data-ambient') !== 'still' && mark.offsetParent !== null;
+    }
+    function tick() {
+      raf = 0;
+      var live = alive(), rest = live ? DRIFT : 0;
+      rot += vel;
+      vel = dragging ? vel * 0.6 : rest + (vel - rest) * 0.94;
+      place();
+      if (live || dragging || Math.abs(vel) > 0.0006) raf = requestAnimationFrame(tick);
+    }
+    function wake() { if (!raf && alive()) raf = requestAnimationFrame(tick); }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; wake(); }).observe(mark);
+    }
+    document.addEventListener('visibilitychange', wake);
+    addEventListener('scroll', function () { setTimeout(wake, 260); }, { passive: true });
+    document.addEventListener('viewChanged', function () { setTimeout(wake, 500); });
+    function kick(v) {
+      if (motionOff()) return;
+      vel = Math.max(-0.16, Math.min(0.16, vel + v));
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+    place();
+    // It moves while the visitor does, and coasts to a stop when they stop.
+    var stage = mark.closest('.cine-stage') || mark;
+    stage.addEventListener('pointerdown', function (e) { dragging = true; dragged = false; lastX = e.clientX; });
+    addEventListener('pointerup', function () { dragging = false; setTimeout(function () { dragged = false; }, 0); });
+    stage.addEventListener('pointermove', function (e) {
+      var dx = e.clientX - lastX; lastX = e.clientX;
+      if (dragging) { if (Math.abs(dx) > 2) dragged = true; kick(-dx * 0.0042); }
+      else if (e.pointerType === 'mouse') kick(-dx * 0.00028);
+    }, { passive: true });
+    addEventListener('resize', place, { passive: true });
+    // One spin on arrival, so it is seen to be a thing that turns.
+    var spun = false;
+    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); kick(0.11); wake(); }
+    if (root.classList.contains('cine-settled')) arrive(); else setTimeout(arrive, 2600);
+    document.addEventListener('viewChanged', function (e) { if (e.detail === 'home') { place(); kick(0.07); } });
+  })();
+
+  /* ── warp: one burst of light per route change ────────────────────────── */
+  (function warp() {
+    var cv = document.getElementById('fdWarp');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), raf = 0, t0 = 0, stars = [], cols = null, W = 0, H = 0, cx = 0, cy = 0;
+    var D = 520;
+    function frame(now) {
+      var p = Math.min(1, (now - t0) / D);
+      ctx.clearRect(0, 0, W, H);
+      // Fast out, then gone: the streaks stretch and thin as they leave.
+      var e = 1 - Math.pow(1 - p, 3), fade = p < 0.2 ? p / 0.2 : 1 - (p - 0.2) / 0.8;
+      ctx.lineCap = 'round';
+      for (var i = 0; i < stars.length; i++) {
+        var s = stars[i];
+        var r1 = s.r + e * s.v, r0 = s.r + Math.max(0, e - 0.16 - s.l) * s.v;
+        ctx.strokeStyle = cols[s.c]; ctx.globalAlpha = fade * s.a; ctx.lineWidth = s.w;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(s.t) * r0, cy + Math.sin(s.t) * r0);
+        ctx.lineTo(cx + Math.cos(s.t) * r1, cy + Math.sin(s.t) * r1);
+        ctx.stroke();
+      }
+      if (p < 1) raf = requestAnimationFrame(frame);
+      else { raf = 0; ctx.clearRect(0, 0, W, H); cv.style.display = 'none'; }
+    }
+    document.addEventListener('viewChanged', function () {
+      if (motionOff()) return;
+      if (raf) cancelAnimationFrame(raf);
+      cols = cols || [css('--accent-warm') || '#FFB736', css('--primary') || '#FF6940', css('--ink') || '#FBF5EC'];
+      W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+      var main = document.querySelector('main'), mr = main ? main.getBoundingClientRect() : { left: 0, width: W };
+      cx = mr.left + mr.width / 2; cy = H * 0.46;
+      var n = W < 700 ? 60 : 130, reach = Math.hypot(W, H) * 0.62;
+      stars = [];
+      for (var i = 0; i < n; i++) stars.push({
+        t: Math.random() * Math.PI * 2, r: 30 + Math.random() * 160, v: reach * (0.5 + Math.random() * 0.7),
+        l: Math.random() * 0.2, a: 0.25 + Math.random() * 0.6, w: Math.random() < 0.2 ? 2 : 1, c: (Math.random() * 3) | 0 });
+      cv.style.display = 'block';
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    });
+  })();
+
+  /* ── rail: sector, depth, time ────────────────────────────────────────── */
+  (function rail() {
+    var el = document.getElementById('fdRail');
+    if (!el) return;
+    var sector = el.querySelector('[data-fd-sector]'), mark = el.querySelector('[data-fd-mark]');
+    var depth = el.querySelector('[data-fd-depth]'), time = el.querySelector('[data-fd-time]');
+    var order = [].map.call(document.querySelectorAll('.sidebar-item[data-view]'), function (a) { return a.getAttribute('data-view'); });
+    function setSector(view) {
+      var parent = /^project-/.test(view) ? 'projects' : view;
+      var i = order.indexOf(parent), label = navLabel(parent) || parent;
+      // A view with no numbered sidebar entry of its own (Contact sits behind a
+      // toggle there) is named without a number rather than given a fake one.
+      if (i < 0 && parent === 'contact') label = labelOf(document.getElementById('sidebarContactToggle')) || label;
+      sector.textContent = i < 0 ? label : ('0' + (i + 1)).slice(-2) + ' / ' + label;
+    }
+    var raf = 0;
+    function measure() {
+      raf = 0;
+      var max = Math.max(1, root.scrollHeight - window.innerHeight);
+      var p = Math.max(0, Math.min(1, (window.scrollY || 0) / max));
+      var travel = el.offsetHeight - 2;
+      mark.style.transform = 'translate3d(0,' + (p * travel).toFixed(1) + 'px,0)';
+      depth.style.transform = 'translate3d(0,' + (p * travel).toFixed(1) + 'px,0)';
+      depth.textContent = ('00' + Math.round(p * 100)).slice(-3);
+    }
+    function onScroll() { if (!raf) raf = requestAnimationFrame(measure); }
+    function clock() {
+      try {
+        time.textContent = 'IST ' + new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+      } catch (e) { time.textContent = 'IST'; }
+    }
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll, { passive: true });
+    document.addEventListener('viewChanged', function (e) { setSector(e.detail); setTimeout(measure, 60); });
+    var active = document.querySelector('.view.active');
+    setSector(active ? active.id.replace('view-', '') : 'home');
+    measure(); clock();
+    setInterval(clock, 30000);
+  })();
+
+  /* ── deck: jump anywhere ──────────────────────────────────────────────── */
+  (function deck() {
+    var dlg = document.getElementById('fdDeck'), input = document.getElementById('fdInput'), list = document.getElementById('fdList');
+    var bar = document.querySelector('.top-bar-links');
+    if (!dlg || !input || !list) return;
+    var items = [], shown = [], sel = 0, lastFocus = null;
+    var mac = /Mac|iPhone|iPad/.test(navigator.platform || '');
+
+    function collect() {
+      items = [];
+      var code = 0;
+      // Pages: the sidebar's own entries, in its order, with its labels.
+      [].forEach.call(document.querySelectorAll('.sidebar-item[data-view]'), function (a) {
+        var label = labelOf(a), v = a.getAttribute('data-view');
+        if (label) items.push({ group: 'Pages', label: label, run: function () { go(v); } });
+      });
+      var ct = labelOf(document.getElementById('sidebarContactToggle'));
+      if (ct) items.push({ group: 'Pages', label: ct, run: function () { go('contact'); } });
+      // Projects: each card's own heading, opening that card's own case study.
+      [].forEach.call(document.querySelectorAll('#view-projects .builds-grid > .build-card'), function (card) {
+        var h = card.querySelector('h3'), link = card.querySelector('[data-view^="project-"], a.btn.primary, a.btn');
+        if (!h || !link) return;
+        items.push({ group: 'Projects', label: h.textContent.replace(/\s+/g, ' ').trim(), run: function () { link.click(); } });
+      });
+      // Reach me: the top bar's own channels.
+      [].forEach.call(document.querySelectorAll('.top-bar-link:not(.fd-k)'), function (b) {
+        var l = b.querySelector('.tb-label');
+        if (l) items.push({ group: 'Reach me', label: l.textContent.trim(), run: function () { b.click(); } });
+      });
+      items.forEach(function (it) { it.code = ('0' + (++code)).slice(-2); it.hay = (it.label + ' ' + it.group).toLowerCase(); });
+    }
+    function match(hay, q) {
+      // Every typed word has to appear; order does not matter.
+      return q.split(/\s+/).every(function (w) { return !w || hay.indexOf(w) !== -1; });
+    }
+    function render() {
+      var q = input.value.trim().toLowerCase();
+      shown = items.filter(function (it) { return match(it.hay, q); });
+      sel = Math.max(0, Math.min(sel, shown.length - 1));
+      list.textContent = '';
+      if (!shown.length) {
+        var none = document.createElement('li');
+        none.className = 'fd-empty'; none.textContent = 'Nothing here by that name.';
+        list.appendChild(none); input.removeAttribute('aria-activedescendant'); return;
+      }
+      var group = '';
+      shown.forEach(function (it, i) {
+        if (it.group !== group) {
+          group = it.group;
+          var g = document.createElement('li');
+          g.className = 'fd-group'; g.setAttribute('role', 'presentation'); g.textContent = group;
+          list.appendChild(g);
+        }
+        var li = document.createElement('li');
+        li.className = 'fd-item'; li.id = 'fdItem' + i; li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', i === sel ? 'true' : 'false');
+        var c = document.createElement('span'); c.className = 'fd-code'; c.textContent = it.code;
+        var t = document.createElement('span'); t.textContent = it.label;
+        li.appendChild(c); li.appendChild(t);
+        li.addEventListener('click', function () { run(i); });
+        li.addEventListener('pointermove', function () { if (sel !== i) { sel = i; mark(); } });
+        list.appendChild(li);
+      });
+      input.setAttribute('aria-activedescendant', 'fdItem' + sel);
+    }
+    function mark() {
+      [].forEach.call(list.querySelectorAll('.fd-item'), function (li, i) { li.setAttribute('aria-selected', i === sel ? 'true' : 'false'); });
+      input.setAttribute('aria-activedescendant', 'fdItem' + sel);
+      var cur = document.getElementById('fdItem' + sel);
+      if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+    }
+    function open() {
+      if (dlg.classList.contains('is-open')) return;
+      lastFocus = document.activeElement;
+      collect(); input.value = ''; sel = 0; render();
+      dlg.classList.add('is-open');
+      input.focus();
+    }
+    function close(restore) {
+      if (!dlg.classList.contains('is-open')) return;
+      dlg.classList.remove('is-open');
+      if (restore !== false && lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    function run(i) { var it = shown[i]; if (!it) return; close(false); it.run(); }
+    window.openCommandDeck = open;
+
+    input.addEventListener('input', function () { sel = 0; render(); });
+    dlg.addEventListener('pointerdown', function (e) { if (e.target === dlg) close(); });
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); sel = Math.min(shown.length - 1, sel + 1); mark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); sel = Math.max(0, sel - 1); mark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); run(sel); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+      else if (e.key === 'Tab') { e.preventDefault(); }          // one field: focus stays in the deck
+      else e.stopPropagation();                                   // typing here is not a page shortcut
+    });
+    document.addEventListener('keydown', function (e) {
+      var typing = e.target && (/input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); dlg.classList.contains('is-open') ? close() : open(); }
+      else if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); open(); }
+    });
+    if (bar) {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'fd-k';
+      btn.setAttribute('aria-label', 'Open the command deck');
+      btn.setAttribute('aria-haspopup', 'dialog');
+      var lab = document.createElement('span'); lab.textContent = 'Jump to';
+      var kbd = document.createElement('kbd'); kbd.textContent = mac ? '⌘K' : 'Ctrl K';
+      btn.appendChild(lab); btn.appendChild(kbd);
+      btn.addEventListener('click', open);
+      bar.insertBefore(btn, bar.firstChild);
+    }
+  })();
 })();
 </script>
 </body>
