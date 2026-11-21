@@ -14249,6 +14249,29 @@
     opacity: 1 !important; transform: none !important;
   }
 
+  /* The row is moved by the book, never by the browser: a native sideways
+     scroll is exactly the slide-with-no-flip this replaced. Vertical touches
+     still scroll the page. Motion off restores the plain grid further down. */
+  #view-projects .builds-grid[data-folio] { overflow-x: hidden; touch-action: pan-y; }
+  #view-projects .folio-inside { background: var(--bg-deep); }
+  #view-projects .folio-front {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-4);
+    background: var(--bg-deep);
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 46%, transparent);
+  }
+  #view-projects .folio-front-kicker {
+    font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent-warm); position: relative; z-index: 11;
+  }
+  #view-projects .folio-front-title {
+    font-family: var(--font-display); font-size: var(--fs-display); line-height: 1; color: var(--ink);
+    position: relative; z-index: 11;
+  }
+  #view-projects .folio-front-rule {
+    width: 88px; height: 2px; position: relative; z-index: 11;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  }
+
   /* The light falls off a page as it leaves the flat. */
   #view-projects .folio-shade {
     position: absolute; inset: 0; z-index: 9; opacity: 0;
@@ -14496,6 +14519,17 @@
     el.style.width = rect.width + 'px';
     el.style.height = rect.height + 'px';
   }
+  // Layout offsets, not getBoundingClientRect: the stage leans toward the
+  // pointer, and a rotated box reports a bounding rect that is not its size.
+  function spreadRects(firstIndex, per) {
+    var first = grid.children[firstIndex];
+    var inStage = first.offsetParent === stage;
+    var gx = grid.offsetLeft + stage.clientLeft;
+    var top = (inStage ? 0 : grid.offsetTop) + first.offsetTop + stage.clientTop;
+    var gw = grid.clientWidth, h = first.offsetHeight;
+    var half = { left: gx, top: top, width: gw / per, height: h };
+    return { half: half, left: half, right: { left: gx + gw / 2, top: top, width: gw / 2, height: h } };
+  }
   function face(src, back) {
     var f = document.createElement('div');
     f.className = 'folio-face' + (back ? ' is-back' : '');
@@ -14516,19 +14550,9 @@
     var dir = i > now ? 1 : -1;
     if (reduce || !stage || !stage.animate) { scrollToPage(i, false); return; }
 
-    // Layout offsets, not getBoundingClientRect: the stage leans toward the
-    // pointer, and a rotated box reports a bounding rect that is not its size.
     var per = perSpread(), kids = grid.children;
     var sr = { left: 0, top: 0 };
-    var first = kids[now * per];
-    var ox = first.offsetParent === stage ? 0 : grid.offsetLeft;
-    var oy = first.offsetParent === stage ? 0 : grid.offsetTop;
-    var gw = grid.clientWidth, h = first.offsetHeight;
-    var gx = (first.offsetParent === stage ? grid.offsetLeft : ox) + stage.clientLeft;
-    var top = oy + first.offsetTop + stage.clientTop;
-    var half = { left: gx, top: top, width: gw / per, height: h };
-    var rectL = half;
-    var rectR = { left: gx + gw / 2, top: top, width: gw / 2, height: h };
+    var g = spreadRects(now * per, per), half = g.half, rectL = g.left, rectR = g.right;
     var made = [];
     var leaf = document.createElement('div');
     leaf.className = 'folio-leaf';
@@ -14613,6 +14637,88 @@
   }
   function step(dir) { go(currentPage() + dir); }
 
+  // The cover. Arriving at Projects, the book is closed: a cover lies over the
+  // right-hand page and opens across the spine, and what is on its back is the
+  // first left-hand page. Its words are the masthead's own (the heading and
+  // the project count), so the cover says nothing the page does not.
+  function openCover() {
+    if (motionOff || !stage || !stage.animate || turning) return;
+    if (perSpread() !== 2 || currentPage() !== 0 || !grid.children.length) return;
+    var g = spreadRects(0, 2), sr = { left: 0, top: 0 }, made = [], D = 1100;
+    var inside = document.createElement('div');
+    inside.className = 'folio-cover folio-inside';
+    box(inside, g.left, sr);
+    var leaf = document.createElement('div');
+    leaf.className = 'folio-leaf'; leaf.dataset.side = 'right';
+    leaf.style.transformOrigin = 'left center';
+    var front = document.createElement('div');
+    front.className = 'folio-face folio-front';
+    var head = root.querySelector('.folio-masthead h2, .folio-masthead .display-lg');
+    var kick = document.createElement('span'); kick.className = 'folio-front-kicker';
+    kick.textContent = countEl ? countEl.textContent : '';
+    var title = document.createElement('span'); title.className = 'folio-front-title';
+    title.textContent = head ? head.textContent.replace(/\s+/g, ' ').trim() : '';
+    var rule = document.createElement('span'); rule.className = 'folio-front-rule';
+    front.appendChild(kick); front.appendChild(title); front.appendChild(rule);
+    var fShade = document.createElement('div'); fShade.className = 'folio-shade';
+    fShade.style.setProperty('--shade-dir', '270deg'); front.appendChild(fShade);
+    var back = face(grid.children[0], true);
+    back.style.setProperty('--shade-dir', '90deg');
+    leaf.appendChild(front); leaf.appendChild(back);
+    box(leaf, g.right, sr);
+    [inside, leaf].forEach(function (el) { stage.appendChild(el); made.push(el); });
+    turning = true;
+    var turn = leaf.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(0deg)', offset: 0.18 }, { transform: 'rotateY(-180deg)' }],
+      { duration: D, easing: EASE, fill: 'forwards' });
+    fShade.animate([{ opacity: 0 }, { opacity: 0, offset: 0.18 }, { opacity: 0.5 }], { duration: D * 0.6, easing: 'ease-in', fill: 'forwards' });
+    back.querySelector('.folio-shade').animate([{ opacity: 0.45 }, { opacity: 0.45, offset: 0.55 }, { opacity: 0 }], { duration: D, easing: 'ease-out', fill: 'forwards' });
+    var done = false;
+    function finish() {
+      if (done) return; done = true;
+      made.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+      turning = false;
+      if (pulse) pulse.animate(
+        [{ opacity: 0, transform: 'scaleY(0)' }, { opacity: 1, transform: 'scaleY(1)', offset: 0.35 }, { opacity: 0, transform: 'scaleY(1)' }],
+        { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)' });
+      if (pending != null) { var q = pending; pending = null; if (q !== currentPage()) go(q); }
+    }
+    turn.onfinish = finish; turn.oncancel = finish;
+    setTimeout(finish, D + 200);
+  }
+
+  // Every way of moving through the book turns a page. A two-finger swipe on
+  // a trackpad used to scroll the row natively, so the pages slid sideways
+  // with no leaf at all, which is the one gesture the hint asks for.
+  if (stage && !motionOff) {
+    var wheelArmed = true, wheelQuiet = 0, wheelSum = 0;
+    stage.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;       // vertical: the page scrolls as usual
+      e.preventDefault();
+      clearTimeout(wheelQuiet);
+      // A trackpad keeps sending inertia after the fingers lift. One gesture is
+      // one page: re-arm only once the stream has gone quiet.
+      wheelQuiet = setTimeout(function () { wheelArmed = true; wheelSum = 0; }, 180);
+      // Two locks, because either alone lets a second page through: the quiet
+      // gap covers the inertia tail, and `turning` covers a stream slow enough
+      // to look quiet between events.
+      if (!wheelArmed || turning) { wheelSum = 0; return; }
+      wheelSum += e.deltaX;
+      if (Math.abs(wheelSum) < 36) return;
+      wheelArmed = false;
+      step(wheelSum > 0 ? 1 : -1);
+    }, { passive: false });
+    var tx = 0, ty = 0, touching = false;
+    stage.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { touching = false; return; }
+      touching = true; tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+    }, { passive: true });
+    stage.addEventListener('touchend', function (e) {
+      if (!touching) return; touching = false;
+      var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+      if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
   root.querySelectorAll('[data-folio-dir]').forEach(function (btn) {
     btn.addEventListener('click', function () { step(parseInt(btn.getAttribute('data-folio-dir'), 10)); });
   });
@@ -14653,12 +14759,12 @@
     }
   }
   document.addEventListener('viewChanged', function (ev) {
-    if (ev.detail === 'projects') { buildToc(); sync(); armOpen(); }
+    if (ev.detail === 'projects') { buildToc(); sync(); armOpen(); setTimeout(openCover, 420); }
   });
 
   buildToc();
   sync();
-  if (document.getElementById('view-projects') && document.getElementById('view-projects').classList.contains('active')) armOpen();
+  if (document.getElementById('view-projects') && document.getElementById('view-projects').classList.contains('active')) { armOpen(); setTimeout(openCover, 900); }
 })();
 </script>
 <!-- ═══ FLIGHT DECK ═══════════════════════════════════════════════════════════
