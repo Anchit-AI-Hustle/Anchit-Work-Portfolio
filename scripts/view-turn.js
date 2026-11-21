@@ -262,6 +262,18 @@ const check = (ok, label, detail) => {
       });
       check(arr.stat.view === 'experience' && arr.n >= 2 && arr.n <= 12, `${name}: the sections on screen arrive as separate blocks`, JSON.stringify(arr));
       check(arr.last > arr.first, `${name}: they arrive in order, not all at once`, `${arr.first}..${arr.last}`);
+      // Direction. Hold one block near the start and near the end of its
+      // flight: it must be fainter and lower early, and whole late. The first
+      // version ran backwards (a lone keyframe is read as the end) and every
+      // other check here still passed.
+      const dir = await pg.evaluate(() => {
+        const a = document.getAnimations().find(a => a.effect && a.effect.target && a.effect.target.closest('#view-experience') && !a.animationName && !a.transitionProperty && !a.effect.target.classList.contains('reveal'));
+        if (!a) return null;
+        const el = a.effect.target, t = a.effect.getTiming(), at = f => { a.pause(); a.currentTime = t.delay + t.duration * f; const cs = getComputedStyle(el); return { o: +cs.opacity, y: cs.transform === 'none' ? 0 : new DOMMatrix(cs.transform).m42 }; };
+        const early = at(0.05), late = at(0.95); a.play();
+        return { early, late };
+      });
+      check(!!dir && dir.early.o < 0.5 && dir.late.o > 0.9 && dir.early.y > dir.late.y && dir.late.y < 2, `${name}: a block starts faint and low and ends whole and in place`, JSON.stringify(dir));
       check(arr.props.join() === 'opacity,transform' && arr.dur <= 700, `${name}: the arrival moves transform and opacity only, and is brief`, JSON.stringify({ props: arr.props, dur: arr.dur }));
       check(!arr.overlay, `${name}: nothing is drawn over the page to announce the arrival`);
       await pg.waitForTimeout(1900);
@@ -526,7 +538,9 @@ const check = (ok, label, detail) => {
     await pg.goto(BASE + '/', { waitUntil: 'load' });
     await pg.waitForTimeout(3200);
     await pg.evaluate(() => window.switchView('contact'));
-    await pg.waitForFunction(() => [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')].some(i => i.getAnimations().some(a => a.playState === 'running')), null, { timeout: 9000 }).catch(() => {});
+    // Wait for two, not one: the cards arrive one after another now, and a scan
+    // that lands mid-arrival lights the first card a moment before the rest.
+    await pg.waitForFunction(() => [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')].filter(i => i.getAnimations().some(a => a.playState === 'running')).length >= 2, null, { timeout: 9000 }).catch(() => {});
     const live = await pg.evaluate(() => {
       const on = [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')];
       const off = [...document.querySelectorAll('.is-lv:not(.is-live) > .lv-beam > i')];

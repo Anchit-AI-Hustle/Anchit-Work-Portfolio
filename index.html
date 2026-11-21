@@ -15314,9 +15314,11 @@
       if (!view || !view.classList.contains('active') || !view.animate) return;
       var list = units(view);
       list.forEach(function (el, i) {
-        // One keyframe: it ends wherever the block's own styles say, so a
-        // block still waiting for its scroll reveal is not forced visible.
-        live.push(el.animate([{ opacity: 0, transform: 'translate3d(0,' + RISE + 'px,0)' }],
+        // One keyframe, pinned to the START (offset 0): it ends wherever the
+        // block's own styles say, so a block still waiting for its scroll
+        // reveal is not forced visible. Without the offset a lone keyframe is
+        // read as the END, and the block fades out and drops, then snaps back.
+        live.push(el.animate([{ offset: 0, opacity: 0, transform: 'translate3d(0,' + RISE + 'px,0)' }],
           { duration: D, delay: 60 + i * STEP, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }));
       });
       stat.plays++; stat.units = list.length; stat.view = name;
