@@ -216,9 +216,12 @@ export class GameRoom extends DurableObject {
   applyScore(m) {
     const sc = this.meta.scores;
     const keys = (o) => (o && typeof o === 'object' ? Object.keys(o).slice(0, LIMITS.scoreKeys) : []);
-    for (const k of keys(m.set)) { const v = +m.set[k]; if (Number.isFinite(v) && k.length <= 16) sc[k] = v; }
-    for (const k of keys(m.add)) { const v = +m.add[k]; if (Number.isFinite(v) && k.length <= 16) sc[k] = (sc[k] || 0) + v; }
-    if (Object.keys(sc).length > LIMITS.scoreKeys) return;
+    // A key already on the board can always change; a new one only while the board has room, so a host
+    // can never grow the room's state or its snapshots past LIMITS.scoreKeys.
+    let n = Object.keys(sc).length;
+    const ok = (k, v) => Number.isFinite(v) && k.length <= 16 && (Object.prototype.hasOwnProperty.call(sc, k) || (n < LIMITS.scoreKeys && ++n));
+    for (const k of keys(m.set)) { const v = +m.set[k]; if (ok(k, v)) sc[k] = v; }
+    for (const k of keys(m.add)) { const v = +m.add[k]; if (ok(k, v)) sc[k] = (sc[k] || 0) + v; }
     this.saveMeta();
   }
 

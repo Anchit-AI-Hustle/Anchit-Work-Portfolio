@@ -156,6 +156,11 @@ async function main() {
   A.send({ t: 'sc', add: { [wa.you.uid]: 3 } });
   const sc = await B.wait((m) => m.t === 'snap' && m.sc);
   check('only the host changes the score', sc && sc.sc[wa.you.uid] === 3 && !(wb.you.uid in sc.sc), sc && JSON.stringify(sc.sc));
+  // Frames of fresh keys never grow the board past the limit; a key already there still updates.
+  for (let f = 0; f < 10; f++) { const add = {}; for (let i = 0; i < 24; i++) add['k' + f + '_' + i] = 1; A.send({ t: 'sc', add }); }
+  A.send({ t: 'sc', add: { [wa.you.uid]: 1 } });
+  const wide = await B.wait((m) => m.t === 'snap' && m.sc && m.sc[wa.you.uid] === 4, 6000);
+  check("the room score never holds more keys than the limit", wide && wide.sc && Object.keys(wide.sc).length <= 24 && wide.sc[wa.you.uid] === 4, wide && wide.sc && (Object.keys(wide.sc).length + " keys, host " + wide.sc[wa.you.uid]));
   A.send({ t: 'start', dur: 1200 });
   const st = await B.wait((m) => m.t === 'start');
   check('the host starts a timed match on one clock', st && st.clock.phase === 'live' && st.clock.end - st.clock.start === 1200);
@@ -222,6 +227,7 @@ async function main() {
   await sleep(300);
   check('a joining human replaces a bot', slotsSeen && slotsSeen.filter((s) => s.kind === 'human').length === 2 && rA.myBots().length === 2 && rB.myBots().length === 0);
   let got = 0; rB.on('state', () => { got++; });
+  let pinged = 0; rB.on('ping', () => { pinged++; });
   let botGot = 0; rB.on('bot', () => { botGot++; });
   for (let i = 0; i <= 10; i++) { rA.send({ x: i * 10, h: 3.1 }); rA.sendBots({ bot2: { x: -i } }); await sleep(50); }
   await sleep(400);
@@ -230,7 +236,8 @@ async function main() {
   const smp = rB.sample(rA.me.uid, ['h']);
   check('sample() interpolates a remote state', smp && typeof smp.x === 'number' && smp.x > 0 && smp.x <= 100, JSON.stringify(smp));
   await sleep(2300);
-  check('net.js measures ping', rB.ping > 0 && rB.ping < 1000, rB.ping + ' ms');
+  // On one machine the round trip can round to 0 ms, so a measurement is known by its event, not by > 0.
+  check('net.js measures ping', pinged > 0 && rB.ping >= 0 && rB.ping < 1000, pinged + ' pings, ' + rB.ping + ' ms');
   rA.leave(); rB.leave();
   const pr = await nA.createRoom('turf-kings', 'friendly', { maxPlayers: 2 });
   const jr = pr && await nB.joinCode('turf-kings', pr.code.toLowerCase());
