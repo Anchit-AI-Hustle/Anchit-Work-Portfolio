@@ -269,6 +269,17 @@ It leaves the compositor during a scroll, thins out on phones
 - Not built on light pages, behind a full-screen app shell, or on the concept
   storefronts, which keep their own idle budget (`test:storefront-motion`).
 
+**Live edges.** On the same pages, a point of light laps the border of each
+card that is on screen, one lap every 7 to 16 seconds depending on the card's
+size, each card on its own phase. A masked child holds a square with one bright
+arc painted on it; the square turns, which is a compositor transform over
+static paint. `assets/room.js` finds cards by how they are drawn (a box of card
+size with a border on three sides or more), because the pages name their
+panels a dozen different ways. A card animates only while it is in view; the
+layer pauses during a scroll, and is off with Motion off, on a light theme, in
+the Projects book (it has its own frame) and on the storefronts. Put
+`data-no-live` on anything that should never get one.
+
 ### Arrival choreography
 
 Blocks arrive **one at a time**, and their children arrive one at a time inside

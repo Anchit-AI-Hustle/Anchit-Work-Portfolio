@@ -158,13 +158,111 @@
     if (room) room.style.display = '';
     else initRoom();
   }
+  // ── Live edges ────────────────────────────────────────────────────────
+  // The room moves behind the page; this is the page itself showing signs of
+  // life. A point of light travels the border of each card that is on screen,
+  // one lap every several seconds, each card on its own phase so no two move
+  // together.
+  //
+  // How: a child covers the card and is masked down to its 1px border ring; a
+  // square with one bright arc painted on it turns inside that mask. The arc
+  // is static paint and the turn is a compositor transform, so nothing is
+  // repainted. A card only animates while it is in view, and the whole layer
+  // pauses during a scroll and stops with Motion off or on a light theme.
+  var CARD = '.nav-card,.work-stat,.work-item,.contact-card,.device-card,.study-card,.project-hero,.project-section,' +
+    '.now-role-card,.now-metrics-card,.now-stack-card,.now-focus-item,.about-value-item,.meta-block,.cw-panel,[class*="card"]';
+  var liveSeen = typeof WeakSet === 'function' ? new WeakSet() : null, liveIO = null, liveCount = 0;
+  function liveCss() {
+    if (document.getElementById('lv-css')) return;
+    var A = 'var(--accent-warm, var(--accent, #FFB736))';
+    var st = document.createElement('style');
+    st.id = 'lv-css';
+    st.textContent = [
+      '.lv-beam{position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;overflow:hidden;z-index:1;opacity:0;transition:opacity .7s ease;',
+      '-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}',
+      '.lv-beam>i{position:absolute;left:50%;top:50%;width:220%;aspect-ratio:1;margin:-110% 0 0 -110%;display:block;',
+      'background:conic-gradient(from 0deg,transparent 0 292deg,color-mix(in srgb,' + A + ' 55%,transparent) 330deg,' + A + ' 352deg,#fff 358deg,transparent 360deg)}',
+      'html.room-live .is-live>.lv-beam{opacity:.9}',
+      'html.room-live .is-live>.lv-beam>i{animation:lvLap var(--lv-t,9s) linear infinite;animation-delay:var(--lv-d,0s)}',
+      'html[data-room-quiet] .lv-beam>i{animation-play-state:paused!important}',
+      '@keyframes lvLap{to{transform:rotate(360deg)}}'
+    ].join('');
+    document.head.appendChild(st);
+  }
+  function scanLive() {
+    if (!liveSeen || !('IntersectionObserver' in window)) return;
+    liveCss();
+    if (!liveIO) {
+      liveIO = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.target.classList.toggle('is-live', e.isIntersecting); });
+      }, { rootMargin: '-6% 0px -6% 0px' });
+    }
+    // What counts as a card is decided by how it is drawn, not what it is
+    // called: the pages here name their panels a dozen different ways and some
+    // not at all. A card is a box of card size with a visible border on at
+    // least three sides, that is not already inside a card.
+    var list = document.querySelectorAll(CARD + ',main div,main a,main article,main li,main section,main figure,body>div div,body>section div,article');
+    var looked = 0;
+    for (var i = 0; i < list.length && liveCount < 70 && looked < 5000; i++) {
+      var el = list[i];
+      if (liveSeen.has(el)) continue;
+      var w = el.offsetWidth, h = el.offsetHeight;
+      if (!w && !h) continue;                            // hidden for now (another view): look again later
+      looked++;
+      liveSeen.add(el);
+      if (w < 170 || h < 80 || w > 1300 || h > 820) continue;
+      if (el.closest('.folio, nav, aside, header, footer, .cin-room, .lux, [data-no-live], #fdDeck, .chat-panel, dialog, .is-lv')) continue;
+      var cs = getComputedStyle(el);
+      if (cs.display === 'inline' || cs.visibility === 'hidden') continue;
+      // Still waiting for its entrance: not a no, a not-yet. Marking it seen
+      // here skipped most of the home page for good, since its blocks start
+      // transparent and arrive as they are scrolled to.
+      if (+cs.opacity < 0.5) { liveSeen.delete(el); continue; }
+      var sides = (parseFloat(cs.borderTopWidth) > 0) + (parseFloat(cs.borderRightWidth) > 0) + (parseFloat(cs.borderBottomWidth) > 0) + (parseFloat(cs.borderLeftWidth) > 0);
+      var ink = (cs.borderTopColor.match(/[\d.]+/g) || []);
+      if (sides < 3 || (ink.length > 3 && +ink[3] < 0.04)) continue;
+      if (cs.position === 'static') el.style.position = 'relative';
+      el.classList.add('is-lv');
+      var beam = document.createElement('span');
+      beam.className = 'lv-beam'; beam.setAttribute('aria-hidden', 'true');
+      beam.appendChild(document.createElement('i'));
+      // A lap takes longer round a bigger card, and every card starts
+      // somewhere different on its lap.
+      var per = Math.max(7, Math.min(16, (w + h) / 70));
+      beam.style.setProperty('--lv-t', per.toFixed(1) + 's');
+      beam.style.setProperty('--lv-d', (-((liveCount * 2.7) % per)).toFixed(1) + 's');
+      el.appendChild(beam);
+      liveIO.observe(el);
+      liveCount++;
+    }
+  }
+  function syncLive() {
+    var on = !isOff() && !!darkBg();
+    root.classList.toggle('room-live', on);
+    if (on) scanLive();
+  }
+  window.__roomScan = function () { if (root.classList.contains('room-live')) scanLive(); };
+
   function start() {
     setTimeout(initRoom, 600);
+    setTimeout(syncLive, 900);
+    // Pages reveal views and inject cards after load; look again when they do,
+    // and stand the edges down while the page is being scrolled.
+    document.addEventListener('viewChanged', function () { setTimeout(window.__roomScan, 900); setTimeout(window.__roomScan, 2400); });
+    setTimeout(window.__roomScan, 3200);
+    var lq = 0;
+    addEventListener('scroll', function () {
+      // An attribute the theme watcher does not listen for, so a scroll does not
+      // make it re-read the page background twice per gesture.
+      root.setAttribute('data-room-quiet', '');
+      clearTimeout(lq);
+      lq = setTimeout(function () { root.removeAttribute('data-room-quiet'); setTimeout(window.__roomScan, 900); }, 220);
+    }, { passive: true });
     if ('MutationObserver' in window) {
       var later = 0;
       // Answer at once, so turning Motion off stops the room now, and again
       // once a theme switch has finished fading the background it is read from.
-      var ask = function () { sync(); clearTimeout(later); later = setTimeout(sync, 420); };
+      var ask = function () { sync(); syncLive(); clearTimeout(later); later = setTimeout(function () { sync(); syncLive(); }, 420); };
       var mo = new MutationObserver(ask);
       var watch = { attributes: true, attributeFilter: ['class', 'data-motion', 'data-theme', 'style'] };
       mo.observe(root, watch);
