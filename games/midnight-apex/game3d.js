@@ -3757,8 +3757,20 @@ function cheapOf(m) {
   }
   return c;
 }
-function applyTier() {
+// A quality change that would rebuild shaders (material swaps, the environment map, the number of lit spots,
+// shadows on or off) waits for a moment with no racing on screen (menu, pause, results), where the short compile
+// goes unnoticed; during a race only the changes that never touch a shader apply: resolution, the shadow map's
+// size and update rate, effect caps.
+function applyTier(force) {
   const r = R3, t = TIERS[r.quality];
+  const racing = !force && ARC && ARC.state === 'play' && r.progSet;
+  const mapSize = t.shadow > 0 ? t.mapSize : 512;
+  if (r.moon.shadow.mapSize.x !== mapSize) { r.moon.shadow.mapSize.set(mapSize, mapSize); if (r.moon.shadow.map) { r.moon.shadow.map.dispose(); r.moon.shadow.map = null; } }
+  if (MARKS) MARKS.setCap([0, 80, 160, 240][r.quality]);
+  if (VFX) VFX.setQuality(r.quality);
+  r.shadowEvery = t.shadow > 0 || !r.shadowCap ? 1 : 3;
+  if (racing) { r.progPending = true; return; }
+  r.progSet = true; r.progPending = false; r.shadowCap = t.shadow > 0; r.shadowEvery = 1;
   r.scene.traverse((o) => {
     if (o.material && !Array.isArray(o.material) && !o.userData.keepMat && !o.material.userData.keepMat) {
       const full = fullOf(o.material), want = t.cheap ? cheapOf(full) : full;
@@ -3771,12 +3783,9 @@ function applyTier() {
   ALL_TEX.forEach((tx) => { if (tx.anisotropy !== an) { tx.anisotropy = an; tx.needsUpdate = true; } });
   r.spots.forEach((sp, i) => { sp.visible = i < t.spots; });
   QUAL_LIST.forEach((m) => { m.castShadow = t.shadow > 0 && r.quality >= 2; });
-  if (MARKS) MARKS.setCap([0, 80, 160, 240][r.quality]);
-  if (VFX) VFX.setQuality(r.quality);
   r.renderer.shadowMap.enabled = t.shadow > 0;
   r.moon.castShadow = t.shadow > 0;
   r.hemi.intensity = r.baseHemi * (t.cheap ? 1.9 : 1); r.moon.intensity = r.baseMoon * (t.cheap ? 1.5 : 1);
-  if (r.moon.shadow.mapSize.x !== t.mapSize) { r.moon.shadow.mapSize.set(t.mapSize, t.mapSize); if (r.moon.shadow.map) { r.moon.shadow.map.dispose(); r.moon.shadow.map = null; } }
 }
 function setQuality(q) {
   if (!R3) return;
@@ -3870,7 +3879,7 @@ function activateWorld(W) {
   FX.clear();
   if (MARKS) MARKS.clear();
   r.skid = [W.P].concat(W.rivals).map(() => [{ on: false, x: 0, y: 0, z: 0 }, { on: false, x: 0, y: 0, z: 0 }]);
-  applyTier();
+  applyTier(true); // a race is being built: a loading moment, so every tier change applies now
   r.camInit = false; r.worldRef = W;
   if (!W.attract) warmDraw(W);
 }
@@ -4219,6 +4228,8 @@ function renderScene(W, dt, a) {
     if (P.drift > 0.75 && r.drSpark <= 0) { r.drSpark = 0.18; _wp.set(Math.random() < 0.5 ? -car.G.wx : car.G.wx, 0.05, car.G.wz).applyMatrix4(car.root.matrix); VFX.impact(_vq.set(_wp.x, _wp.y, _wp.z), _vn, { kind: 'spark', size: 0.5 }); }
     VFX.update(dt);
   }
+  if (r.progPending && ARC && ARC.state !== 'play') applyTier();
+  if (r.shadowCap) { const sm = r.renderer.shadowMap; if (r.shadowEvery > 1) { sm.autoUpdate = false; if (((r.shF = (r.shF || 0) + 1) % r.shadowEvery) === 0) sm.needsUpdate = true; } else sm.autoUpdate = true; }
   if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, cam); } else r.renderer.render(r.scene, cam);
   if (!r.firstR) { r.firstR = 1; }
 }

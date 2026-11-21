@@ -1,8 +1,10 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createHuman, createCrowd, crowdRows, prepareHuman } from '/games/shared/human.js';
 import { createVFX } from '/games/shared/vfx.js';
-import { createFX, contactShadow, createSkyEnv, isSoftRenderer } from '/games/shared/fx3d.js';
-import { boot, RH, ROPE, POST, APRON, FLOOR, STAGE_Z, STAGE_Y, RAMP_END, PHf, PI, HALF, TAU, clamp, lerp, smooth01, PROMO, REF } from '/games/ring-rajas/core.js';
+import { createFX, contactShadow, createSkyEnv, isSoftRenderer, createResScale } from '/games/shared/fx3d.js';
+// dynamic resolution: sharpness gives way in small steps before a whole quality tier does
+const RESS = createResScale({ min: 0.62 });
+import { boot, RH, ROPE, POST, APRON, FLOOR, STAGE_Z, STAGE_Y, RAMP_END, PHf, PI, HALF, TAU, clamp, lerp, smooth01, PROMO, REF, ROSTER } from '/games/ring-rajas/core.js';
 
 /*
  * Ring Rajas in 3D. The match itself lives in core.js; this file builds the
@@ -268,7 +270,7 @@ function buildBase() {
   // lights: a warm rig straight over the ring, cool hall fill, a dim hemisphere
   const key = new THREE.DirectionalLight('#fff0dc', 3.4);
   key.position.set(2.2, 15, 5.5); key.target.position.set(0, RH, 0);
-  key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
+  key.castShadow = R.shadowCap !== false; key.shadow.mapSize.set(1024, 1024);
   const sc = key.shadow.camera; sc.left = -7; sc.right = 7; sc.top = 7; sc.bottom = -7; sc.near = 4; sc.far = 30;
   key.shadow.bias = -0.0006; key.shadow.normalBias = 0.03; key.shadow.radius = 3;
   R.scene.add(key, key.target); R.key = key;
@@ -484,7 +486,7 @@ function rigFor(w) {
   if (!rig) {
     const d = w.def;
     const h = createHuman({ seed: d.id.length * 97 + d.kg, sex: d.sex, build: d.build, height: d.height, skin: d.skin, hair: d.hair, hairColor: d.hairColor, age: d.age, quality: HUMQ(), unit: 1, outfit: w.outfit });
-    h.mesh.castShadow = R.q >= 1;
+    h.mesh.castShadow = R.shadowCap != null ? R.shadowCap : R.q >= 1;
     rig = makeRig(h, w);
     if (d.mask) {
       const mm = std({ color: d.mask, roughness: 0.45 });
@@ -496,6 +498,19 @@ function rigFor(w) {
     RIGS.set(keyId, rig);
   }
   return rig;
+}
+// The menu builds every wrestler once, one per idle moment, and compiles their shaders off the main thread.
+// Play then finds each rig and every program it needs already made: picking a match never stalls the first seconds.
+function warmRoster(a) {
+  if (R.soft || !a || a.state !== 'menu' || R.warmBusy) return;
+  if (!R.warmQ) R.warmQ = ROSTER.slice();
+  if (!R.warmQ.length || (R.warmWait = (R.warmWait || 0) + 1) < 20) return;
+  R.warmWait = 0;
+  const def = R.warmQ.shift(), rig = rigFor({ def, alt: false, outfit: Object.assign({}, def.outfit) });
+  if (rig.root.parent || !R.renderer.compileAsync) return;
+  rig.root.visible = false; R.scene.add(rig.root); R.warmBusy = true;
+  const done = () => { if (!rig.w && rig.root.parent === R.scene) R.scene.remove(rig.root); rig.root.visible = true; R.warmBusy = false; };
+  try { R.renderer.compileAsync(R.scene, R.camera).then(done, done); } catch (e) { done(); }
 }
 function setMatch(G) {
   const S = R.S;
@@ -961,6 +976,8 @@ function render(a, G, ctx) {
   if (R.pending) { const g = R.pending; R.pending = null; setMatch(g); }
   if (G !== G0) setMatch(G);
   R.time += dtR;
+  warmRoster(a);
+  if (!R.lockQ && ARC && ARC.state !== 'pause' && RESS.tick(dtR)) resize(ARC);
   fpsWatch(dtR);
   const S = R.S, paused = a.state === 'pause';
   const dt = paused ? 0 : dtR * (VFX ? VFX.timeScale : 1);
@@ -1004,6 +1021,7 @@ function render(a, G, ctx) {
   director(G, dtR, a);
   if (VFX) { if (!paused) VFX.update(dtR); else VFX.update(0); VFX.applyShake(R.camera); }
   if (CS) cstrack(G);
+  if (R.shadowCap) { const sm = R.renderer.shadowMap; if (R.shadowEvery > 1) { sm.autoUpdate = false; if (((R.shF = (R.shF || 0) + 1) % R.shadowEvery) === 0) sm.needsUpdate = true; } else sm.autoUpdate = true; }
   try { if (FX && TIERS[Math.max(0, R.q)].post) FX.render(R.scene, R.camera); else R.renderer.render(R.scene, R.camera); }
   catch (e) { /* lost context: next frame */ }
   if (VFX) VFX.removeShake(R.camera);
@@ -1056,14 +1074,19 @@ function buildStep(a) {
 }
 function applyTier() {
   const t = TIERS[Math.max(0, R.q)];
-  R.renderer.shadowMap.enabled = t.shadow; R.key.castShadow = t.shadow;
-  if (R.key.shadow.mapSize.x !== t.map) { R.key.shadow.mapSize.set(t.map, t.map); if (R.key.shadow.map) { R.key.shadow.map.dispose(); R.key.shadow.map = null; } }
+  // Shadows on or off is decided once, at build, before anything compiles. Switching them later rebuilds every
+  // material's shader at once (a long hitch, measured at Play on a phone-class GPU), so a lower tier keeps the
+  // shadows and updates a smaller map less often instead.
+  if (R.shadowCap == null) { R.shadowCap = t.shadow; R.renderer.shadowMap.enabled = t.shadow; R.key.castShadow = t.shadow; }
+  R.shadowEvery = t.shadow ? 1 : 3;
+  const map = t.shadow ? t.map : 512;
+  if (R.key.shadow.mapSize.x !== map) { R.key.shadow.mapSize.set(map, map); if (R.key.shadow.map) { R.key.shadow.map.dispose(); R.key.shadow.map = null; } }
   if (R.S.crowd) R.S.crowd.mesh.count = Math.max(40, Math.floor(R.S.crowdN * t.crowd));
   if (VFX) VFX.setQuality(t.vfx);
   if (FX) FX.setQuality(R.q, R.lockQ);
-  for (const r of RIGS.values()) r.hum.mesh.castShadow = t.shadow;
+  for (const r of RIGS.values()) r.hum.mesh.castShadow = R.shadowCap;
   if (R.S.staff) for (const h of R.S.staff) h.group.visible = R.q >= 1;
-  if (R.S.ref) R.S.ref.hum.mesh.castShadow = t.shadow;
+  if (R.S.ref) R.S.ref.hum.mesh.castShadow = R.shadowCap;
   resize(ARC);
 }
 function setQuality(q) {
@@ -1080,15 +1103,16 @@ function fpsWatch(dt) {
     const fps = R.fN / R.fT; R.fps = fps; R.fT = 0; R.fN = 0;
     R.warm++;
     if (R.warm < 2) return;
-    if (fps < 36 && R.q > 0) { setQuality(fps < 20 ? R.q - 2 : R.q - 1); R.warm = 0; }
-    else if (fps > 57 && R.q < R.maxQ && R.warm > 6) { setQuality(R.q + 1); R.warm = 0; }
+    // a tier drops only once resolution is at its floor, and rises only from full resolution
+    if (fps < 36 && R.q > 0 && (RESS.atFloor() || fps < 20)) { RESS.reset(); setQuality(fps < 20 ? R.q - 2 : R.q - 1); R.warm = 0; }
+    else if (fps > 57 && R.q < R.maxQ && R.warm > 6 && RESS.atCeiling()) { setQuality(R.q + 1); R.warm = 0; }
   }
 }
 function resize(a) {
   if (!R || !a) return;
   const t = TIERS[Math.max(0, R.q)];
   const pr = Math.min(a.dpr * t.px, Math.sqrt(t.budget / Math.max(1, a.w * a.h)));
-  R.renderer.setPixelRatio(Math.max(0.35, pr));
+  R.renderer.setPixelRatio(Math.max(0.35, pr * (R.lockQ ? 1 : RESS.scale)));
   R.renderer.setSize(a.w, a.h, false);
   R.camera.aspect = a.w / Math.max(1, a.h); R.camera.updateProjectionMatrix();
 }
@@ -1109,7 +1133,10 @@ function init(a) {
   const soft = isSoftRenderer(renderer);
   const dev = a.device;
   const q0 = soft ? 0 : dev === 'phone' ? 1 : dev === 'tablet' ? 2 : 3;
-  R = { renderer, scene, camera, S: {}, q: q0, maxQ: soft ? 1 : 3, lockQ: false, soft, built: false, step: 0, time: 0, fT: 0, fN: 0, fps: 60, warm: 0, lost: false, recTime: 0 };
+  // shadows on or off is decided here, before the first frame compiles anything: deciding it later rebuilt
+  // every arena shader at once, which landed as a long stall right when Play was pressed
+  renderer.shadowMap.enabled = TIERS[q0].shadow;
+  R = { renderer, scene, camera, S: {}, q: q0, shadowCap: TIERS[q0].shadow, maxQ: soft ? 1 : 3, lockQ: false, soft, built: false, step: 0, time: 0, fT: 0, fN: 0, fps: 60, warm: 0, lost: false, recTime: 0 };
   a.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); R.lost = true; });
   a.canvas.addEventListener('webglcontextrestored', () => { R.lost = false; });
   resize(a);
