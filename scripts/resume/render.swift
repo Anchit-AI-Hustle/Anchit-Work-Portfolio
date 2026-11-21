@@ -37,7 +37,7 @@ func metricText(_ s:String,_ centerX:CGFloat,_ baseline:CGFloat,_ size:CGFloat,_
 func section(_ s:String,_ y:inout CGFloat){y+=7;y+=text(s,M,y,CW,9,true,teal)+4;rule(y);y+=6}
 func start(){pdf.beginPDFPage(nil);pdf.saveGState();pdf.translateBy(x:0,y:H);pdf.scaleBy(x:1,y:-1);NSGraphicsContext.saveGraphicsState();NSGraphicsContext.current=NSGraphicsContext(cgContext:pdf,flipped:true)}
 func finish(_ page:Int){rule(H-32);text("Anchit Tandon · anchit-tandon.com",M,H-25,CW-40,7.7,false,muted,"https://anchit-tandon.com");text("\(page) / 2",W-M-32,H-25,32,7.7,false,muted);NSGraphicsContext.restoreGraphicsState();pdf.restoreGState();for (r,l) in annotations {pdf.setURL(URL(string:l)! as CFURL,for:r)};annotations=[];pdf.endPDFPage()}
-func bullet(_ s:String,_ y:inout CGFloat,_ size:CGFloat=10){text("•",M+1,y,8,size,false,teal);y+=text(s,M+12,y,CW-12,size)+4}
+func bullet(_ s:String,_ y:inout CGFloat,_ size:CGFloat=10){text("•",M+1,y,8,size,false,teal);y+=text(s,M+12,y,CW-12,size)+3}
 func heading(_ title:String,_ dates:String,_ y:inout CGFloat){y+=4;text(dates,W-M-108,y+1,108,8.1,false,muted);y+=text(title,M,y,CW-115,10.3,true)+2}
 
 start()
@@ -52,13 +52,13 @@ var lx=M+textWidth(contact,8.7)
 text("anchit-tandon.com",lx,y,textWidth("anchit-tandon.com",8.7)+2,8.7,false,teal,"https://anchit-tandon.com")
 lx+=textWidth("anchit-tandon.com",8.7);text("  |  ",lx,y,30,8.7);lx+=textWidth("  |  ",8.7)
 y+=text("linkedin.com/in/anchit-tandon",lx,y,textWidth("linkedin.com/in/anchit-tandon",8.7)+2,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+12
-let bandH:CGFloat=58
+let bandH:CGFloat=56
 NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:bandH)).fill()
 let projectCount=(content["projects"] as! [[String:String]]).count
 let metrics=[("5×","ET Prime revenue","₹15L to ₹80L/mo"),("400%+","ROI in 6 months","ET Prime"),("₹3Cr+","Annual revenue","ET Markets"),("+27%","Engagement","ET Markets"),("150+","Qualified leads/day","from ~30"),("18K+","Runners","Delhi Half Marathon"),("\(projectCount)","Products built","AI & consumer")]
 let colW7=CW/CGFloat(metrics.count)
 for col in 1..<metrics.count {let x=M+CGFloat(col)*colW7;line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+10));p.line(to:NSPoint(x:x,y:y+bandH-10));p.lineWidth=0.45;p.stroke()}
-for (i,m) in metrics.enumerated(){let cx=M+(CGFloat(i)+0.5)*colW7;metricText(m.0,cx,y+24,13.6,true,ink);metricText(m.1,cx,y+37,6.9,false,muted);metricText(m.2,cx,y+47,6.9,false,muted)}
+for (i,m) in metrics.enumerated(){let cx=M+(CGFloat(i)+0.5)*colW7;metricText(m.0,cx,y+23,13.6,true,ink);metricText(m.1,cx,y+36,6.9,false,muted);metricText(m.2,cx,y+46,6.9,false,muted)}
 y+=bandH+6
 section("PROFILE",&y)
 y+=text(content["profile"] as! String,M,y,CW,10.1)+2
@@ -83,7 +83,7 @@ func page2(_ y:inout CGFloat){
 let earlier:[(String,String,[String])]=[
  ("Citymall | Software Engineer (SDE II)","Mar 2022 - Jun 2022",["Built and scaled backend systems supporting high-frequency consumer transactions on a consumer-commerce platform.","Improved data pipelines and API performance to support growth and reliability."]),
  ("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",["Appointed Product Owner for Chatter (now DebatabL), a live football commentary app; led the MVP from ideation to launch, driving early user engagement and adoption.","Built APIs and backend systems for consumer and hyperlocal commerce products.","Supported growth initiatives through onboarding, distribution and early go-to-market efforts."])]
-let bh={(b:String)->CGFloat in measure(b,CW-12,9.3)+4}
+let bh={(b:String)->CGFloat in measure(b,CW-12,9.3)+3}
 if y+30+measure(earlier[0].0,CW-115,10.3,true)+6+bh(earlier[0].2[0]) > limit {page2(&y)}
 section("EARLIER TECHNICAL EXPERIENCE",&y)
 for (title,dates,bullets) in earlier{
