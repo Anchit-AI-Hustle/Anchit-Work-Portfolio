@@ -75,22 +75,25 @@ func measure(_ s:String,_ width:CGFloat,_ size:CGFloat,_ bold:Bool=false)->CGFlo
  let font=NSFont(name:bold ? "Arial-BoldMT":"ArialMT",size:size)!
  return ceil(NSAttributedString(string:s,attributes:[.font:font,.paragraphStyle:para]).boundingRect(with:NSSize(width:width,height:2000),options:[.usesLineFragmentOrigin,.usesFontLeading]).height)}
 var page=1
+var inEarlier=false
 let limit=H-38
 func page2(_ y:inout CGFloat){
  print("Page 1 content ends:",y);precondition(y <= limit, "Page 1 content overflows the footer: \(y) > \(limit)")
  finish(1);start();y=29
- text("ANCHIT TANDON",M,y,300,12,true);text("EXPERIENCE & COMPLETE PORTFOLIO",M+240,y,285,8.3,true,teal);y+=23;page=2}
+ text("ANCHIT TANDON",M,y,300,12,true);text("EXPERIENCE & COMPLETE PORTFOLIO",M+240,y,285,8.3,true,teal);y+=23;page=2
+ if inEarlier {y+=text("EARLIER TECHNICAL EXPERIENCE (CONTINUED)",M,y,CW,8,true,muted)+5}}
 let earlier:[(String,String,[String])]=[
  ("Citymall | Software Engineer (SDE II)","Mar 2022 - Jun 2022",["Built and scaled backend systems supporting high-frequency consumer transactions on a consumer-commerce platform.","Improved data pipelines and API performance to support growth and reliability."]),
  ("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",["Appointed Product Owner for Chatter (now DebatabL), a live football commentary app; led the MVP from ideation to launch, driving early user engagement and adoption.","Built APIs and backend systems for consumer and hyperlocal commerce products.","Supported growth initiatives through onboarding, distribution and early go-to-market efforts."])]
 let bh={(b:String)->CGFloat in measure(b,CW-12,9.3)+3}
 if y+30+measure(earlier[0].0,CW-115,10.3,true)+6+bh(earlier[0].2[0]) > limit {page2(&y)}
-section("EARLIER TECHNICAL EXPERIENCE",&y)
+section("EARLIER TECHNICAL EXPERIENCE",&y);inEarlier=true
 for (title,dates,bullets) in earlier{
  if page==1 && y+measure(title,CW-115,10.3,true)+6+bh(bullets[0]) > limit {page2(&y)}
  heading(title,dates,&y)
  for b in bullets{ if page==1 && y+bh(b) > limit {page2(&y)}; bullet(b,&y,9.3) }
 }
+inEarlier=false
 if page==1 {page2(&y)}
 section("CORE SKILLS",&y)
 y+=text("Product: Discovery, strategy, roadmaps, prioritisation, A/B experimentation, pricing and monetisation.",M,y,CW,9.1)+3
@@ -123,10 +126,10 @@ for col in 0...1 {
  let x=M+CGFloat(col)*(colW+22);var cy=top
  for i in range{
   let p=projects[i]
-  cy+=text(p["name"]!,x,cy,colW,9.2,true,ink,p["url"]!)+0.5
-  cy+=text(p["text"]!,x,cy,colW,9.05)-0.5
+  cy+=text(p["name"]!,x,cy,colW,9.2,true,ink,p["url"]!)+2
+  cy+=text(p["text"]!,x,cy,colW,9.05)+0.5
   let visibleURL="URL: "+p["url"]!
-  cy+=text(visibleURL,x,cy,colW,7.3,false,teal,p["url"]!)+1.5
+  cy+=text(visibleURL,x,cy,colW,7.3,false,teal,p["url"]!)+2
  }
  ends.append(cy)
 }
