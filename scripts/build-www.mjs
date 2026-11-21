@@ -90,6 +90,7 @@ const assets = [
   'deli-chic',
   'xazina-revamp',
   'pw-study',
+  'radio-mirchi',
   'lenskart-study',
   'amar-ujala',
   'ET_Study',
@@ -587,3 +588,4 @@ async function main() {
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
+

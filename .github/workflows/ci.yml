@@ -23,7 +23,7 @@ jobs:
       - name: Install portfolio dependencies
         run: npm install --no-audit --no-fund
 
-      - name: HTML smoke test
+      - name: Validate Mirchi study and economics\n        run: npm run test:mirchi\n\n      - name: HTML smoke test
         run: |
           test -f index.html
           test -f task-tracker.html
@@ -124,3 +124,4 @@ jobs:
 
       - name: Exhaustive internal links and redirects
         run: npm run test:redirects
+
