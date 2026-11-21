@@ -120,6 +120,14 @@
 <script defer src="/assets/vendor/ScrollTrigger.min.js"></script>
 
 <style>
+  /* Needed before the rest of this file has arrived. The sidebar is parsed
+     near the top; the rules that collapse its Contact submenu and size its
+     icons live thousands of lines below. On a slow load the submenu rendered
+     open with its icons at full width, the first of which is a circle with an
+     exclamation mark, 200px across, which reads as an error. */
+  .sidebar-subnav { display: none; }
+  .sidebar-subitem svg, .sidebar-item svg, .sidebar-caret { width: 16px; height: 16px; flex: 0 0 auto; }
+
   /* ============ DESIGN TOKENS ============ */
   :root[data-theme="light"] {
     --bg: #FBF5EC;
@@ -3543,11 +3551,11 @@
   .float-aura{ inset:-22%;
     background:
       /* Subtle pointer-following atmospheric light + faint architectural grid */
-      radial-gradient(38% 28% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(201,169,110,.075), transparent 60%),
-      radial-gradient(40% 36% at 18% 22%, rgba(255,105,64,.045), transparent 64%),
-      radial-gradient(44% 40% at 84% 74%, rgba(201,169,110,.04), transparent 66%),
-      linear-gradient(to right, rgba(251,245,236,.022) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(251,245,236,.022) 1px, transparent 1px);
+      radial-gradient(38% 28% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(201,169,110,.15), transparent 60%),
+      radial-gradient(40% 36% at 18% 22%, rgba(255,105,64,.1), transparent 64%),
+      radial-gradient(44% 40% at 84% 74%, rgba(201,169,110,.085), transparent 66%),
+      linear-gradient(to right, rgba(251,245,236,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(251,245,236,.045) 1px, transparent 1px);
     background-size: auto, auto, auto, 72px 72px, 72px 72px;
     animation:floatAura 26s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-1%,-0.5%,0)} to{transform:translate3d(1.5%,1%,0)} }
@@ -3625,7 +3633,7 @@
   var x=c.getContext('2d');
   var W,H,ps=[];
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
-  function seed(){ ps=[]; var n=Math.min(44,Math.floor(W/32)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.4,v:Math.random()*.24+.08,a:Math.random()*.18+.08}); }
+  function seed(){ ps=[]; var n=Math.min(96,Math.floor(W/15)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.4,v:Math.random()*.24+.08,a:Math.random()*.18+.08}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
   // Defer to the ambient tier resolved before the first paint, rather than
   // reading the preference again and risking a different answer. At the `still`
@@ -3798,7 +3806,7 @@
       </button>
       <div class="sidebar-subnav" id="sidebarContactSub">
         <a class="sidebar-subitem" href="#contact" data-view="contact" data-c="page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
           <span>Contact page</span>
         </a>
         <button type="button" class="sidebar-subitem" data-wa-choice data-c="whatsapp">
@@ -5027,6 +5035,11 @@
       <div class="folio-stage" data-no-motion>
         <div class="folio-bind" aria-hidden="true"></div>
         <div class="folio-spine" aria-hidden="true"></div>
+        <button type="button" class="folio-nav folio-side is-prev" data-folio-dir="-1" aria-label="Previous spread">&#8249;</button>
+        <button type="button" class="folio-nav folio-side is-next" data-folio-dir="1" aria-label="Next spread">&#8250;</button>
+        <div class="folio-edge is-left" aria-hidden="true"></div>
+        <div class="folio-edge is-right" aria-hidden="true"></div>
+        <div class="folio-ribbon" aria-hidden="true"></div>
         <div class="folio-hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <div class="folio-pulse" aria-hidden="true"></div>
         <div class="folio-sweep" aria-hidden="true"></div>
@@ -12242,7 +12255,7 @@
     var camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 260);
     camera.position.z = 30;
 
-    var COUNT = isMobile ? 90 : 220, SPREAD = 90;
+    var COUNT = isMobile ? 320 : 1100, SPREAD = 90;
     var geo = new THREE.BufferGeometry();
     var pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
     for (var i = 0; i < COUNT; i++) {
@@ -12252,7 +12265,7 @@
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.24 : 0.22, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.34, sizeAttenuation: true });
+    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.34 : 0.32, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.34, sizeAttenuation: true });
     var points = new THREE.Points(geo, mat);
     scene.add(points);
 
@@ -12294,7 +12307,7 @@
     // backdrops while the WebGL canvas was still empty, and anyone whose first
     // render was slow got a bare background in the gap.
     function reveal() {
-      canvas.style.opacity = '0.36';
+      canvas.style.opacity = '0.62';
       // Announce it, so the CSS can retire the other backdrops. The quality
       // guard clears it again if this machine cannot keep up, and the 2D field
       // comes straight back.
@@ -14233,7 +14246,7 @@
       transform-origin: 50% 50%;
     }
   }
-  @media (max-width: 820px) { #view-projects .folio-pulse, #view-projects .folio-hud { display: none; } }
+  @media (max-width: 820px) { #view-projects .folio-pulse { display: none; } }
   html[data-motion="off"] #view-projects .folio-hud,
   html[data-motion="off"] #view-projects .folio-pulse,
   html[data-motion="off"] #view-projects .folio-sweep { display: none !important; }
@@ -14271,6 +14284,82 @@
     width: 88px; height: 2px; position: relative; z-index: 11;
     background: linear-gradient(90deg, transparent, var(--primary), transparent);
   }
+
+  /* ── It is a book ────────────────────────────────────────────────────────
+     Two flat panels with a line between them do not read as one. A book is a
+     cover board larger than its pages, a block of page edges at each side, a
+     gutter the pages fall into, and a ribbon. All static paint. */
+  #view-projects .folio-stage {
+    padding: var(--sp-4) var(--sp-5);
+    background:
+      linear-gradient(90deg, transparent 49.2%, rgba(0,0,0,.5) 50%, transparent 50.8%),
+      linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, var(--bg-deep)), var(--bg-deep) 46%, color-mix(in srgb, var(--primary) 8%, var(--bg-deep)));
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lg),
+      inset 0 0 0 4px var(--bg-deep),
+      inset 0 0 0 5px color-mix(in srgb, var(--accent-warm) 34%, transparent);
+  }
+  /* The page block: the edges of every page not yet (or already) turned. */
+  #view-projects .folio-edge {
+    position: absolute; top: var(--sp-5); bottom: var(--sp-5); width: 9px; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--ink) 30%, var(--bg-elev)) 0 1px, var(--bg-elev) 1px 3px);
+  }
+  #view-projects .folio-edge.is-left { left: var(--sp-3); border-radius: 2px 0 0 2px; }
+  #view-projects .folio-edge.is-right { right: var(--sp-3); border-radius: 0 2px 2px 0; }
+  /* Pages fall away into the gutter. */
+  #view-projects .builds-grid[data-folio] > :nth-child(odd) {
+    background-image: linear-gradient(90deg, transparent 82%, rgba(0,0,0,.42)) !important;
+  }
+  #view-projects .builds-grid[data-folio] > :nth-child(even) {
+    background-image: linear-gradient(270deg, transparent 82%, rgba(0,0,0,.42)) !important;
+  }
+  #view-projects .folio-ribbon {
+    position: absolute; top: -6px; left: calc(50% + 28px); width: 14px; height: 38px; z-index: 6; pointer-events: none;
+    background: linear-gradient(180deg, var(--primary-deep), var(--primary));
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  }
+  /* The arrows sit on the book, at the middle of each side, where a hand
+     would turn the page. They were in a row above it. */
+  #view-projects .folio-side {
+    position: absolute; top: 50%; z-index: 9; width: 44px; height: 44px; margin-top: -22px;
+    font-size: var(--fs-body);
+    background: var(--bg-deep);
+    border-color: color-mix(in srgb, var(--accent-warm) 60%, transparent);
+    color: var(--accent-warm);
+  }
+  #view-projects .folio-side.is-prev { left: -22px; }
+  #view-projects .folio-side.is-next { right: -22px; }
+  #view-projects .folio-side:hover { transform: scale(1.08); border-color: var(--primary); color: var(--ink); }
+  #view-projects .folio-side[disabled] { opacity: 0; pointer-events: none; }
+  #view-projects .folio-toolbar .folio-nav { display: none; }
+  @media (max-width: 820px) {
+    /* One page to a spread. It is still a book: the same cover board, page
+       edges, ribbon, brackets and side arrows, scaled to the gutter a phone
+       has. The arrows sit just inside the screen edge, over the page's own
+       padding, so they stay 44px without causing a sideways scroll. */
+    #view-projects .folio-stage { padding: var(--sp-3) var(--sp-2); }
+    #view-projects .folio-edge { width: 4px; top: var(--sp-4); bottom: var(--sp-4); display: block; }
+    #view-projects .folio-edge.is-left { left: 2px; }
+    #view-projects .folio-edge.is-right { right: 2px; }
+    #view-projects .folio-ribbon { left: auto; right: var(--sp-8); height: 30px; }
+    /* 32px to look at, 44px to hit: at full size they sat on the first
+       character of every line at mid-height. */
+    #view-projects .folio-side { width: 32px; height: 32px; margin-top: -16px; font-size: var(--fs-body); }
+    #view-projects .folio-side::after { content: ''; position: absolute; inset: -6px; }
+    #view-projects .folio-side.is-prev { left: -10px; }
+    #view-projects .folio-side.is-next { right: -10px; }
+    #view-projects .folio-hud { display: block; inset: -4px; }
+    #view-projects .folio-hud > i { width: 14px; height: 14px; }
+    #view-projects .builds-grid[data-folio] > :nth-child(odd),
+    #view-projects .builds-grid[data-folio] > :nth-child(even) {
+      background-image: linear-gradient(270deg, transparent 90%, rgba(0,0,0,.3)) !important;
+    }
+  }
+  html[data-motion="off"] #view-projects .folio-side,
+  html[data-motion="off"] #view-projects .folio-edge,
+  html[data-motion="off"] #view-projects .folio-ribbon { display: none !important; }
 
   /* The light falls off a page as it leaves the flat. */
   #view-projects .folio-shade {
@@ -14643,8 +14732,9 @@
   // the project count), so the cover says nothing the page does not.
   function openCover() {
     if (motionOff || !stage || !stage.animate || turning) return;
-    if (perSpread() !== 2 || currentPage() !== 0 || !grid.children.length) return;
-    var g = spreadRects(0, 2), sr = { left: 0, top: 0 }, made = [], D = 1100;
+    if (currentPage() !== 0 || !grid.children.length) return;
+    var per = perSpread();
+    var g = spreadRects(0, per), sr = { left: 0, top: 0 }, made = [], D = per === 2 ? 1100 : 900;
     var inside = document.createElement('div');
     inside.className = 'folio-cover folio-inside';
     box(inside, g.left, sr);
@@ -14664,11 +14754,16 @@
     fShade.style.setProperty('--shade-dir', '270deg'); front.appendChild(fShade);
     var back = face(grid.children[0], true);
     back.style.setProperty('--shade-dir', '90deg');
-    leaf.appendChild(front); leaf.appendChild(back);
-    box(leaf, g.right, sr);
-    [inside, leaf].forEach(function (el) { stage.appendChild(el); made.push(el); });
+    leaf.appendChild(front);
+    if (per === 2) leaf.appendChild(back);
+    box(leaf, per === 2 ? g.right : g.half, sr);
+    // Two pages: the cover lands on the left and its back is that page. One
+    // page (phones): the cover lifts off the page and is gone.
+    (per === 2 ? [inside, leaf] : [leaf]).forEach(function (el) { stage.appendChild(el); made.push(el); });
     turning = true;
-    var turn = leaf.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(0deg)', offset: 0.18 }, { transform: 'rotateY(-180deg)' }],
+    var turn = leaf.animate(per === 2
+      ? [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(0deg)', offset: 0.18 }, { transform: 'rotateY(-180deg)' }]
+      : [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(0deg)', opacity: 1, offset: 0.2 }, { transform: 'rotateY(-78deg)', opacity: 1, offset: 0.75 }, { transform: 'rotateY(-104deg)', opacity: 0 }],
       { duration: D, easing: EASE, fill: 'forwards' });
     fShade.animate([{ opacity: 0 }, { opacity: 0, offset: 0.18 }, { opacity: 0.5 }], { duration: D * 0.6, easing: 'ease-in', fill: 'forwards' });
     back.querySelector('.folio-shade').animate([{ opacity: 0.45 }, { opacity: 0.45, offset: 0.55 }, { opacity: 0 }], { duration: D, easing: 'ease-out', fill: 'forwards' });
@@ -14690,7 +14785,7 @@
   // a trackpad used to scroll the row natively, so the pages slid sideways
   // with no leaf at all, which is the one gesture the hint asks for.
   if (stage && !motionOff) {
-    var wheelArmed = true, wheelQuiet = 0, wheelSum = 0;
+    var wheelArmed = true, wheelQuiet = 0, wheelSum = 0, wheelLock = 0;
     stage.addEventListener('wheel', function (e) {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;       // vertical: the page scrolls as usual
       e.preventDefault();
@@ -14698,13 +14793,15 @@
       // A trackpad keeps sending inertia after the fingers lift. One gesture is
       // one page: re-arm only once the stream has gone quiet.
       wheelQuiet = setTimeout(function () { wheelArmed = true; wheelSum = 0; }, 180);
-      // Two locks, because either alone lets a second page through: the quiet
-      // gap covers the inertia tail, and `turning` covers a stream slow enough
-      // to look quiet between events.
-      if (!wheelArmed || turning) { wheelSum = 0; return; }
+      // Three locks, because any one alone lets a second page through: the
+      // quiet gap covers the inertia tail, `turning` covers a stream slow
+      // enough to look quiet between events, and the clock covers a tail that
+      // outlasts the turn itself.
+      if (!wheelArmed || turning || performance.now() < wheelLock) { wheelSum = 0; return; }
       wheelSum += e.deltaX;
       if (Math.abs(wheelSum) < 36) return;
       wheelArmed = false;
+      wheelLock = performance.now() + 1150;
       step(wheelSum > 0 ? 1 : -1);
     }, { passive: false });
     var tx = 0, ty = 0, touching = false;
@@ -14828,6 +14925,14 @@
     color: var(--ink-dim);
   }
   @media (min-width: 1280px) { .fd-rail { display: block; } }
+  /* Below that there is no margin for the words, so the rail is the gauge
+     alone: a hairline and its marker on the screen edge. */
+  @media (max-width: 1279px) {
+    .fd-rail { display: block; right: 2px; width: 6px; height: 36vh; margin-top: -18vh; }
+    .fd-rail-txt { display: none; }
+    .fd-rail-line { right: 2px; }
+    .fd-rail-mark { right: 0; width: 6px; }
+  }
   .fd-rail-line {
     position: absolute; right: 7px; top: 0; bottom: 0; width: 1px;
     background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--accent-warm) 55%, transparent) 0 1px, transparent 1px 12px);
@@ -14845,6 +14950,28 @@
   .fd-rail-depth { top: 0; color: var(--ink); writing-mode: horizontal-tb; transform: none; right: 22px; margin-top: -6px; }
   body.sidebar-open .fd-rail, body.view-chat .fd-rail, body.chat-guide-open .fd-rail { visibility: hidden; }
 
+  /* ── reticle: the block you are reading is the one in the brackets ── */
+  .fd-reticle {
+    position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 3;
+    pointer-events: none; opacity: 0; transition: opacity .3s ease;
+  }
+  .fd-reticle.is-on { opacity: 1; }
+  .fd-reticle > i {
+    position: absolute; left: 0; top: 0; width: 16px; height: 16px;
+    border: 0 solid var(--accent-warm);
+    transition: transform .34s cubic-bezier(.22,1,.36,1);
+  }
+  .fd-reticle > i:nth-child(1) { border-top-width: 2px; border-left-width: 2px; }
+  .fd-reticle > i:nth-child(2) { border-top-width: 2px; border-right-width: 2px; }
+  .fd-reticle > i:nth-child(3) { border-bottom-width: 2px; border-left-width: 2px; }
+  .fd-reticle > i:nth-child(4) { border-bottom-width: 2px; border-right-width: 2px; }
+  .fd-reticle > span {
+    position: absolute; left: 0; top: 0; white-space: nowrap;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em; color: var(--accent-warm);
+    transition: transform .34s cubic-bezier(.22,1,.36,1);
+  }
+  html[data-motion="off"] .fd-reticle { display: none; }
+
   /* ── deck ── */
   .fd-k {
     font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase;
@@ -14856,6 +14983,8 @@
   .fd-k:hover, .fd-k:focus-visible { border-color: var(--primary); color: var(--ink); }
   .fd-k:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .fd-k kbd { font: inherit; color: var(--ink-dim); }
+  /* A keyboard shortcut is no use to a thumb. */
+  @media (hover: none) { .fd-k kbd { display: none; } }
   .fd-deck {
     position: fixed; inset: 0; z-index: 10050; display: none;
     align-items: flex-start; justify-content: center;
@@ -15071,7 +15200,10 @@
     function setSector(view) {
       var parent = /^project-/.test(view) ? 'projects' : view;
       var i = order.indexOf(parent), label = navLabel(parent) || parent;
-      sector.textContent = (i < 0 ? '--' : ('0' + (i + 1)).slice(-2)) + ' / ' + label;
+      // A view with no numbered sidebar entry of its own (Contact sits behind a
+      // toggle there) is named without a number rather than given a fake one.
+      if (i < 0 && parent === 'contact') label = labelOf(document.getElementById('sidebarContactToggle')) || label;
+      sector.textContent = i < 0 ? label : ('0' + (i + 1)).slice(-2) + ' / ' + label;
     }
     var raf = 0;
     function measure() {
@@ -15096,6 +15228,64 @@
     setSector(active ? active.id.replace('view-', '') : 'home');
     measure(); clock();
     setInterval(clock, 30000);
+  })();
+
+  /* ── reticle: brackets lock onto the block being read ─────────────────── */
+  (function reticle() {
+    var main = document.querySelector('main');
+    if (!main) return;
+    // Content blocks across the views. Projects is left out: its book has its
+    // own frame. The home stage is left out: nothing there is a block.
+    var SEL = '.work-item, .study-card, .contact-card, .project-hero, .project-section, ' +
+      '.now-role-card, .now-focus-item, .now-metrics-card, .now-stack-card, ' +
+      '.about-prose, .about-value-item, .meta-block, .nav-card, .device-card, .home-tl-item, .cw-panel';
+    var el = document.createElement('div');
+    el.className = 'fd-reticle'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<i></i><i></i><i></i><i></i><span></span>';
+    main.appendChild(el);
+    var c = el.children, tag = c[4], target = null, raf = 0, settle = 0;
+    function candidates() {
+      var view = document.querySelector('.view.active');
+      if (!view || view.id === 'view-projects') return [];
+      return [].filter.call(view.querySelectorAll(SEL), function (n) { return n.offsetParent !== null && n.offsetHeight >= 64; });
+    }
+    function lock() {
+      if (!target || !target.isConnected) { el.classList.remove('is-on'); return; }
+      var r = target.getBoundingClientRect(), m = main.getBoundingClientRect(), pad = 6;
+      var x0 = r.left - m.left - pad, y0 = r.top - m.top - pad, x1 = r.right - m.left + pad - 16, y1 = r.bottom - m.top + pad - 16;
+      var t = function (x, y) { return 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)'; };
+      c[0].style.transform = t(x0, y0); c[1].style.transform = t(x1, y0);
+      c[2].style.transform = t(x0, y1); c[3].style.transform = t(x1, y1);
+      tag.style.transform = t(x0 + 22, y0 - 16);
+      el.classList.add('is-on');
+    }
+    function pick() {
+      raf = 0;
+      var list = candidates(), fy = window.innerHeight * 0.42, best = null, bestScore = Infinity;
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i].getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        // Inside the focus line beats near it; among those inside, the smallest
+        // block wins, so a card is chosen over the section that contains it.
+        var inside = r.top <= fy && r.bottom >= fy;
+        var score = inside ? r.height / 100000 : 1 + Math.abs((r.top + r.bottom) / 2 - fy);
+        if (score < bestScore) { bestScore = score; best = list[i]; }
+      }
+      if (best && bestScore > 1 + window.innerHeight * 0.5) best = null;
+      if (best !== target) {
+        target = best;
+        if (target) tag.textContent = ('0' + (list.indexOf(target) + 1)).slice(-2) + ' / ' + ('0' + list.length).slice(-2);
+        clearTimeout(settle);
+        // Blocks arrive on a transform; measure again once they have landed.
+        settle = setTimeout(lock, 760);
+      }
+      lock();
+    }
+    function ask() { if (!raf) raf = requestAnimationFrame(pick); }
+    addEventListener('scroll', ask, { passive: true });
+    addEventListener('resize', ask, { passive: true });
+    document.addEventListener('viewChanged', function () { target = null; el.classList.remove('is-on'); setTimeout(ask, 520); });
+    setTimeout(ask, 1200);
   })();
 
   /* ── deck: jump anywhere ──────────────────────────────────────────────── */

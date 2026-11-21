@@ -130,7 +130,12 @@ const check = (ok, label, detail) => {
     check(!before.bail, `${href}: entrances are not switched off after six seconds`);
     check(before.waiting > 0, `${href}: blocks below the fold are still waiting for their entrance`, String(before.waiting));
     for (let i = 0; i < 4; i++) { await pg.mouse.wheel(0, 700); await pg.waitForTimeout(500); }
-    await pg.waitForTimeout(1500);
+    // Blocks arrive one at a time through a queue, so "settled" is a state to
+    // wait for, not a delay to guess: a fixed 1.5s caught the queue mid-drain.
+    // First that something new has played at all, then that nothing is left.
+    await pg.waitForFunction((n) => document.querySelectorAll('.cin-in').length > n, before.played, { timeout: 8000 }).catch(() => {});
+    await pg.waitForFunction(() => ![...document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)')].some(e => {
+      const r = e.getBoundingClientRect(); return r.height > 0 && r.top < innerHeight && r.bottom > 0; }), null, { timeout: 6000 }).catch(() => {});
     const after = await pg.evaluate(() => ({
       played: document.querySelectorAll('.cin-in').length,
       stuck: [...document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)')].filter(e => {
@@ -262,15 +267,21 @@ const check = (ok, label, detail) => {
     await pg.waitForTimeout(1700);
     check(await pg.evaluate(() => document.querySelectorAll('.folio-leaf,.folio-cover').length) === 0, 'book: the cover leaves nothing behind');
     const label = () => pg.evaluate(() => document.querySelector('[data-folio-progress]').textContent);
+    // A burst, then an inertia tail, as a trackpad sends it. Dispatched from
+    // inside the page on its own timers: driven from here, each event waits on
+    // a round trip, and a slow machine turns one gesture into several.
     const swipe = async (dir) => {
-      let flipped = false;
-      // A burst, then an inertia tail, as a trackpad sends it.
-      for (let i = 0; i < 16; i++) {
-        await pg.mouse.wheel(dir * (i < 5 ? 30 : 5), 0);
-        await pg.waitForTimeout(16);
-        if (!flipped) flipped = await pg.evaluate(() => !!document.querySelector('.folio-leaf'));
-      }
-      await pg.waitForTimeout(1300);
+      const flipped = await pg.evaluate((dir) => new Promise((resolve) => {
+        const st = document.querySelector('.folio-stage'), r = st.getBoundingClientRect();
+        let i = 0, seen = false;
+        const send = () => {
+          st.dispatchEvent(new WheelEvent('wheel', { deltaX: dir * (i < 5 ? 30 : 5), deltaY: 0, clientX: r.left + r.width / 2, clientY: r.top + 200, bubbles: true, cancelable: true }));
+          if (document.querySelector('.folio-leaf')) seen = true;
+          if (++i < 40) setTimeout(send, 16); else resolve(seen);
+        };
+        send();
+      }), dir);
+      await pg.waitForTimeout(1500);
       return flipped;
     };
     await pg.mouse.move(800, 600);
@@ -285,6 +296,63 @@ const check = (ok, label, detail) => {
     await pg.waitForTimeout(700);
     check((await pg.evaluate(() => scrollY)) > y0, 'book: a vertical scroll over the book still scrolls the page');
     await pg.close();
+  }
+
+  // The reticle: brackets lock onto the block being read, in the views that
+  // are made of blocks, and move to the next one as the page scrolls.
+  for (const [name, width, height] of [['phone', 390, 844], ['desktop', 1440, 900]]) {
+    const pg = await browser.newPage({ viewport: { width, height } });
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(3200);
+    const read = () => pg.evaluate(() => {
+      const el = document.querySelector('.fd-reticle'), c = el.querySelectorAll('i');
+      const a = c[0].getBoundingClientRect(), z = c[3].getBoundingClientRect();
+      const hit = [...document.querySelectorAll('.view.active .contact-card, .view.active .work-item, .view.active .study-card')]
+        .some(n => { const r = n.getBoundingClientRect(); return Math.abs(r.left - 6 - a.left) < 3 && Math.abs(r.top - 6 - a.top) < 3 && Math.abs(r.right + 6 - z.right) < 3 && Math.abs(r.bottom + 6 - z.bottom) < 3; });
+      return { on: el.classList.contains('is-on'), tag: el.querySelector('span').textContent, hit, overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    await pg.evaluate(() => window.switchView('contact'));
+    await pg.waitForTimeout(900);
+    await pg.mouse.wheel(0, 200);
+    await pg.waitForTimeout(1500);
+    const one = await read();
+    check(one.on && one.hit, `${name}: the reticle frames a block exactly, 6px out`, JSON.stringify(one));
+    check(/^\d\d \/ \d\d$/.test(one.tag), `${name}: the reticle numbers the block`, one.tag);
+    check(one.overflow <= 1, `${name}: the reticle causes no horizontal overflow`, String(one.overflow));
+    await pg.mouse.wheel(0, 420);
+    await pg.waitForTimeout(1500);
+    const two = await read();
+    check(two.on && two.hit && two.tag !== one.tag, `${name}: scrolling moves the reticle to another block`, `${one.tag} -> ${two.tag}`);
+    await pg.evaluate(() => window.switchView('projects'));
+    await pg.waitForTimeout(1300);
+    check(!(await read()).on, `${name}: the reticle stands down on Projects, where the book has its own frame`);
+    await pg.close();
+  }
+
+  // The book's arrows sit at the middle of its sides, and the sidebar's
+  // submenu never renders unstyled: its rules used to arrive thousands of lines
+  // after its markup, so a slow load showed a 200px warning-sign icon.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + '/#projects', { waitUntil: 'load' });
+    await pg.waitForTimeout(5200);
+    const side = await pg.evaluate(() => {
+      const st = document.querySelector('.folio-stage').getBoundingClientRect(), mid = st.top + st.height / 2;
+      return [...document.querySelectorAll('.folio-side')].map(b => { const r = b.getBoundingClientRect();
+        return { dy: Math.round(r.top + r.height / 2 - mid), onEdge: Math.abs(r.left + r.width / 2 - st.left) < 4 || Math.abs(r.left + r.width / 2 - st.right) < 4, size: Math.round(r.width) }; });
+    });
+    check(side.length === 2 && side.every(a => Math.abs(a.dy) <= 2 && a.onEdge && a.size >= 44), 'book: arrows are centred on the left and right edges, 44px', JSON.stringify(side));
+    const l0 = await pg.evaluate(() => document.querySelector('[data-folio-progress]').textContent);
+    await pg.locator('.folio-side.is-next').click();
+    await pg.waitForTimeout(1300);
+    check((await pg.evaluate(() => document.querySelector('[data-folio-progress]').textContent)) !== l0, 'book: the side arrow turns the page');
+    await pg.close();
+
+    const html = fs.readFileSync(path.join(WWW, 'index.html'), 'utf8');
+    const firstStyle = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
+    const sidebarAt = html.indexOf('id="sidebarContactSub"');
+    check(html.indexOf('<style>') < sidebarAt && /\.sidebar-subnav\s*\{\s*display:\s*none/.test(firstStyle) && /\.sidebar-subitem svg[^{]*\{[^}]*width:\s*16px/.test(firstStyle),
+      'sidebar: the submenu is collapsed and its icons sized before its markup is parsed');
   }
 
   // Motion off, saved on the origin, must hold on the incoming page before its
