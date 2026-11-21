@@ -171,7 +171,7 @@
   // pauses during a scroll and stops with Motion off or on a light theme.
   var CARD = '.nav-card,.work-stat,.work-item,.contact-card,.device-card,.study-card,.project-hero,.project-section,' +
     '.now-role-card,.now-metrics-card,.now-stack-card,.now-focus-item,.about-value-item,.meta-block,.cw-panel,[class*="card"]';
-  var liveSeen = typeof WeakSet === 'function' ? new WeakSet() : null, liveIO = null, liveCount = 0, liveCards = [], liveSerial = 0;
+  var liveSeen = typeof WeakSet === 'function' ? new WeakSet() : null, liveIO = null, liveCount = 0, liveCards = [], liveSerial = 0, liveIn = new Set();
   function liveCss() {
     if (document.getElementById('lv-css')) return;
     var A = 'var(--accent-warm, var(--accent, #FFB736))';
@@ -194,7 +194,16 @@
     liveCss();
     if (!liveIO) {
       liveIO = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { e.target.classList.toggle('is-live', e.isIntersecting); });
+        // Every lit card is one more masked, turning layer for the GPU to
+        // blend, so only a handful run at once however many are in view: fewer
+        // on a phone. The rest wait their turn as others scroll away.
+        es.forEach(function (e) { if (e.isIntersecting) liveIn.add(e.target); else liveIn.delete(e.target); });
+        var cap = (innerWidth < 821 || matchMedia('(pointer: coarse)').matches) ? 3 : 6, lit = 0;
+        liveCards.forEach(function (c) {
+          var on = liveIn.has(c) && c.isConnected && lit < cap;
+          if (on) lit++;
+          c.classList.toggle('is-live', on);
+        });
       }, { rootMargin: '-6% 0px -6% 0px' });
     }
     // What counts as a card is decided by how it is drawn, not what it is
@@ -207,7 +216,7 @@
     // with cards that no longer exist and new ones never get an edge.
     liveCards = liveCards.filter(function (c) {
       if (c.isConnected) return true;
-      liveIO.unobserve(c);
+      liveIO.unobserve(c); liveIn.delete(c);
       return false;
     });
     liveCount = liveCards.length;

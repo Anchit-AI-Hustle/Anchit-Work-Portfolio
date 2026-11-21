@@ -327,6 +327,41 @@ const check = (ok, label, detail) => {
     await pg.mouse.wheel(0, 400);
     await pg.waitForTimeout(1500);
     check(await pg.evaluate(() => !document.querySelector('.fd-reticle')), 'no reading reticle: no brackets or block counter follow the content');
+    // Asked for a second time, and for everywhere: no corner brackets on cards
+    // or on the book, no serial stamps, and no "05 / 08" style counter in any
+    // view, at rest or after a scroll.
+    const views = await pg.evaluate(() => [...document.querySelectorAll('section.view')].map(v => v.id.replace('view-', '')));
+    const stray = [];
+    for (const v of views) {
+      await pg.evaluate(v => window.switchView(v), v);
+      await pg.waitForTimeout(500);
+      await pg.mouse.wheel(0, 600);
+      await pg.waitForTimeout(350);
+      const got = await pg.evaluate(() => {
+        const out = [];
+        if (document.querySelector('.dc-corner, .cw-corner, .dc-stamp, .folio-hud, .fd-reticle')) out.push('bracket markup');
+        document.querySelectorAll('body *').forEach(e => {
+          if (e.children.length > 4) return;
+          const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+          if (t.length > 14 || !/^\[?\s*\d{1,2}\s*\/\s*(\d{1,2}|[A-Za-z]+)\s*\]?$/.test(t)) return;
+          const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+          if (r.width > 0 && cs.visibility !== 'hidden' && +cs.opacity > 0.05) out.push(t);
+        });
+        return out;
+      });
+      got.forEach(g => stray.push(v + ': ' + g));
+    }
+    // The frame governor: a device that drops frames is stepped down, and
+    // each step really removes layers.
+    const gov = await pg.evaluate(() => {
+      const vis = sel => [...document.querySelectorAll(sel)].filter(e => getComputedStyle(e).display !== 'none').length;
+      const a = window.__ambientStep(), lite = { tier: document.documentElement.dataset.ambient, ring2: vis('.lux-r2') };
+      const b = window.__ambientStep(), lean = { lean: document.documentElement.hasAttribute('data-lean'), dust: vis('.lux-dust'), beams: vis('.lv-beam'), glow: vis('.lux-glow') };
+      return { a, b, c: window.__ambientStep(), lite, lean };
+    });
+    check(gov.a === 'lite' && gov.lite.tier === 'lite' && gov.lite.ring2 === 0, 'governor: the first step down is the lite tier', JSON.stringify(gov.lite));
+    check(gov.b === 'lean' && gov.lean.lean && gov.lean.dust === 0 && gov.lean.beams === 0 && gov.lean.glow >= 1 && gov.c === '', 'governor: the second step drops dust and edges, keeps the light, and is the last', JSON.stringify(gov.lean));
+    check(stray.length === 0, 'no brackets or numbered counter tags in any view', [...new Set(stray)].slice(0, 4).join(' | '));
     await pg.close();
   }
 
@@ -466,8 +501,10 @@ const check = (ok, label, detail) => {
       return { moving: on.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
         phases: new Set(on.map(i => getComputedStyle(i).animationDelay)).size,
         offscreenRunning: off.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
+        lit: document.querySelectorAll('.is-live').length, cap: innerWidth < 821 ? 3 : 6,
         overflow: document.documentElement.scrollWidth - innerWidth };
     });
+    check(live.lit <= live.cap, `${name}: no more than ${live.cap} edges run at once`, String(live.lit));
     check(live.moving >= 2, `${name}: light is lapping the edges of the cards on screen`, JSON.stringify(live));
     check(live.phases >= 2, `${name}: the cards are not all in step`, String(live.phases));
     check(live.offscreenRunning === 0, `${name}: no card animates while it is off screen`, String(live.offscreenRunning));

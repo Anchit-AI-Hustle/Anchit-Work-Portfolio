@@ -4286,10 +4286,7 @@
 
         <!-- METRIC TILE 1: Parwah (current) -->
         <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
-          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
-          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
-            <span class="dc-stamp" aria-hidden="true">parwah/id-01</span>
             <span class="dc-badge">Current focus // 2026</span>
             <span class="dc-status"><span class="dc-dot" aria-hidden="true"></span>live</span>
           </div>
@@ -4303,10 +4300,7 @@
 
         <!-- METRIC TILE 2: Vahdam -->
         <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="3">
-          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
-          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
-            <span class="dc-stamp" aria-hidden="true">vahdam/id-02</span>
             <span class="dc-badge">Apr &ndash; Sep 2026</span>
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
@@ -4319,10 +4313,7 @@
 
         <!-- METRIC TILE 3: Times Internet -->
         <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="4">
-          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
-          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
-            <span class="dc-stamp" aria-hidden="true">ti/id-03</span>
             <span class="dc-badge">Y2022 &ndash; Y2026 // shipped</span>
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
@@ -4388,8 +4379,6 @@
         <span class="cw-light cw-light-l" aria-hidden="true"></span>
         <span class="cw-light cw-light-r" aria-hidden="true"></span>
         <div class="cw-panel">
-          <span class="cw-corner cw-tl" aria-hidden="true"></span><span class="cw-corner cw-tr" aria-hidden="true"></span>
-          <span class="cw-corner cw-bl" aria-hidden="true"></span><span class="cw-corner cw-br" aria-hidden="true"></span>
           <div class="cw-screen">
             <!-- The stamp, the badge and the live dot used to sit here too, and
                  they are the SAME three values as the Vahdam tile a section
@@ -5049,7 +5038,6 @@
         <div class="folio-edge is-left" aria-hidden="true"></div>
         <div class="folio-edge is-right" aria-hidden="true"></div>
         <div class="folio-ribbon" aria-hidden="true"></div>
-        <div class="folio-hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <div class="folio-pulse" aria-hidden="true"></div>
         <div class="folio-sweep" aria-hidden="true"></div>
         <button type="button" class="folio-curl" data-folio-dir="1" aria-label="Turn the page"></button>
@@ -5437,10 +5425,6 @@
       </div>
 
       <div class="ebook-portal-stage device-card" id="ebookPortalStage">
-        <span class="dc-corner tl" aria-hidden="true"></span>
-        <span class="dc-corner tr" aria-hidden="true"></span>
-        <span class="dc-corner bl" aria-hidden="true"></span>
-        <span class="dc-corner br" aria-hidden="true"></span>
 
         <div class="ebook-portal-hud">
           <span class="ebook-hud-pill">EDITION VAULT // 09 VOLUMES</span>
@@ -14958,6 +14942,14 @@
   /* The page is moving: leave the compositor, like every other ambient layer. */
   body.is-scrolling .lux { opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s .12s; }
   body.is-scrolling .lux > i, body.is-scrolling .lux-r1::after { animation-play-state: paused !important; }
+  /* One dust sheet, not two. The second was a full-screen layer blended on
+     every frame for a difference nobody could pick out next to the first. */
+  .lux > i.lux-d2 { display: none; }
+  /* The frame governor found this device dropping frames with everything on:
+     the dust, the rings, the lit card edges and the 2D particle canvas go, the
+     light and the page stay. See the governor at the end of the flight deck. */
+  html[data-lean] .lux-dust, html[data-lean] .lux-ring, html[data-lean] .lux-sheen,
+  html[data-lean] .lv-beam, html[data-lean] #floatBg { display: none !important; }
   /* Phones: the light, the far dust and the foil. Fewer sheets to blend. */
   html[data-ambient="lite"] .lux-c, html[data-ambient="lite"] .lux-d2, html[data-ambient="lite"] .lux-r2 { display: none; }
   /* Calm or off: the room holds still, lit. */
@@ -15187,21 +15179,33 @@
     mark.appendChild(wrap);
 
     var rot = -0.5, vel = 0, raf = 0, dragging = false, dragged = false, lastX = 0;
-    function place() {
-      var w = mark.offsetWidth, rx = w * 0.86, ry = w * 0.2;
+    // Geometry is read and the ring is sized here, once per resize or view
+    // change. This used to happen inside the per-frame loop: three layout reads
+    // and three layout writes sixty times a second, which forced a full layout
+    // of the page on every frame the orbit turned (77 ms of every second on a
+    // phone, idle). The loop below now writes transform and opacity only.
+    var gRx = 0, gRy = 0, gDrop = 0, gShown = false, far = [];
+    function measure() {
+      var w = mark.offsetWidth;
+      gShown = w > 0 && mark.offsetParent !== null;
+      if (!gShown) return;
+      var rx = w * 0.86, ry = w * 0.2;
       // Every label stays on screen at every point of the turn. A node sits
       // centred on the ring, so the ring may reach the nearer screen edge less
-      // half the widest label. This used a fixed 110px guess, which held while
-      // the orbit rested in one place and failed once it turned on its own: on
-      // a phone a label swung past the edge and was cut off.
+      // half the widest label.
       var mr = mark.getBoundingClientRect(), mid = mr.left + mr.width / 2, widest = 0;
       for (var k = 0; k < nodes.length; k++) widest = Math.max(widest, nodes[k].offsetWidth);
       rx = Math.max(40, Math.min(rx, Math.min(mid, window.innerWidth - mid) - widest / 2 - 8));
-      track.style.width = (rx * 2) + 'px'; track.style.height = (ry * 2) + 'px';
       // The ring sits low on the portrait, so the nearest node crosses under
       // the chin line rather than across the face.
       var drop = w * 0.2;
+      gRx = rx; gRy = ry; gDrop = drop;
+      track.style.width = (rx * 2) + 'px'; track.style.height = (ry * 2) + 'px';
       track.style.margin = (drop - ry) + 'px 0 0 ' + (-rx) + 'px';
+    }
+    function place() {
+      if (!gRx) measure();
+      var rx = gRx, ry = gRy, drop = gDrop;
       for (var i = 0; i < nodes.length; i++) {
         var a = rot + i * (Math.PI * 2 / nodes.length);
         var depth = Math.sin(a);                         // +1 nearest, -1 behind the portrait
@@ -15210,24 +15214,31 @@
         var n = nodes[i];
         n.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translateX(-50%) scale(' + s.toFixed(3) + ')';
         n.style.opacity = (0.34 + 0.66 * (depth + 1) / 2).toFixed(2);
-        n.style.zIndex = depth > -0.15 ? 6 : -1;
-        n.classList.toggle('is-far', depth < -0.15);
+        var isFar = depth < -0.15;
+        if (far[i] !== isFar) {                          // only when it crosses, not every frame
+          far[i] = isFar;
+          n.style.zIndex = isFar ? -1 : 6;
+          n.classList.toggle('is-far', isFar);
+        }
       }
     }
     // It turns on its own, slowly, for as long as it is on screen and the
     // visitor has not asked for calm; a drag or a flick adds to that and then
     // settles back to it. Off screen, in a hidden tab, during a scroll or with
     // Motion off, the loop is not running at all.
-    var DRIFT = 0.0026, visible = true;
+    var DRIFT = 0.0026, visible = true, beat = 0;
     function alive() {
       return visible && !document.hidden && !motionOff() && !window.__scrolling &&
-        root.getAttribute('data-ambient') !== 'still' && mark.offsetParent !== null;
+        root.getAttribute('data-ambient') !== 'still' && gShown;
     }
     function tick() {
       raf = 0;
       var live = alive(), rest = live ? DRIFT : 0;
       rot += vel;
       vel = dragging ? vel * 0.6 : rest + (vel - rest) * 0.94;
+      // The sidebar can open or fold without a resize event and move the
+      // portrait; one re-measure every couple of seconds keeps the ring fitted.
+      if (++beat >= 120) { beat = 0; measure(); }
       place();
       if (live || dragging || Math.abs(vel) > 0.0006) raf = requestAnimationFrame(tick);
     }
@@ -15237,13 +15248,13 @@
     }
     document.addEventListener('visibilitychange', wake);
     addEventListener('scroll', function () { setTimeout(wake, 260); }, { passive: true });
-    document.addEventListener('viewChanged', function () { setTimeout(wake, 500); });
+    document.addEventListener('viewChanged', function () { setTimeout(function () { measure(); wake(); }, 500); });
     function kick(v) {
       if (motionOff()) return;
       vel = Math.max(-0.16, Math.min(0.16, vel + v));
       if (!raf) raf = requestAnimationFrame(tick);
     }
-    place();
+    measure(); place();
     // It moves while the visitor does, and coasts to a stop when they stop.
     var stage = mark.closest('.cine-stage') || mark;
     stage.addEventListener('pointerdown', function (e) { dragging = true; dragged = false; lastX = e.clientX; });
@@ -15253,12 +15264,13 @@
       if (dragging) { if (Math.abs(dx) > 2) dragged = true; kick(-dx * 0.0042); }
       else if (e.pointerType === 'mouse') kick(-dx * 0.00028);
     }, { passive: true });
-    addEventListener('resize', place, { passive: true });
+    addEventListener('resize', function () { measure(); place(); }, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); place(); });
     // One spin on arrival, so it is seen to be a thing that turns.
     var spun = false;
-    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); kick(0.11); wake(); }
+    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); measure(); kick(0.11); wake(); }
     if (root.classList.contains('cine-settled')) arrive(); else setTimeout(arrive, 2600);
-    document.addEventListener('viewChanged', function (e) { if (e.detail === 'home') { place(); kick(0.07); } });
+    document.addEventListener('viewChanged', function (e) { if (e.detail === 'home') { measure(); place(); kick(0.07); } });
   })();
 
   /* ── warp: one burst of light per route change ────────────────────────── */
@@ -15316,7 +15328,8 @@
       // A view with no numbered sidebar entry of its own (Contact sits behind a
       // toggle there) is named without a number rather than given a fake one.
       if (i < 0 && parent === 'contact') label = labelOf(document.getElementById('sidebarContactToggle')) || label;
-      sector.textContent = i < 0 ? label : ('0' + (i + 1)).slice(-2) + ' / ' + label;
+      // The name alone. A numbered tag ("05 / Now") read as one more counter.
+      sector.textContent = label;
     }
     var raf = 0;
     function measure() {
@@ -15457,6 +15470,42 @@
     }
   })();
 })();
+
+  /* ── frame governor ───────────────────────────────────────────────────────
+     The tier chosen before first paint is a guess from hardware hints. This
+     checks the guess against what the device actually does: it times two
+     seconds of frames after load and after each view turn, and if too many
+     run long it steps the page down, full to lite, then lite to lean. It only
+     ever steps down, and it stops watching once it has nothing left to drop.
+     Automated browsers render on the CPU and would always trip it, so they
+     get the hook (window.__ambientStep) and not the timer. */
+  (function governor() {
+    var root = document.documentElement;
+    function step() {
+      var t = root.getAttribute('data-ambient') || 'full';
+      if (t === 'full') { root.setAttribute('data-ambient', 'lite'); return 'lite'; }
+      if (t === 'lite' && !root.hasAttribute('data-lean')) { root.setAttribute('data-lean', ''); return 'lean'; }
+      return '';
+    }
+    window.__ambientStep = step;
+    if (navigator.webdriver || root.getAttribute('data-motion') === 'off') return;
+    var busy = false, done = false;
+    function watch() {
+      if (busy || done || document.hidden) return;
+      busy = true;
+      var last = 0, n = 0, slow = 0;
+      function f(t) {
+        if (last) { var d = t - last; if (d < 250 && !window.__scrolling) { n++; if (d > 25) slow++; } }
+        last = t;
+        if (n < 120 && !document.hidden) return requestAnimationFrame(f);
+        busy = false;
+        if (n >= 120 && slow / n > 0.3) { if (!step()) done = true; else setTimeout(watch, 1500); }
+      }
+      requestAnimationFrame(f);
+    }
+    setTimeout(watch, 3500);
+    document.addEventListener('viewChanged', function () { setTimeout(watch, 1200); });
+  })();
 </script>
 </body>
 </html>
