@@ -6,6 +6,14 @@
 // the Vercel production alias, which keeps answering even when Vercel cannot
 // take a new deployment. If Vercel is unreachable the API returns a 503 and the
 // site's chat falls back to its offline answers.
+//
+// /net/* is the games' online layer (live rooms, lobbies, global boards), run
+// here on Durable Objects; see net/index.js. The classes are exported below so
+// the runtime can find them.
+import { handleNet, GameRoom, Lobby, Board } from './net/index.js';
+
+export { GameRoom, Lobby, Board };
+
 const VERCEL = 'https://anchit-work-portfolio-anchit-ai-hustle.vercel.app';
 
 // Mirrors the external rewrites in vercel.json.
@@ -29,9 +37,11 @@ async function pass(request, target, isApi) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     let path = url.pathname;
+
+    if (path.startsWith('/net/')) return handleNet(request, env, ctx);
 
     if (path === '/teleprompter' || path === '/teleprompter/') {
       return Response.redirect('https://teleprompter.anchit-tandon.com/', 308);

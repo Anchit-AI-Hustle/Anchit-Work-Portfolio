@@ -141,6 +141,13 @@ async function game(browser, vp, slug) {
   check(`${tag} menu card fits the screen`, !!menu && menu.fits);
   const modes = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg')).map((e) => e.getAttribute('data-opt')));
   check(`${tag} menu offers a mode picker`, modes.includes('mode'), modes.join(','));
+  // Every mode the menu offers must be one the global board accepts (net/config.js), or that mode's
+  // scores would be refused. Same mode key the shell posts under (arcade.js boardMode).
+  const offered = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg[data-opt="mode"] button[data-v]'))
+    .map((b) => String(b.getAttribute('data-v')).toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 16) || 'all'));
+  const cfg = NET && NET.gameConfig(slug);
+  const refused = cfg ? offered.filter((m) => !NET.modeAllowed(cfg, m)) : offered;
+  check(`${tag} every mode can post to the global board`, !!cfg && refused.length === 0, cfg ? 'refused: ' + refused.join(',') : 'not in net/config.js');
 
   // Pixels as the player sees them: a screenshot of the stage, which works for
   // a 2D canvas and a WebGL one alike (a WebGL canvas has no 2D context to read).
@@ -203,7 +210,9 @@ async function game(browser, vp, slug) {
   await ctx.close();
 }
 
+let NET = null;
 (async () => {
+  NET = await import('../net/config.js');
   const browser = await chromium.launch();
   try {
     for (const vp of VIEWPORTS) {

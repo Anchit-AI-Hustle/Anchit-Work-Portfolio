@@ -161,8 +161,13 @@ async function fingerprintStudyAssets() {
 // and start the 3D engine downloading with the page instead of after it.
 //
 // 1. VERSIONED URLS. Every '/games/...' or './...' reference to a .js, .css,
-//    .webp or .png that exists in the build gets ?v=<content hash>, in the game
-//    modules (import specifiers and the 2D fallback loaders) and in the pages.
+//    .webp, .png, .glb, .hdr, .ktx2 or .json that exists in the build gets
+//    ?v=<content hash>, in the game modules (import specifiers and the 2D
+//    fallback loaders), in the pages, and inside .json files: the asset
+//    library's games/assets/catalog.json lists every model, texture and HDRI
+//    by path, so each entry is versioned there, the catalog's own hash then
+//    follows its contents, and /games/shared/assets.js (which names the
+//    catalog) changes hash whenever any library file does.
 //    A module's hash is taken AFTER its own imports are rewritten, so changing
 //    three.js changes every module that imports it, and an old page can never
 //    pair with new code. vercel.json marks /games/* requests that carry ?v= as
@@ -177,7 +182,8 @@ async function fingerprintStudyAssets() {
 //    names as <link rel="modulepreload">, so the browser fetches and compiles
 //    it in parallel with the page. The graph is read from the files, so it
 //    cannot drift from what the game actually imports.
-const GAME_REF = /(["'])((?:\/games\/|\.\.?\/)[^"'\s?#]+\.(?:js|mjs|css|webp|png))\1/g;
+const GAME_REF = /(["'])((?:\/games\/|\.\.?\/)[^"'\s?#]+\.(?:js|mjs|css|webp|png|glb|hdr|ktx2|json))\1/g;
+const GAME_TEXT = /\.(js|mjs|css|json)$/;
 const STATIC_IMPORT = /(?:^|[;\s}])(?:import|export)\s*(?:[\w*{}\s,$]+?\s*from\s*)?["']([^"']+)["']/g;
 // Minify the games' own scripts in the built copy (the source stays readable).
 // Measured on Ghat Riders: 312 KB of code to parse becomes 202 KB, 83 KB over
@@ -261,7 +267,7 @@ async function optimizeGames() {
   };
   const hashOf = async (file) => {
     if (hashes.has(file)) return hashes.get(file);
-    const text = /\.(js|mjs|css)$/.test(file);
+    const text = GAME_TEXT.test(file);
     const bytes = text ? Buffer.from(await rewrite(file)) : await readFile(file);
     const h = createHash('sha256').update(bytes).digest('hex').slice(0, 10);
     hashes.set(file, h);
@@ -279,9 +285,9 @@ async function optimizeGames() {
   };
 
   let pages = 0, preloads = 0;
-  for (const f of files) if (/\.(js|mjs|css)$/.test(f)) await hashOf(f);
+  for (const f of files) if (GAME_TEXT.test(f)) await hashOf(f);
   for (const f of files) {
-    if (/\.(js|mjs|css)$/.test(f)) { await writeFile(f, rewritten.get(f)); continue; }
+    if (GAME_TEXT.test(f)) { const out = rewritten.get(f); if (out !== undefined) await writeFile(f, out); continue; }
     if (!f.endsWith('.html')) continue;
     let html = await rewrite(f);
     // The module the page's loader runs when WebGL2 is there.

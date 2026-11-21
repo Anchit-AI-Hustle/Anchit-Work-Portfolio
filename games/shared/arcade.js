@@ -32,6 +32,14 @@
  * Play fades through black, and arc.fade() gives a game the same cut.
  * 3D games can add /games/shared/fx3d.js for bloom, grade, grain, letterbox
  * and an establishing camera move.
+ *
+ * Global boards: every game that ends a run with arc.over({ score }) also
+ * posts it to a worldwide leaderboard (all time, this week, today, per mode,
+ * the mode being arc.choices.mode), and its menu and results show the top 10
+ * and the player's own rank. The online client /games/shared/net.js is loaded
+ * in the background after the menu is up; a run token is asked for when a run
+ * starts. With no server (offline, a local copy) nothing shows and nothing
+ * waits. A game can opt out with opts.leaderboard = false.
  */
 (function () {
   'use strict';
@@ -634,6 +642,7 @@
       arc.hidePanel(); input.clear(); arc.time = 0; arc.state = 'play'; paintPause(); sfx.unlock(); keepAwake(true);
       applyTouchStyle();
       store.set('arcade.played.' + slug, (store.get('arcade.played.' + slug, 0) || 0) + 1);
+      boardRunStart();
       if (opts.start) opts.start(arc, arc.choices);
     };
     arc.menu = (p) => {
@@ -651,6 +660,7 @@
       const best = arc.best();
       if (best != null && m.html != null && !m.noBest) m.html += '<div class="stat"><div>Your best<b>' + esc(opts.formatScore ? opts.formatScore(best) : best) + '</b></div></div>';
       arc.panel(m);
+      boardAttach(null);
       if (opts.onMenu) opts.onMenu(arc);
     };
     arc.pause = () => {
@@ -796,6 +806,7 @@
       arc.state = 'over'; paintPause(); input.clear(); keepAwake(false);
       if (opts.onOver) opts.onOver(arc);
       let stats = '';
+      const posted = typeof o.score === 'number' && isFinite(o.score) ? o.score : null;
       if (typeof o.score === 'number') {
         const r = arc.record(o.score, o.lowerIsBetter);
         const f = opts.formatScore || ((v) => v);
@@ -807,7 +818,145 @@
         eyebrow: o.eyebrow || 'Game over', title: o.title || 'Game over', html: (o.html || '') + stats,
         actions: [{ label: o.again || 'Play again', primary: true, on: arc.start }, { label: 'Change settings', on: () => arc.menu() }, { label: 'All games', href: '/games' }],
       });
+      boardAttach({ score: posted, noSubmit: !!o.noSubmit });
     };
+
+    /* global boards (see the header): all of it async, none of it in the way */
+    const boardOn = opts.leaderboard !== false && typeof fetch === 'function';
+    const board = { netP: null, runP: null, runMode: null, period: store.get('arcade.lb.period', 'week'), seq: 0, last: null };
+    const loadNet = () => {
+      if (board.netP) return board.netP;
+      board.netP = new Promise((res) => {
+        if (window.ArcadeNet) { res(window.ArcadeNet); return; }
+        const sc = document.createElement('script');
+        sc.src = '/games/shared/net.js'; sc.async = true;
+        sc.onload = () => res(window.ArcadeNet || null);
+        sc.onerror = () => res(null);
+        document.head.appendChild(sc);
+      }).then((n) => (n ? n.available().then((up) => (up ? n : null)) : null)).catch(() => null);
+      return board.netP;
+    };
+    const boardMode = () => {
+      const m = opts.boardMode ? opts.boardMode(arc) : arc.choices.mode;
+      return String(m == null || m === '' ? 'all' : m).toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 16) || 'all';
+    };
+    const fmtScore = (v) => esc((opts.formatScore || ((x) => x))(v));
+    const PERIODS = [['day', 'Today'], ['week', 'This week'], ['all', 'All time']];
+    function boardRunStart() {
+      board.runP = null;
+      if (!boardOn) return;
+      const mode = boardMode();
+      board.runMode = mode;
+      board.runP = loadNet().then((n) => (n ? n.leaderboard.run(slug, mode) : null)).catch(() => null);
+    }
+    // Add the board to the panel that is open now; `res` is set on a results panel.
+    function boardAttach(res) {
+      if (!boardOn) return;
+      // The finished run's token and mode are taken now, and its score posted now. Waiting for the panel's idle
+      // moment let a quick Play again swap in the next run's token (posting the old score with it), and a panel
+      // already closed never posted at all.
+      const runMode = res && board.runMode ? board.runMode : null;
+      let posting = null;
+      if (res && res.score != null && !res.noSubmit && board.runP) {
+        const runP = board.runP, m = runMode || boardMode(); board.runP = null;
+        posting = Promise.all([loadNet(), runP]).then(([n, tok]) => (n && tok ? n.leaderboard.submit(slug, m, res.score, tok) : null)).catch(() => null);
+      }
+      const seq = ++board.seq;
+      const spot = card.querySelector('.arc-actions');
+      if (!spot) return;
+      const el = document.createElement('section');
+      el.className = 'arc-lb'; el.hidden = true;
+      el.setAttribute('aria-label', 'Global leaderboard');
+      spot.parentNode.insertBefore(el, spot);
+      const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
+      later(() => {
+        loadNet().then((net) => {
+          if (!net || seq !== board.seq || !el.isConnected) return;
+          const mode = runMode || boardMode();
+          boardFill(net, el, mode, res, posting, seq);
+          // A different mode picked on the menu shows that mode's board.
+          if (!res) {
+            card.querySelectorAll('.arc-seg[data-opt="mode"]').forEach((sg) => sg.addEventListener('click', () => setTimeout(() => {
+              if (el.isConnected && seq === board.seq) boardFill(net, el, boardMode(), null, null, seq);
+            }, 0)));
+          }
+        });
+      });
+    }
+    function boardFill(net, el, mode, res, posting, seq) {
+      el.hidden = false;
+      const nameOpen = el.querySelector('.arc-lb-form');
+      el.innerHTML =
+        '<div class="arc-lb-head"><span class="label">Global top 10</span>' +
+        '<div class="arc-lb-per" role="group" aria-label="Leaderboard period">' +
+        PERIODS.map((p) => '<button type="button" data-p="' + p[0] + '" aria-pressed="' + (board.period === p[0]) + '">' + p[1] + '</button>').join('') +
+        '</div></div><div class="arc-lb-rank" aria-live="polite"></div><ol class="arc-lb-list"><li class="arc-lb-note">Loading the board</li></ol><div class="arc-lb-name"></div>';
+      el.querySelectorAll('.arc-lb-per button').forEach((b) => b.addEventListener('click', () => {
+        board.period = b.getAttribute('data-p'); store.set('arcade.lb.period', board.period);
+        el.querySelectorAll('.arc-lb-per button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        drawList(net, el, mode, seq);
+      }));
+      drawName(net, el, mode, seq, !!nameOpen);
+      const rankEl = el.querySelector('.arc-lb-rank');
+      if (posting) {
+        rankEl.textContent = 'Posting your score';
+        posting.then((r) => {
+          if (!el.isConnected || seq !== board.seq) return;
+          if (r && r.ok) {
+            const pr = r.periods || {};
+            rankEl.innerHTML = 'Global rank: ' + PERIODS.map((p) => pr[p[0]] ? '<b>#' + pr[p[0]].rank + '</b> ' + p[1].toLowerCase() : '').filter(Boolean).join(' &middot; ');
+            // Ask for a name once, the first time a score lands on a board.
+            if (!net.getNickname() && !store.get('arcade.net.asked', false)) { store.set('arcade.net.asked', true); drawName(net, el, mode, seq, true); }
+          } else {
+            rankEl.textContent = r && r.error ? 'This score could not go on the global board.' : '';
+          }
+          drawList(net, el, mode, seq, true);
+        });
+      } else {
+        rankEl.textContent = '';
+        drawList(net, el, mode, seq);
+      }
+    }
+    function drawList(net, el, mode, seq, fresh) {
+      const list = el.querySelector('.arc-lb-list');
+      const period = board.period;
+      net.leaderboard.top(slug, mode, period, { n: 10, maxAge: fresh ? 0 : 60000 }).then((b) => {
+        if (!el.isConnected || seq !== board.seq || period !== board.period) return;
+        if (!b) { list.innerHTML = '<li class="arc-lb-note">The global board is not answering right now.</li>'; return; }
+        const rows = b.top.map((r) => '<li' + (r.me ? ' class="me"' : '') + '><span class="r">' + r.rank + '</span><span class="n">' + esc(r.nick) + (r.me ? ' <em>you</em>' : '') + '</span><span class="s">' + fmtScore(r.score) + '</span></li>');
+        if (b.me && !b.top.some((r) => r.me)) rows.push('<li class="me gap"><span class="r">' + b.me.rank + '</span><span class="n">' + esc(b.me.nick) + ' <em>you</em></span><span class="s">' + fmtScore(b.me.score) + '</span></li>');
+        const label = { day: 'today', week: 'this week', all: 'yet' }[period];
+        list.innerHTML = rows.length ? rows.join('') : '<li class="arc-lb-note">No scores ' + label + '. Finish a run to be first.</li>';
+        const tail = b.total > 10 ? '<li class="arc-lb-note">' + b.total.toLocaleString('en-IN') + ' players on this board</li>' : '';
+        if (tail) list.insertAdjacentHTML('beforeend', tail);
+      });
+    }
+    function drawName(net, el, mode, seq, open) {
+      const box = el.querySelector('.arc-lb-name');
+      if (!box) return;
+      if (!open) {
+        box.innerHTML = 'Playing as <b>' + esc(net.shownNick()) + '</b> <button type="button" class="arc-lb-edit">Change name</button>';
+        box.querySelector('.arc-lb-edit').addEventListener('click', () => drawName(net, el, mode, seq, true));
+        return;
+      }
+      box.innerHTML = '<form class="arc-lb-form"><label for="arc-lb-nick">Your name on the global boards</label>' +
+        '<div class="arc-lb-row"><input id="arc-lb-nick" name="nick" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="2 to 16 letters" value="' + esc(net.getNickname() || '') + '">' +
+        '<button type="submit" class="arc-btn">Save</button><button type="button" class="arc-btn arc-lb-cancel">Not now</button></div>' +
+        '<div class="arc-lb-msg" aria-live="polite">Only this name and your scores are shown; no account needed.</div></form>';
+      const form = box.querySelector('form'), input = form.querySelector('input'), msg = form.querySelector('.arc-lb-msg');
+      // Typing a name must not steer the game or press the panel's main button.
+      ['keydown', 'keyup', 'keypress'].forEach((t) => input.addEventListener(t, (e) => e.stopPropagation()));
+      form.querySelector('.arc-lb-cancel').addEventListener('click', () => drawName(net, el, mode, seq, false));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const r = net.setNickname(input.value);
+        if (!r.ok) { msg.textContent = r.reason; return; }
+        msg.textContent = 'Saved.';
+        net.leaderboard.rename(slug, r.nick).then(() => { if (el.isConnected && seq === board.seq) { drawName(net, el, mode, seq, false); drawList(net, el, mode, seq, true); } });
+      });
+      if (!arc.touchMode) setTimeout(() => { try { input.focus({ preventScroll: true }); } catch (err) { /* ignore */ } }, 30);
+    }
+    arc.board = { load: loadNet, mode: boardMode };
 
     /* toast */
     let toastTimer = 0;
