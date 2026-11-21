@@ -246,6 +246,47 @@ const check = (ok, label, detail) => {
     await pg.close();
   }
 
+  // The book opens, and a swipe turns a page. A two-finger trackpad swipe used
+  // to scroll the row natively: the pages slid sideways with no leaf, on the
+  // one gesture the hint asks for, while every keyboard check passed.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(3200);
+    await pg.evaluate(() => window.switchView('projects'));
+    const opened = await pg.waitForFunction(() => {
+      const f = document.querySelector('.folio-leaf .folio-front');
+      return f && f.textContent.trim().length > 3 && !!document.querySelector('.folio-leaf .is-back .folio-preface, .folio-leaf .is-back .build-card');
+    }, null, { timeout: 2500 }).then(() => true, () => false);
+    check(opened, 'book: a cover opens on arrival, and its back is the first page');
+    await pg.waitForTimeout(1700);
+    check(await pg.evaluate(() => document.querySelectorAll('.folio-leaf,.folio-cover').length) === 0, 'book: the cover leaves nothing behind');
+    const label = () => pg.evaluate(() => document.querySelector('[data-folio-progress]').textContent);
+    const swipe = async (dir) => {
+      let flipped = false;
+      // A burst, then an inertia tail, as a trackpad sends it.
+      for (let i = 0; i < 16; i++) {
+        await pg.mouse.wheel(dir * (i < 5 ? 30 : 5), 0);
+        await pg.waitForTimeout(16);
+        if (!flipped) flipped = await pg.evaluate(() => !!document.querySelector('.folio-leaf'));
+      }
+      await pg.waitForTimeout(1300);
+      return flipped;
+    };
+    await pg.mouse.move(800, 600);
+    const l0 = await label();
+    const f1 = await swipe(1); const l1 = await label();
+    const f2 = await swipe(1); const l2 = await label();
+    const f3 = await swipe(-1); const l3 = await label();
+    check(f1 && f2 && f3, 'book: a sideways swipe turns a leaf, both directions');
+    check(l1 !== l0 && l2 !== l1 && l3 === l1, 'book: one swipe is exactly one page, inertia included', [l0, l1, l2, l3].join(' > '));
+    const y0 = await pg.evaluate(() => scrollY);
+    await pg.mouse.wheel(0, 400);
+    await pg.waitForTimeout(700);
+    check((await pg.evaluate(() => scrollY)) > y0, 'book: a vertical scroll over the book still scrolls the page');
+    await pg.close();
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {
