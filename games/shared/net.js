@@ -120,14 +120,18 @@
   }
 
   /* -------------------------------------------------------- identity */
+  // Kept in memory too: with storage blocked, a fresh id on every call made a run and its submit two
+  // different players, so every score was refused.
+  let memId = null;
   function getId() {
-    let id = ls.get('arcade.net.id');
+    let id = memId || ls.get('arcade.net.id');
     if (!id || !/^[A-Za-z0-9_-]{16,40}$/.test(id)) {
       const a = new Uint8Array(16);
       (window.crypto || window.msCrypto).getRandomValues(a);
       id = btoa(String.fromCharCode.apply(null, a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       ls.set('arcade.net.id', id);
     }
+    memId = id;
     return id;
   }
 
