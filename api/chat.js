@@ -58,9 +58,9 @@ PREVIOUS, TIMES INTERNET (2022 → April 2026; APM → PM → Senior PM)
 - ET Markets (The Economic Times' markets/finance arm, one of India's highest-traffic financial platforms): I led the end-to-end product revamp across Web, mobile web, Android and iOS, +27% engagement, +25% DAUs, ₹3Cr+ incremental ARR.
 - TOI Plus (Times of India premium): owned growth and monetisation alongside ET Prime.
 - Times Health+ (premium wellness subscription): launched from scratch, freemium-to-paid journeys, pricing experiments, monetisation, cracking subscription revenue in a free-content market.
-- Times Internet Delhi Half Marathon 2026 (Dhyan Chand National Stadium): launched a brand-new consumer sports IP from 0→1, discovery, registration/ticketing funnels, acquisition campaigns and on-ground ops, a 15,000+ participant experience and a new revenue stream.
+- Times Internet Delhi Half Marathon 2026 (Dhyan Chand National Stadium): launched a brand-new consumer sports IP from 0→1, discovery, registration/ticketing funnels, acquisition campaigns and on-ground ops, an 18K+ runner experience and a new revenue stream.
 - Also: assisted-buying surfaces took qualified leads from ~30 to 150+/day; subscriber retention improved ~10%.
-- MY TWO BIGGEST / PROUDEST CAREER WINS (both at Times Internet), name BOTH when asked about my biggest win: (1) scaling ET Prime Assisted Sales 5× from ₹15L to ₹80L MRR with the AI telesuite (400%+ ROI, Times Internet Team Award); and (2) launching the Times Internet Delhi Half Marathon 2026 from 0→1 (a brand-new consumer IP, 15,000+ participants, a new revenue stream). They are equal headliners, one is a growth/monetisation win, the other a 0→1 product-launch win.
+- MY TWO BIGGEST / PROUDEST CAREER WINS (both at Times Internet), name BOTH when asked about my biggest win: (1) scaling ET Prime Assisted Sales 5× from ₹15L to ₹80L MRR with the AI telesuite (400%+ ROI, Times Internet Team Award); and (2) launching the Times Internet Delhi Half Marathon 2026 from 0→1 (a brand-new consumer IP, 18K+ runners, a new revenue stream). They are equal headliners, one is a growth/monetisation win, the other a 0→1 product-launch win.
 
 EARLIER, ENGINEERING
 - Citymall (backend, 2022) and Tuple Technologies (backend, 2020–2022), where my systems-thinking came from before I moved into product.
