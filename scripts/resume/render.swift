@@ -8,8 +8,8 @@ let content=try JSONSerialization.jsonObject(with:Data(contentsOf:URL(fileURLWit
 let W:CGFloat=595.276, H:CGFloat=841.89, M:CGFloat=35, CW:CGFloat=525.276
 let ink=NSColor(calibratedRed:0.09,green:0.17,blue:0.25,alpha:1)
 let teal=NSColor(calibratedRed:0.07,green:0.39,blue:0.42,alpha:1)
-let muted=NSColor(calibratedRed:0.32,green:0.39,blue:0.45,alpha:1)
-let line=NSColor(calibratedRed:0.81,green:0.87,blue:0.87,alpha:1)
+let muted=NSColor(calibratedRed:53.0/255,green:71.0/255,blue:88.0/255,alpha:1)
+let line=NSColor(calibratedRed:148.0/255,green:168.0/255,blue:176.0/255,alpha:1)
 var bounds=CGRect(x:0,y:0,width:W,height:H)
 let path=root+"/assets/resume.pdf"
 let pdf=CGContext(URL(fileURLWithPath:path) as CFURL,mediaBox:&bounds,[kCGPDFContextTitle:"Anchit Tandon | Senior Product Manager & AI Builder",kCGPDFContextAuthor:"Anchit Tandon"] as CFDictionary)!
