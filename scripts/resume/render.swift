@@ -51,7 +51,7 @@ text("anchit-tandon.com",M,y,140,8.7,false,teal,"https://anchit-tandon.com")
 y+=text("linkedin.com/in/anchit-tandon",M+143,y,300,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+10
 NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:89)).fill()
 let projectCount=(content["projects"] as! [[String:String]]).count
-let metrics=[("5×","ET Prime · ₹15L to ₹80L/mo"),("400%+","ROI · ET Prime · Six months"),("₹3Cr+","Annual revenue · ET Markets"),("+27%","Engagement · ET Markets"),("+25%","Daily active users · ET Markets"),("150+","Qualified leads/day · from ~30"),("18K+","Runners · Delhi Half Marathon"),("\(projectCount)","Products, demos & concepts")]
+let metrics=[("5×","ET Prime · ₹15L to ₹80L/mo"),("400%+","ROI · ET Prime · Six months"),("₹3Cr+","Annual revenue · ET Markets"),("+27%","Engagement · ET Markets"),("+25%","Daily active users · ET Markets"),("150+","Qualified leads/day · from ~30"),("18K+","Runners · Delhi Half Marathon"),("\(projectCount)","Products built")]
 for col in 1...3 {let x=M+CGFloat(col)*(CW/4);line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+10));p.line(to:NSPoint(x:x,y:y+79));p.lineWidth=0.45;p.stroke()}
 for (i,m) in metrics.enumerated(){let centerX=M+(CGFloat(i%4)+0.5)*(CW/4);let rowY=y+CGFloat(i/4)*44.5;metricText(m.0,centerX,rowY+20,14.2,true,ink);metricText(m.1,centerX,rowY+35,7.2,false,muted)}
 y+=96
@@ -99,7 +99,7 @@ for row in educationRows{
  for i in 0...3 {height=max(height,text(row[i],educationX[i],y,educationW[i],8.6,i==0))}
  y+=height+3
 }
-section("COMPLETE PRODUCT PORTFOLIO | \(projectCount) BUILDS & CONCEPTS",&y)
+section("COMPLETE PRODUCT PORTFOLIO | \(projectCount) PRODUCTS",&y)
 y+=2
  let top=y, colW:CGFloat=(CW-22)/2
 let projects=content["projects"] as! [[String:String]]
