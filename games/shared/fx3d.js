@@ -810,7 +810,9 @@ export function createResScale(o) {
         raisedAt = -1;
       } else if (roomT > need) { next = Math.min(max, scale * 1.06); roomT = 0; raisedAt = clock; }
       else if (raisedAt >= 0 && clock - raisedAt > 30) { need = Math.max(3, need / 2); raisedAt = -1; }
-      if (Math.abs(next - scale) < 0.01) return false;
+      // a tiny step is skipped, unless it is the last one onto the floor or ceiling: that one has to land
+      if (Math.abs(next - scale) < 0.01 && next !== min && next !== max) return false;
+      if (next === scale) return false;
       scale = next; cool = 1; return true;
     },
   };
