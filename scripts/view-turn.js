@@ -213,6 +213,16 @@ const check = (ok, label, detail) => {
     });
     check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
     check(orbit.inside, `${name}: every orbit node is on screen`);
+    // The orbit turns on its own, so one sample proves nothing: watch it for
+    // most of a turn and require every label inside the screen every time.
+    const swept = await pg.evaluate(() => new Promise((resolve) => {
+      let worst = 0, n = 0;
+      const t = setInterval(() => {
+        for (const el of document.querySelectorAll('.fd-node')) { const r = el.getBoundingClientRect(); worst = Math.max(worst, -r.left, r.right - innerWidth); }
+        if (++n >= 60) { clearInterval(t); resolve(Math.round(worst)); }
+      }, 100);
+    }));
+    check(swept <= 0, `${name}: no orbit label leaves the screen at any point of the turn`, `${swept}px past the edge at worst`);
     check(orbit.clean, `${name}: orbit labels are the nav names, not name plus caption`);
     check(orbit.overflow <= 1, `${name}: the orbit causes no horizontal overflow`, String(orbit.overflow));
     const near = await pg.evaluate(() => {
@@ -353,6 +363,101 @@ const check = (ok, label, detail) => {
     const sidebarAt = html.indexOf('id="sidebarContactSub"');
     check(html.indexOf('<style>') < sidebarAt && /\.sidebar-subnav\s*\{\s*display:\s*none/.test(firstStyle) && /\.sidebar-subitem svg[^{]*\{[^}]*width:\s*16px/.test(firstStyle),
       'sidebar: the submenu is collapsed and its icons sized before its markup is parsed');
+  }
+
+  // The room moves, everywhere, and stands down when it should. The backdrop
+  // was static dust on black; "continuous" is a property to measure, so each
+  // piece is sampled twice and has to have moved.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(6000);
+    const snap = () => pg.evaluate(() => ({
+      node: document.querySelector('.fd-node').getBoundingClientRect().left,
+      glow: document.querySelector('.lux-a').getBoundingClientRect().left,
+      dust: document.querySelector('.lux-d1').getBoundingClientRect().top,
+      ring: getComputedStyle(document.querySelector('.lux-r1')).transform }));
+    const a = await snap();
+    await pg.waitForTimeout(3000);
+    const z = await snap();
+    check(Math.abs(z.glow - a.glow) > 1 && Math.abs(z.dust - a.dust) > 5 && z.ring !== a.ring, 'home: light, dust and rings are all moving with nobody touching the page', JSON.stringify({ glow: Math.round(z.glow - a.glow), dust: Math.round(z.dust - a.dust) }));
+    check(Math.abs(z.node - a.node) > 5, 'home: the orbit turns on its own', String(Math.round(z.node - a.node)));
+    // Keep the page moving and wait for the state, rather than sampling at a
+    // guessed moment between the scroll starting and the governor releasing.
+    const stoodDown = pg.waitForFunction(() => getComputedStyle(document.querySelector('.lux')).visibility === 'hidden', null, { timeout: 3000, polling: 30 }).then(() => true, () => false);
+    for (let i = 0; i < 12; i++) { await pg.mouse.wheel(0, 120); await pg.waitForTimeout(40); }
+    check(await stoodDown, 'home: the room stands down while the page scrolls');
+    await pg.waitForTimeout(1200);
+    check(await pg.evaluate(() => getComputedStyle(document.querySelector('.lux')).visibility === 'visible'), 'home: the room comes back when the scroll stops');
+    await pg.close();
+
+    const off = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const po = await off.newPage();
+    await po.addInitScript(() => { try { localStorage.setItem('anchit-motion', 'off'); } catch (e) {} });
+    await po.goto(BASE + '/', { waitUntil: 'load' });
+    await po.waitForTimeout(2500);
+    check(await po.evaluate(() => document.querySelector('.lux').getAnimations({ subtree: true }).length === 0), 'home: with Motion off nothing in the room animates');
+    await po.goto(BASE + '/lifecycle-os', { waitUntil: 'load' });
+    await po.waitForTimeout(2500);
+    check(!(await po.evaluate(() => !!document.querySelector('.cin-room'))), 'linked pages: with Motion off the room is not built');
+    await off.close();
+
+    for (const [href, want] of [['/freelancer', true], ['/lifecycle-os', true], ['/growth-school', true], ['/deli-chic/', false], ['/task-tracker', false]]) {
+      const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await p2.goto(BASE + href, { waitUntil: 'load' });
+      await p2.waitForTimeout(3000);
+      const r = await p2.evaluate(() => { const room = document.querySelector('.cin-room');
+        return { room: !!room, running: room ? room.getAnimations({ subtree: true }).filter(x => x.playState === 'running').length : 0,
+          behind: room ? getComputedStyle(room).zIndex === '-1' && getComputedStyle(room).pointerEvents === 'none' : true,
+          overflow: document.documentElement.scrollWidth - innerWidth }; });
+      if (want) check(r.room && r.running >= 4 && r.behind && r.overflow <= 1, `${href}: has a moving room, behind the page, no overflow`, JSON.stringify(r));
+      else check(!r.room, `${href}: is left without a room (a storefront or a full-screen app)`);
+      await p2.close();
+    }
+
+    // Curtains: all four placed and moving. A selector that counted siblings
+    // of the same tag left two of them unpositioned and still.
+    const pv = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pv.goto(BASE + '/hotel', { waitUntil: 'load' });
+    await pv.waitForTimeout(3000);
+    const veil = await pv.evaluate(() => [...document.querySelectorAll('.cin-room .cr-veil')].map(v => ({
+      x: Math.round(v.getBoundingClientRect().left), moving: v.getAnimations().some(a => a.playState === 'running') })));
+    check(veil.length === 4 && veil.every(v => v.moving) && new Set(veil.map(v => Math.round(v.x / 60))).size === 4, '/hotel: four curtains, four places, all moving', JSON.stringify(veil));
+    await pv.close();
+
+    // A page that loads with its own Motion switch off builds the room when
+    // the switch is turned on, and hides it again when turned off.
+    const cf = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const pf = await cf.newPage();
+    await pf.addInitScript(() => { try { localStorage.setItem('freelancer-motion', 'off'); } catch (e) {} });
+    await pf.goto(BASE + '/freelancer', { waitUntil: 'load' });
+    await pf.waitForTimeout(2500);
+    const before = await pf.evaluate(() => !!document.querySelector('.cin-room'));
+    await pf.locator('#motion-toggle').click();
+    await pf.waitForTimeout(1200);
+    const on = await pf.evaluate(() => { const r = document.querySelector('.cin-room'); return !!r && getComputedStyle(r).display !== 'none'; });
+    await pf.locator('#motion-toggle').click();
+    await pf.waitForTimeout(400);
+    const offAgain = await pf.evaluate(() => { const r = document.querySelector('.cin-room'); return !r || getComputedStyle(r).display === 'none'; });
+    check(!before && on && offAgain, '/freelancer: the room follows the Motion switch in both directions after load', JSON.stringify({ before, on, offAgain }));
+    await cf.close();
+
+    // The room follows a page's own theme switch: gone on light, back on dark.
+    const pt = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pt.goto(BASE + '/lifecycle-os', { waitUntil: 'load' });
+    await pt.waitForTimeout(3000);
+    const shown = () => pt.evaluate(() => { const r = document.querySelector('.cin-room'); return !!r && getComputedStyle(r).display !== 'none'; });
+    const theme = () => pt.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    const t0 = await theme(), dark0 = await shown();
+    const btn = pt.locator('button:has-text("Theme")').first();
+    await btn.click();
+    await pt.waitForTimeout(1500);
+    const t1 = await theme(), light = await shown();
+    await btn.click();
+    await pt.waitForTimeout(1500);
+    const dark1 = await shown();
+    check(dark0 && t1 !== t0 && !light && dark1, '/lifecycle-os: the room hides on the light theme and returns on dark', JSON.stringify({ t0, t1, dark0, light, dark1 }));
+    await pt.close();
   }
 
   // Motion off, saved on the origin, must hold on the incoming page before its

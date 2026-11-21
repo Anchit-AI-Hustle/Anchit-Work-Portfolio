@@ -1162,8 +1162,18 @@
     });
   }
 
+  // The moving backdrop lives in assets/room.js so pages that do not load this
+  // runtime (the freelance page, the course) can load it on its own.
+  function initRoom() {
+    if (document.querySelector('script[data-room]')) return;
+    var sc = document.createElement('script');
+    sc.src = '/assets/room.js'; sc.defer = true; sc.setAttribute('data-room', '');
+    document.head.appendChild(sc);
+  }
+
   function boot() {
     observe();
+    setTimeout(initRoom, 600);
     // Lenis goes up FIRST, not on a timer.
     //
     // Every jump this page used to make on an early scroll was exactly one
