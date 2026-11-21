@@ -376,6 +376,9 @@ const check = (ok, label, detail) => {
       return { a, b, c: window.__ambientStep(), lite, lean };
     });
     check(gov.a === 'lite' && gov.lite.tier === 'lite' && gov.lite.ring2 === 0, 'governor: the first step down is the lite tier', JSON.stringify(gov.lite));
+    const jd = await pg.evaluate(() => { const J = window.__ambientJudge, rep = (v, n) => Array(n).fill(v);
+      return { smooth: J(rep(16.7, 120)), slow: J(rep(40, 120)), stalls: J(rep(300, 13)), mixed: J(rep(16.7, 70).concat(rep(300, 50))), few: J(rep(300, 3)) }; });
+    check(!jd.smooth && jd.slow && jd.stalls && jd.mixed && !jd.few, 'governor: smooth frames pass; slow frames and long stalls both step the page down', JSON.stringify(jd));
     await pg.waitForTimeout(200);
     check(await pg.evaluate(() => window.__floatBgStopped === true), 'governor: the particle canvas stops drawing at lean, not only hides');
     check(gov.b === 'lean' && gov.lean.lean && gov.lean.dust === 0 && gov.lean.beams === 0 && gov.lean.glow >= 1 && gov.c === '', 'governor: the second step drops dust and edges, keeps the light, and is the last', JSON.stringify(gov.lean));

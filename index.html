@@ -15643,18 +15643,32 @@
       return '';
     }
     window.__ambientStep = step;
+    // judge() is the whole decision, kept apart from the timer so the suites
+    // can feed it frame intervals. A stall counts as a slow frame: discarding
+    // long gaps meant the worst devices, where every frame is a stall, were
+    // never sampled at all and never stepped down.
+    function judge(gaps) {
+      var n = 0, slow = 0;
+      for (var i = 0; i < gaps.length; i++) { n++; if (gaps[i] > 25) slow++; }
+      return n >= 8 && slow / n > 0.3;
+    }
+    window.__ambientJudge = judge;
     if (navigator.webdriver || root.getAttribute('data-motion') === 'off') return;
     var busy = false, done = false;
     function watch() {
       if (busy || done || document.hidden) return;
       busy = true;
-      var last = 0, n = 0, slow = 0;
+      var last = 0, gaps = [], began = 0;
       function f(t) {
-        if (last) { var d = t - last; if (d < 250 && !window.__scrolling) { n++; if (d > 25) slow++; } }
-        last = t;
-        if (n < 120 && !document.hidden) return requestAnimationFrame(f);
+        if (!began) began = t;
+        // A hidden tab or a scroll is not the device being slow: drop the gap.
+        if (document.hidden || window.__scrolling) last = 0;
+        else { if (last) gaps.push(t - last); last = t; }
+        // Two seconds of frames, or four seconds on the clock, whichever
+        // comes first: a device managing three frames a second still ends.
+        if (gaps.length < 120 && t - began < 4000) return requestAnimationFrame(f);
         busy = false;
-        if (n >= 120 && slow / n > 0.3) { if (!step()) done = true; else setTimeout(watch, 1500); }
+        if (judge(gaps)) { if (!step()) done = true; else setTimeout(watch, 1500); }
       }
       requestAnimationFrame(f);
     }
