@@ -1,10 +1,22 @@
 /*
- * Saffron City: an original top-down open-world city sandbox.
+ * Sultan Bay: an original top-down open-world city sandbox.
  * Invented coastal megacity, family friendly: no weapons, trouble comes from
  * reckless driving and borrowing cars. Everything is drawn in code.
  */
 (function () {
   'use strict';
+
+/* Saved progress from before the city's rename lives under its old name: copy it across once, never overwrite. */
+(function migrateOldSave() {
+  try {
+    const ls = window.localStorage, OLD = 'saffron' + '-city', NEW = 'sultan-bay';
+    if (!ls || ls.getItem('sultan-bay.migrated')) return;
+    const keys = [];
+    for (let i = 0; i < ls.length; i++) keys.push(ls.key(i));
+    for (const k of keys) { if (!k || k.indexOf(OLD) < 0) continue; const nk = k.split(OLD).join(NEW); if (ls.getItem(nk) == null) ls.setItem(nk, ls.getItem(k)); }
+    ls.setItem('sultan-bay.migrated', '1');
+  } catch (e) { /* private mode: nothing to move */ }
+})();
 
   const TAU = Math.PI * 2, PI = Math.PI;
   const W = 5120, CELL = 16, GW = 320, TILE = 512, TN = 10;
@@ -56,13 +68,13 @@
   const SAND = 54;
 
   const DISTRICTS = [
-    { id: 'docks', name: 'Bandar Docks', test: (x, y) => y > 3700 && x < 2300 },
-    { id: 'marine', name: 'Marine Parade', test: (x) => x < 1010 },
-    { id: 'fort', name: 'Qila Quarter', test: (x, y) => x > 1420 && x < 2420 && y > 380 && y < 1560 },
-    { id: 'bazaar', name: 'Chowk Bazaar', test: (x, y) => x > 2250 && x < 3600 && y > 1500 && y < 2950 },
-    { id: 'heights', name: 'Malabar Heights', test: (x, y) => x > 3500 && y < 2500 },
-    { id: 'biz', name: 'Navi Business Park', test: (x, y) => x > 3300 && y > 2950 },
-    { id: 'res', name: 'Lakshmi Nagar', test: () => true },
+    { id: 'docks', name: 'Anchor Port', test: (x, y) => y > 3700 && x < 2300 },
+    { id: 'marine', name: 'Corniche Beach', test: (x) => x < 1010 },
+    { id: 'fort', name: 'Old Qila', test: (x, y) => x > 1420 && x < 2420 && y > 380 && y < 1560 },
+    { id: 'bazaar', name: 'Lantern Bazaar', test: (x, y) => x > 2250 && x < 3600 && y > 1500 && y < 2950 },
+    { id: 'heights', name: 'Cedar Hills', test: (x, y) => x > 3500 && y < 2500 },
+    { id: 'biz', name: 'Crescent Towers', test: (x, y) => x > 3300 && y > 2950 },
+    { id: 'res', name: 'Palm Gardens', test: () => true },
   ];
   const districtAt = (x, y) => { for (let i = 0; i < DISTRICTS.length; i++) if (DISTRICTS[i].test(x, y)) return DISTRICTS[i]; return DISTRICTS[DISTRICTS.length - 1]; };
 
@@ -439,7 +451,7 @@
 
   /* safehouses sit on sidewalk corners */
   const corner = (i, j, sx, sy) => ({ x: XC[i] + (sx ? 1 : -1) * (XR[i].hw + 9), y: YC[j] + (sy ? 1 : -1) * (YR[j].hw + 9) });
-  const SAFE_DEFS = [[0, 5, 1, 1, 'Marine Parade flat'], [5, 6, 0, 1, 'Bazaar loft'], [10, 3, 1, 1, 'Hilltop villa'], [2, 12, 1, 0, 'Dockside shed'], [9, 10, 0, 1, 'Tower suite']];
+  const SAFE_DEFS = [[0, 5, 1, 1, 'Corniche flat'], [5, 6, 0, 1, 'Bazaar loft'], [10, 3, 1, 1, 'Cedar Hills villa'], [2, 12, 1, 0, 'Anchor Port shed'], [9, 10, 0, 1, 'Crescent Tower suite']];
   SAFE_DEFS.forEach((s) => { const p = corner(s[0], s[1], s[2], s[3]); SAFE.push({ x: p.x, y: p.y, i: s[0], j: s[1], sx: s[2], sy: s[3], name: s[4] }); });
 
   /* ================================================================ static map: tiles */
@@ -1962,7 +1974,7 @@
   const nightOf = (h) => { const s = Math.sin(PI * (h - 6) / 12); return clamp((0.18 - s) / 0.5, 0, 1); };
   const duskOf = (h) => { const s = Math.sin(PI * (h - 6) / 12); return Math.max(0, 1 - Math.abs(s - 0.03) / 0.3); };
   const hourText = (h) => { const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60), ap = hh >= 12 ? 'PM' : 'AM', h12 = hh % 12 === 0 ? 12 : hh % 12; return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap; };
-  const RANKS = [[0, 'Pavement Rookie'], [500, 'Rickshaw Runner'], [1500, 'Street Hustler'], [3000, 'Saffron Boss'], [6000, 'City Legend']];
+  const RANKS = [[0, 'Pavement Rookie'], [500, 'Rickshaw Runner'], [1500, 'Street Hustler'], [3000, 'Bay Boss'], [6000, 'City Legend']];
   const rankOf = (cash) => { let r = RANKS[0]; for (const k of RANKS) if (cash >= k[0]) r = k; return r[1]; };
   const nextRank = (cash) => { for (const k of RANKS) if (cash < k[0]) return k; return null; };
 
@@ -2091,8 +2103,8 @@
     const types = ['courier', 'courier', 'courier', 'fare', 'fare', 'race', 'race', 'getaway', 'getaway'];
     types.forEach((t, i) => { const o = { type: t, x: 0, y: 0, cd: 0, hidden: false }; G.offers.push(o); placeOffer(o, pl.x, pl.y, i < 4 ? 260 : 500, i < 4 ? 1100 : 2400); });
     for (let i = 0; i < 6; i++) managePickups();
-    banner('Saffron City', arcRef.touchMode ? 'Walk to the car and tap Car. Drive into a glowing marker for a job.' : 'Walk to the yellow car and press F. Drive into a glowing marker for a job.', 5200, '#FFB736');
-    arcRef.toast('Marine Parade', 'Entering', 1800);
+    banner('Sultan Bay', arcRef.touchMode ? 'Walk to the car and tap Car. Drive into a glowing marker for a job.' : 'Walk to the yellow car and press F. Drive into a glowing marker for a job.', 5200, '#FFB736');
+    arcRef.toast('Corniche Beach', 'Entering', 1800);
     G.district = districtAt(pl.x, pl.y);
   }
 
@@ -2489,7 +2501,7 @@
     c.strokeStyle = G.copDist < 440 && stars() > 0 && !arc.reducedMotion ? (flash ? '#ff5252' : '#4b8bff') : '#c9a96e'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
   }
 
-  const DLABELS = [['Marine Parade', 640, 1700], ['Bandar Docks', 1300, 4300], ['Qila Quarter', 1900, 960], ['Chowk Bazaar', 2900, 2200], ['Malabar Heights', 4260, 1100], ['Navi Business Park', 4100, 3900], ['Lakshmi Nagar', 1850, 3000]];
+  const DLABELS = [['Corniche Beach', 640, 1700], ['Anchor Port', 1300, 4300], ['Old Qila', 1900, 960], ['Lantern Bazaar', 2900, 2200], ['Cedar Hills', 4260, 1100], ['Crescent Towers', 4100, 3900], ['Palm Gardens', 1850, 3000]];
   function drawFullMap(c, arc) {
     const w = arc.w, h = arc.h;
     c.fillStyle = 'rgba(6,5,3,.92)'; c.fillRect(0, 0, w, h);
@@ -2683,11 +2695,11 @@
     G.preload = true;
   }
 
-  const MENU_HTML = '<p>It is dusk in Saffron City. Walk to a car and press F to borrow it, then drive into a glowing marker to take a job: courier runs, taxi fares, street races or a getaway. Crash, carjack or run people off the road and the heat rises, so break the police\'s sight to cool off.</p>' +
-    '<p>Free roam has no clock. The ten minute hustle ends when time is up and your score is your cash.</p>';
+  const MENU_HTML = '<p>It is dusk in Sultan Bay. Walk to a car and press F to borrow it, then drive into a glowing marker to take a job: courier runs, taxi fares, street races or a getaway. Crash, carjack or run people off the road and the heat rises, so break the police\'s sight to cool off.</p>' +
+    '<p>Free roam has no clock. The ten minute hustle ends when time is up and your score is your cash. This is the light version of the city for browsers without 3D graphics: the full story campaign, boats, stunt ramps, property and the radio need WebGL 2.</p>';
   function showMenu(arc, extra) {
     arc.menu({
-      eyebrow: 'Open-world sandbox', title: 'Saffron <em>City</em>',
+      eyebrow: 'Open-world crime caper', title: 'Sultan <em>Bay</em>',
       html: (extra || '') + MENU_HTML,
       options: [
         { id: 'mode', label: 'Mode', choices: [{ v: 'free', label: 'Free roam' }, { v: 'hustle', label: 'Ten minute hustle' }] },
@@ -2697,7 +2709,7 @@
   }
 
   const arc = Arcade.create({
-    slug: 'saffron-city', title: 'Saffron City', genre: 'Open-world sandbox',
+    slug: 'sultan-bay', title: 'Sultan Bay', genre: 'Open-world crime caper',
     keys: [['WASD / arrows', 'Walk or drive'], ['Space', 'Handbrake (sprint on foot)'], ['Shift', 'Sprint on foot'], ['F', 'Get in or out of a car'], ['H', 'Horn'], ['M', 'City map']],
     touch: { stick: true, pads: [{ label: 'Car', key: 'KeyF' }, { label: 'Brake', key: 'Space', big: true, hot: true }, { label: 'Map', key: 'KeyM' }, { label: 'Horn', key: 'KeyH' }] },
     touchKeys: [['On-screen stick', 'Walk or steer'], ['Car', 'Get in or out'], ['Brake', 'Handbrake'], ['Horn', 'Honk'], ['Map', 'Open the city map']],

@@ -1,7 +1,8 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createHuman } from '/games/shared/human.js';
 import { createVFX } from '/games/shared/vfx.js';
-import { boot, HW, HL, HC, RC, GW, GH, GD, BR, H0, TEAM, clamp, lerp, TAU, smooth01, surf } from '/games/nitro-goal/core.js';
+import { boot, HW, HL, HC, RC, GW, GH, GD, BR, H0, TEAM, clamp, lerp, TAU, smooth01, surf, RULE, HOOP, PUCK, BOOST_COL } from '/games/nitro-goal/core.js';
+const boostHex = (c) => BOOST_COL[c.boostCol] || TEAM[c.team].glow;
 
 /*
  * Nitro Goal in 3D. The rules live in core.js; this file builds the stadium,
@@ -11,6 +12,13 @@ import { boot, HW, HL, HC, RC, GW, GH, GD, BR, H0, TEAM, clamp, lerp, TAU, smoot
  * A floodlit bowl on the edge of an Indian city at dusk or night: a turf pitch
  * whose edges curve up into walls, glass above them, tiers of fans, four light
  * masts, and a skyline of towers, domes and a temple spire beyond the roof.
+ */
+
+/*
+ * Every model is built by one function, so a library model can replace it later without touching the rest:
+ * carGeos(team, body) the cars (body, lights, canopy), wheelGeo() the wheels, buildBall() the ball and the
+ * puck, buildVariants() the hoops, shutters and rink, buildStadium() / buildCity() the venue, and the
+ * drivers come from human.js. MODELS below names them in one place.
  */
 
 /* ------------------------------------------------------------ small helpers */
@@ -263,13 +271,14 @@ function buildStadium(scene) {
   const grp = new THREE.Group(); scene.add(grp);
   // pitch
   const pitch = new THREE.Mesh(new THREE.PlaneGeometry(PW * 2, PL * 2), std({ map: tx.pitch, normalMap: tx.grassN, normalScale: new THREE.Vector2(0.7, 0.7), roughnessMap: tx.grassR, roughness: 0.95, emissive: '#ffffff', emissiveMap: tx.lines, emissiveIntensity: 0.22 }));
-  pitch.rotation.x = -Math.PI / 2; pitch.receiveShadow = true; grp.add(pitch);
+  pitch.rotation.x = -Math.PI / 2; pitch.receiveShadow = true; grp.add(pitch); S.pitch = pitch; S.pitchMap = pitch.material.map;
+  S.goalParts = [];
   // the floor of each goal mouth and goal, team tinted
   [0, 1].forEach((t) => {
     const s = t === 0 ? -1 : 1, len = GD + RC;
     const g = new THREE.PlaneGeometry(GW * 2, len); g.rotateX(-Math.PI / 2); g.translate(0, 0.005, s * (PL + len / 2));
     const m = new THREE.Mesh(g, std({ color: t === 0 ? '#3a2a1c' : '#1c2a36', roughness: 0.85, map: tx.concrete, emissive: TEAM[t].col, emissiveIntensity: 0.06 }));
-    m.receiveShadow = true; grp.add(m);
+    m.receiveShadow = true; grp.add(m); S.goalParts.push(m);
   });
   // the curved ramps and walls
   const loop = loopPts(HW - RC, HL - RC, 0.0001, 4, 8, [-GW, GW]);
@@ -301,7 +310,8 @@ function buildStadium(scene) {
     }
   }));
   const sideMat = std({ map: tx.panel, normalMap: tx.panelN, roughness: 0.55, metalness: 0.35, color: '#9a9aa2', side: THREE.DoubleSide });
-  sideGeo.forEach((g) => { const m = new THREE.Mesh(g, sideMat); m.receiveShadow = true; grp.add(m); });
+  sideGeo.forEach((g) => { const m = new THREE.Mesh(g, sideMat); m.receiveShadow = true; grp.add(m); S.goalParts.push(m); });
+  S.rampMat = rampMat;
   // glass above the ramps
   const glassProf = [{ h: RC, y: RC + 1.4, nh: -1, ny: 0, v: 0 }, { h: RC, y: HC - RC, nh: -1, ny: 0, v: HC - RC - RC - 1.4 }];
   const glassGeo = sweepGeo(loop, glassProf, { us: 7, vs: 7, color: (L) => (L.z < 0 ? '#ffb47a' : '#86d4ff') });
@@ -324,7 +334,7 @@ function buildStadium(scene) {
       cylG(0.12, 0.12, GH, 8, '#ffffff', [-GW, GH / 2, z + s * GD]), cylG(0.12, 0.12, GH, 8, '#ffffff', [GW, GH / 2, z + s * GD])
     ]);
     const fm = new THREE.MeshStandardMaterial({ color: TEAM[t].col, emissive: TEAM[t].col, emissiveIntensity: 2.4, roughness: 0.3, metalness: 0.2, vertexColors: true });
-    const frame = new THREE.Mesh(fg, fm); frame.castShadow = true; grp.add(frame); QUAL.push(frame);
+    const frame = new THREE.Mesh(fg, fm); frame.castShadow = true; grp.add(frame); QUAL.push(frame); S.goalParts.push(frame);
     // the net: back, two sides and the roof, one mesh, displaced in its own shader
     const parts = [];
     const plane = (w, h, sw, sh, pos, rot) => { const g = new THREE.PlaneGeometry(w, h, sw, sh); _e.set(rot[0], rot[1], rot[2], 'YXZ'); _q.setFromEuler(_e); _m4.compose(_p3.set(pos[0], pos[1], pos[2]), _q, _s3.set(1, 1, 1)); g.applyMatrix4(_m4); return g.toNonIndexed(); };
@@ -354,11 +364,12 @@ function buildStadium(scene) {
       transparent: true, depthWrite: false, side: THREE.DoubleSide
     });
     const net = new THREE.Mesh(ng, nm); net.renderOrder = 4; grp.add(net);
-    S.nets.push(nm);
+    S.nets.push(nm); S.goalParts.push(net);
     // a glow strip at the back of the goal and a light inside it
     const gl = new THREE.Mesh(new THREE.BoxGeometry(GW * 2 - 0.6, 0.18, 0.2), new THREE.MeshBasicMaterial({ color: new THREE.Color(TEAM[t].col).multiplyScalar(3) }));
-    gl.position.set(0, 0.2, z + s * (GD - 0.2)); grp.add(gl);
+    gl.position.set(0, 0.2, z + s * (GD - 0.2)); grp.add(gl); S.goalParts.push(gl);
   });
+  MODELS.arenaVariants(grp, S, tx);
   // boost pads: bases, big orbs, small glows
   S.pads = null;
   // the stands: tiers round a rounded rectangle, a back wall, a canopy, and an LED band outside
@@ -517,6 +528,69 @@ function buildStadium(scene) {
   return S;
 }
 
+// The Hoops arena: the goal mouths close behind curved shutters, a rim hangs over each end with a net, a
+// backboard on the wall and an arm holding it. The Snow Puck rink: an ice texture swapped onto the pitch.
+function buildVariants(grp, S, tx) {
+  S.coverGrp = new THREE.Group(); S.hoopGrp = new THREE.Group(); grp.add(S.coverGrp, S.hoopGrp);
+  [0, 1].forEach((t) => {
+    const s = t === 0 ? -1 : 1;
+    const cg = new THREE.CylinderGeometry(RC, RC, GW * 2 + 0.2, 20, 1, true, -Math.PI / 2, Math.PI / 2);
+    cg.rotateZ(Math.PI / 2);
+    if (s < 0) cg.scale(1, 1, -1);
+    cg.translate(0, RC, s * (HL - RC));
+    const cm = std({ map: tx.panel, normalMap: tx.panelN, color: t === 0 ? '#d8b49a' : '#9ab8d0', roughness: 0.5, metalness: 0.4, emissive: TEAM[t].col, emissiveIntensity: 0.12, side: THREE.DoubleSide });
+    const cover = new THREE.Mesh(cg, cm); cover.receiveShadow = true; S.coverGrp.add(cover);
+    // a glowing seam across the shutter, so it reads as a closed gate
+    const seam = new THREE.Mesh(new THREE.BoxGeometry(GW * 2, 0.16, 0.16), new THREE.MeshBasicMaterial({ color: new THREE.Color(TEAM[t].col).multiplyScalar(2.4) }));
+    seam.position.set(0, RC - Math.cos(Math.PI / 4) * RC, s * (HL - RC + Math.sin(Math.PI / 4) * RC)); S.coverGrp.add(seam);
+    const cz = s * (HL - HOOP.off);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(HOOP.r, HOOP.tube, 12, 64).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: TEAM[t].col, emissive: TEAM[t].col, emissiveIntensity: 2.2, roughness: 0.3, metalness: 0.5 }));
+    rim.position.set(0, HOOP.y, cz); rim.castShadow = true; S.hoopGrp.add(rim); (S.rims = S.rims || []).push(rim);
+    const netT = canvasTex(128, 64, (g, w, h) => { g.clearRect(0, 0, w, h); g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 2; for (let x = -h; x < w + h; x += 12) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h, h); g.stroke(); g.beginPath(); g.moveTo(x + h, 0); g.lineTo(x, h); g.stroke(); } }, { repeatS: true, data: false });
+    netT.wrapS = THREE.RepeatWrapping; netT.repeat.set(6, 1);
+    const net = new THREE.Mesh(new THREE.CylinderGeometry(HOOP.r, HOOP.r * 0.62, 3.4, 32, 1, true), new THREE.MeshBasicMaterial({ map: netT, transparent: true, depthWrite: false, side: THREE.DoubleSide, color: new THREE.Color(TEAM[t].glow).multiplyScalar(1.4), opacity: 0.85 }));
+    net.position.set(0, HOOP.y - 1.7, cz); net.renderOrder = 4; S.hoopGrp.add(net); S.rims.push(net);
+    const board = new THREE.Mesh(new THREE.PlaneGeometry(18, 9), std({ color: '#ffffff', transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.2, emissive: TEAM[t].col, emissiveIntensity: 0.35, side: THREE.DoubleSide, depthWrite: false }));
+    board.position.set(0, HOOP.y + 2.6, s * (HL - 0.08)); board.renderOrder = 3; S.hoopGrp.add(board);
+    const sq = new THREE.Mesh(new THREE.RingGeometry(3.4, 3.8, 4, 1, Math.PI / 4).scale(1.4, 1, 1), new THREE.MeshBasicMaterial({ color: new THREE.Color(TEAM[t].glow).multiplyScalar(2.2), side: THREE.DoubleSide }));
+    sq.position.set(0, HOOP.y + 2.6, s * (HL - 0.12)); S.hoopGrp.add(sq);
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, HOOP.off - HOOP.r + 0.4), std({ color: '#3a3d46', metalness: 0.7, roughness: 0.35 }));
+    arm.position.set(0, HOOP.y, s * (HL - (HOOP.off - HOOP.r) / 2)); S.hoopGrp.add(arm);
+    // a glowing target ring on the floor under each hoop
+    const tgt = new THREE.Mesh(new THREE.PlaneGeometry(HOOP.r * 2.4, HOOP.r * 2.4).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: tx.pad, color: new THREE.Color(TEAM[t].glow).multiplyScalar(1.2), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    tgt.position.set(0, 0.06, cz); S.hoopGrp.add(tgt);
+  });
+  S.coverGrp.visible = false; S.hoopGrp.visible = false;
+  // ice: blue-white with skate scratches and the rink's own lines
+  S.iceMap = null;
+}
+function iceTex() {
+  const PXM = 6, tw = Math.round(PW * 2 * PXM), th = Math.round(PL * 2 * PXM);
+  return canvasTex(tw, th, (g, w, h) => {
+    const r = rng(91);
+    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#dfeefa'); gr.addColorStop(0.5, '#eef6fc'); gr.addColorStop(1, '#d4e6f6'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 1400; i++) { g.strokeStyle = 'rgba(150,180,210,' + (0.05 + r() * 0.12) + ')'; g.lineWidth = 0.6 + r(); const x = r() * w, y = r() * h, a = r() * TAU, l = 6 + r() * 40; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a + 0.4) * l * 0.5, y + Math.sin(a + 0.4) * l * 0.5, x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+    for (let i = 0; i < 60; i++) { const x = r() * w, y = r() * h, rr2 = 10 + r() * 40, gg = g.createRadialGradient(x, y, 0, x, y, rr2); gg.addColorStop(0, 'rgba(255,255,255,0.35)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gg; g.fillRect(x - rr2, y - rr2, rr2 * 2, rr2 * 2); }
+    const X = (x) => (x + PW) * PXM, Z = (z) => (PL - z) * PXM;
+    g.lineWidth = 0.5 * PXM;
+    g.strokeStyle = 'rgba(220,40,50,0.75)'; g.beginPath(); g.moveTo(X(-PW), Z(0)); g.lineTo(X(PW), Z(0)); g.stroke();
+    g.strokeStyle = 'rgba(40,110,220,0.7)'; [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(X(-PW), Z(sd * 18)); g.lineTo(X(PW), Z(sd * 18)); g.stroke(); });
+    g.strokeStyle = 'rgba(220,40,50,0.6)'; g.beginPath(); g.arc(X(0), Z(0), 10 * PXM, 0, TAU); g.stroke();
+    [-1, 1].forEach((sd) => { g.strokeStyle = 'rgba(220,40,50,0.6)'; g.beginPath(); g.moveTo(X(-PW), Z(sd * (PL - 4))); g.lineTo(X(PW), Z(sd * (PL - 4))); g.stroke(); g.fillStyle = 'rgba(80,140,230,0.25)'; g.beginPath(); g.arc(X(0), Z(sd * PL), 13 * PXM, 0, TAU); g.fill(); [-1, 1].forEach((sx) => { g.strokeStyle = 'rgba(220,40,50,0.55)'; g.beginPath(); g.arc(X(sx * 18), Z(sd * 32), 6 * PXM, 0, TAU); g.stroke(); }); });
+  }, { clamp: true });
+}
+function setVariant(G) {
+  const S = R3.S, v = RULE.variant;
+  S.goalParts.forEach((m) => { m.visible = v !== 'hoops'; });
+  S.coverGrp.visible = v === 'hoops'; S.hoopGrp.visible = v === 'hoops';
+  const pm = S.pitch.material.userData && S.pitch.material.userData.full ? S.pitch.material.userData.full : S.pitch.material;
+  if (v === 'puck') { if (!S.iceMap) S.iceMap = iceTex(); pm.map = S.iceMap; pm.roughness = 0.22; pm.metalness = 0.05; pm.normalScale.set(0.15, 0.15); pm.emissiveIntensity = 0.05; }
+  else { pm.map = S.pitchMap; pm.roughness = 0.95; pm.metalness = 0; pm.normalScale.set(0.7, 0.7); pm.emissiveIntensity = 0.22; }
+  pm.needsUpdate = true;
+  const cm = cheapCache.get(pm); if (cm) { cm.map = pm.map; cm.needsUpdate = true; }
+  R3.B.ball.visible = v !== 'puck'; R3.B.puck.visible = v === 'puck';
+}
+
 /* ------------------------------------------------------------ the city beyond the roof */
 function buildCity(grp, S) {
   const r = rng(303), items = [];
@@ -628,39 +702,60 @@ function updatePads(P, G, t) {
 
 /* ------------------------------------------------------------ cars */
 // Local frame: nose along +z, roof along +y, origin at the car's centre (H0 above the surface it drives on).
-function carGeos(team) {
-  const paint = TEAM[team].col, dark = '#17181c', trim = '#2c2e34', glassC = '#0b1420', stripe = '#f4efe6';
-  const Y = -H0;
-  const body = new THREE.Shape();
-  const bp = [[2.05, 0.36], [2.14, 0.58], [1.8, 0.74], [0.62, 0.88], [-1.92, 0.92], [-2.12, 0.8], [-2.08, 0.38]];
-  body.moveTo(bp[0][0], bp[0][1] + Y); bp.slice(1).forEach((p) => body.lineTo(p[0], p[1] + Y)); body.closePath();
-  const bg = new THREE.ExtrudeGeometry(body, { depth: 1.66, bevelEnabled: true, bevelThickness: 0.14, bevelSize: 0.11, bevelSegments: 3, curveSegments: 4 });
-  bg.translate(0, 0, -0.83); bg.rotateY(-Math.PI / 2);
+// Six original body shapes on one hitbox: a side profile (forward, height) extruded across the car, plus
+// each shape's own wing, scoops, fins and trim. The canopy is shared, so every body is built round it.
+const BODIES = {
+  comet: { bp: [[2.05, 0.36], [2.14, 0.58], [1.8, 0.74], [0.62, 0.88], [-1.92, 0.92], [-2.12, 0.8], [-2.08, 0.38]], wing: 'flat', depth: 1.66 },
+  tusker: { bp: [[2.02, 0.34], [2.08, 0.74], [1.82, 0.9], [0.7, 0.94], [-1.94, 1.0], [-2.1, 0.94], [-2.06, 0.34]], wing: 'none', depth: 1.74, bar: true, roofBar: true },
+  kestrel: { bp: [[2.28, 0.32], [2.3, 0.48], [1.7, 0.66], [0.62, 0.86], [-1.96, 0.9], [-2.24, 0.72], [-2.18, 0.34]], wing: 'tall', depth: 1.6, splitter: true },
+  scarab: { bp: [[2.0, 0.4], [2.1, 0.62], [1.7, 0.82], [1.0, 0.9], [0.4, 0.94], [-1.0, 0.98], [-1.8, 0.94], [-2.12, 0.72], [-2.06, 0.4]], wing: 'none', depth: 1.7, dome: true },
+  mongoose: { bp: [[2.1, 0.34], [2.16, 0.56], [1.76, 0.72], [0.62, 0.88], [-1.92, 0.92], [-2.14, 0.84], [-2.1, 0.36]], wing: 'fins', depth: 1.68, skirts: true },
+  jugnu: { bp: [[2.24, 0.34], [2.26, 0.5], [1.5, 0.7], [0.62, 0.88], [-1.92, 0.9], [-2.2, 0.82], [-2.16, 0.34]], wing: 'blade', depth: 1.62, glow: true, canards: true }
+};
+function carGeos(team, body) {
+  const B = BODIES[body] || BODIES.comet;
+  const paint = TEAM[team].col, dark = '#17181c', trim = '#2c2e34', glassC = '#0b1420', stripe = body === 'jugnu' ? '#ffd36a' : '#f4efe6';
+  const Y = -H0, D = B.depth;
+  const shape = new THREE.Shape(), bp = B.bp;
+  shape.moveTo(bp[0][0], bp[0][1] + Y); bp.slice(1).forEach((p) => shape.lineTo(p[0], p[1] + Y)); shape.closePath();
+  const bg = new THREE.ExtrudeGeometry(shape, { depth: D, bevelEnabled: true, bevelThickness: B.dome ? 0.22 : 0.14, bevelSize: B.dome ? 0.16 : 0.11, bevelSegments: B.dome ? 5 : 3, curveSegments: 4 });
+  bg.translate(0, 0, -D / 2); bg.rotateY(-Math.PI / 2);
   const cab = new THREE.Shape();
   const cp = [[0.66, 0.84], [-0.28, 1.34], [-1.18, 1.32], [-1.9, 0.9]];
   cab.moveTo(cp[0][0], cp[0][1] + Y); cp.slice(1).forEach((p) => cab.lineTo(p[0], p[1] + Y)); cab.closePath();
   const cg = new THREE.ExtrudeGeometry(cab, { depth: 1.34, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.07, bevelSegments: 2 });
   cg.translate(0, 0, -0.67); cg.rotateY(-Math.PI / 2);
+  const fz = bp[0][0], rz = bp[bp.length - 1][0], hw = D / 2 + 0.12;
   const parts = [
     prep(bg, paint),
     boxG(1.36, 0.06, 0.95, paint, [0, 1.36 + Y, -0.72]),                      // roof panel
     boxG(0.32, 0.03, 2.2, stripe, [0, 0.93 + Y, 0.95]), boxG(0.32, 0.03, 0.9, stripe, [0, 1.4 + Y, -0.72]),  // racing stripe
-    boxG(2.06, 0.12, 0.5, dark, [0, 0.33 + Y, 2.12]),                         // front splitter
-    boxG(2.0, 0.22, 0.32, dark, [0, 0.46 + Y, -2.2]),                         // diffuser
-    boxG(0.08, 0.36, 1.6, dark, [1.03, 0.52 + Y, 0.1]), boxG(0.08, 0.36, 1.6, dark, [-1.03, 0.52 + Y, 0.1]), // side intakes
-    boxG(0.12, 0.42, 0.12, trim, [0.7, 1.12 + Y, -1.95]), boxG(0.12, 0.42, 0.12, trim, [-0.7, 1.12 + Y, -1.95]),
-    boxG(2.2, 0.08, 0.5, paint, [0, 1.36 + Y, -2.02], [0.12, 0, 0]),           // wing
-    boxG(0.06, 0.3, 0.55, dark, [1.1, 1.3 + Y, -2.0]), boxG(0.06, 0.3, 0.55, dark, [-1.1, 1.3 + Y, -2.0]),
+    boxG(D + 0.4, 0.12, 0.5, dark, [0, 0.33 + Y, fz + 0.07]),                 // front splitter
+    boxG(D + 0.34, 0.22, 0.32, dark, [0, 0.46 + Y, rz - 0.12]),               // diffuser
+    boxG(0.08, 0.36, 1.6, dark, [hw - 0.06, 0.52 + Y, 0.1]), boxG(0.08, 0.36, 1.6, dark, [-hw + 0.06, 0.52 + Y, 0.1]), // side intakes
     boxG(0.5, 0.06, 0.3, dark, [0, 0.95 + Y, 1.25]),                          // hood vent
-    cylG(0.11, 0.13, 0.25, 10, trim, [0.35, 0.5 + Y, -2.22], [Math.PI / 2, 0, 0]), cylG(0.11, 0.13, 0.25, 10, trim, [-0.35, 0.5 + Y, -2.22], [Math.PI / 2, 0, 0]) // exhausts
+    cylG(0.11, 0.13, 0.25, 10, trim, [0.35, 0.5 + Y, rz - 0.14], [Math.PI / 2, 0, 0]), cylG(0.11, 0.13, 0.25, 10, trim, [-0.35, 0.5 + Y, rz - 0.14], [Math.PI / 2, 0, 0]) // exhausts
   ];
-  const lights = mergeG([
-    boxG(0.46, 0.1, 0.06, '#ffffff', [0.7, 0.66 + Y, 2.16], [0, 0.18, 0]), boxG(0.46, 0.1, 0.06, '#ffffff', [-0.7, 0.66 + Y, 2.16], [0, -0.18, 0]),
-    boxG(1.86, 0.07, 0.06, '#ff2a20', [0, 0.82 + Y, -2.2]),
+  if (B.wing === 'flat') parts.push(boxG(0.12, 0.42, 0.12, trim, [0.7, 1.12 + Y, -1.95]), boxG(0.12, 0.42, 0.12, trim, [-0.7, 1.12 + Y, -1.95]), boxG(2.2, 0.08, 0.5, paint, [0, 1.36 + Y, -2.02], [0.12, 0, 0]), boxG(0.06, 0.3, 0.55, dark, [1.1, 1.3 + Y, -2.0]), boxG(0.06, 0.3, 0.55, dark, [-1.1, 1.3 + Y, -2.0]));
+  if (B.wing === 'tall') parts.push(boxG(0.1, 0.7, 0.1, trim, [0.6, 1.24 + Y, -2.05]), boxG(0.1, 0.7, 0.1, trim, [-0.6, 1.24 + Y, -2.05]), boxG(2.3, 0.07, 0.62, paint, [0, 1.6 + Y, -2.1], [0.18, 0, 0]), boxG(0.06, 0.42, 0.7, dark, [1.16, 1.52 + Y, -2.1]), boxG(0.06, 0.42, 0.7, dark, [-1.16, 1.52 + Y, -2.1]));
+  if (B.wing === 'fins') parts.push(boxG(0.08, 0.62, 0.9, paint, [0.62, 1.22 + Y, -1.72], [0, 0, -0.1]), boxG(0.08, 0.62, 0.9, paint, [-0.62, 1.22 + Y, -1.72], [0, 0, 0.1]), boxG(1.4, 0.06, 0.36, dark, [0, 1.46 + Y, -1.9]));
+  if (B.wing === 'blade') parts.push(boxG(2.36, 0.05, 0.42, dark, [0, 1.22 + Y, -2.12], [0.25, 0, 0]), boxG(0.05, 0.5, 0.06, trim, [0, 1.0 + Y, -2.05]));
+  if (B.bar) parts.push(boxG(1.7, 0.1, 0.1, trim, [0, 0.62 + Y, fz + 0.2]), boxG(1.7, 0.1, 0.1, trim, [0, 0.82 + Y, fz + 0.12]), boxG(0.1, 0.32, 0.1, trim, [0.6, 0.72 + Y, fz + 0.18]), boxG(0.1, 0.32, 0.1, trim, [-0.6, 0.72 + Y, fz + 0.18]));
+  if (B.roofBar) parts.push(boxG(1.2, 0.1, 0.16, dark, [0, 1.45 + Y, -0.3]));
+  if (B.dome) parts.push(sphG(0.42, paint, [0, 0.9 + Y, 1.2], [1.4, 0.35, 1.6], 14, 8));
+  if (B.skirts) parts.push(boxG(0.1, 0.14, 3.2, dark, [hw, 0.3 + Y, 0]), boxG(0.1, 0.14, 3.2, dark, [-hw, 0.3 + Y, 0]));
+  if (B.splitter) parts.push(boxG(D + 0.6, 0.05, 0.3, dark, [0, 0.28 + Y, fz + 0.18]));
+  if (B.canards) parts.push(boxG(0.38, 0.04, 0.24, dark, [hw + 0.06, 0.5 + Y, fz - 0.25], [0, 0, 0.3]), boxG(0.38, 0.04, 0.24, dark, [-hw - 0.06, 0.5 + Y, fz - 0.25], [0, 0, -0.3]));
+  const lp = [
+    boxG(0.46, 0.1, 0.06, '#ffffff', [0.7, 0.66 + Y, fz + 0.11], [0, 0.18, 0]), boxG(0.46, 0.1, 0.06, '#ffffff', [-0.7, 0.66 + Y, fz + 0.11], [0, -0.18, 0]),
+    boxG(1.86, 0.07, 0.06, '#ff2a20', [0, 0.82 + Y, rz - 0.12]),
     boxG(1.7, 0.03, 3.2, TEAM[team].col, [0, 0.16 + Y, 0])                      // underglow line
-  ]);
-  return { body: mergeG(parts), lights, glass: prep(cg, glassC) };
+  ];
+  if (B.glow) lp.push(boxG(0.05, 0.05, 3.4, TEAM[team].glow, [hw - 0.02, 0.62 + Y, 0]), boxG(0.05, 0.05, 3.4, TEAM[team].glow, [-hw + 0.02, 0.62 + Y, 0]), boxG(1.2, 0.04, 0.05, '#ffd36a', [0, 0.92 + Y, 1.6]));
+  return { body: mergeG(parts), lights: mergeG(lp), glass: prep(cg, glassC) };
 }
+// The swap points for library models: replace an entry, keep the signature.
+const MODELS = { car: (team, body) => carGeos(team, body), wheel: () => wheelGeo(), ball: (scene) => buildBall(scene), arenaVariants: (grp, S, tx) => buildVariants(grp, S, tx) };
 function wheelGeo() {
   const tire = prep(new THREE.CylinderGeometry(0.42, 0.42, 0.36, 18), '#141416', null, [0, 0, Math.PI / 2]);
   const rim = prep(new THREE.CylinderGeometry(0.27, 0.27, 0.38, 12), '#b8bcc4', null, [0, 0, Math.PI / 2]);
@@ -672,31 +767,41 @@ function wheelGeo() {
 function flameMat() {
   return new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 } },
-    vertexShader: 'attribute float aLen; varying vec2 vUv; varying float vY; void main(){ vUv = uv; vY = aLen; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
-    fragmentShader: 'uniform float uTime; varying vec2 vUv; varying float vY;' +
+    vertexShader: 'attribute float aLen; varying vec2 vUv; varying float vY; varying vec3 vTint; void main(){ vUv = uv; vY = aLen;\n#ifdef USE_INSTANCING_COLOR\n vTint = instanceColor;\n#else\n vTint = vec3(1.0, 0.54, 0.16);\n#endif\n gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform float uTime; varying vec2 vUv; varying float vY; varying vec3 vTint;' +
       'float h(float x){ return fract(sin(x * 91.7) * 4375.5); }' +
       'void main(){ float t = clamp(vY / 2.2, 0.0, 1.0); float n = 0.75 + 0.25 * sin(vUv.x * 30.0 + uTime * 40.0) * sin(vY * 9.0 - uTime * 55.0);' +
-      ' vec3 core = vec3(4.0, 3.6, 2.6), mid = vec3(4.2, 1.6, 0.35), tip = vec3(1.4, 0.35, 0.9); vec3 c = mix(core, mid, smoothstep(0.0, 0.45, t)); c = mix(c, tip, smoothstep(0.45, 1.0, t));' +
+      ' vec3 core = vec3(4.0, 3.6, 2.6), mid = vTint * 4.2, tip = vTint * vTint * 1.6 + vec3(0.2, 0.05, 0.3); vec3 c = mix(core, mid, smoothstep(0.0, 0.45, t)); c = mix(c, tip, smoothstep(0.45, 1.0, t));' +
       ' float a = (1.0 - t) * n; gl_FragColor = vec4(c * a, a); }',
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide
   });
 }
 let CARMAT = null;
+// Paint finishes from the garage: one shared material each, so a full grid of six cars is still six draws.
+const FIN = {};
+const CARGEO = new Map();
+function carGeo(team, body) { const k = team + '|' + body; let g = CARGEO.get(k); if (!g) { g = MODELS.car(team, body); g.glass.dispose(); CARGEO.set(k, g); } return g; }
 function buildCars(scene) {
   CARMAT = std({ vertexColors: true, metalness: 0.35, roughness: 0.4, envMapIntensity: 0.6 });
-  const C = { teams: [[], []], wheels: null, flames: null };
-  [0, 1].forEach((t) => {
-    const g = carGeos(t);
-    const lm = new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(3.4, 3.4, 3.4) });
-    for (let s = 0; s < 3; s++) {
-      const root = new THREE.Group();
-      const body = new THREE.Mesh(g.body, CARMAT); body.castShadow = true; body.receiveShadow = true;
-      const lights = new THREE.Mesh(g.lights, lm);
-      root.add(body, lights); root.visible = false; scene.add(root);
-      C.teams[t].push({ root, body });
-    }
-  });
-  C.wheels = new THREE.InstancedMesh(wheelGeo(), std({ vertexColors: true, roughness: 0.6, metalness: 0.4 }), 24);
+  FIN.gloss = CARMAT;
+  FIN.matte = std({ vertexColors: true, metalness: 0.05, roughness: 0.82, envMapIntensity: 0.35 });
+  FIN.metal = std({ vertexColors: true, metalness: 0.85, roughness: 0.28, envMapIntensity: 1.0 });
+  FIN.pearl = new THREE.MeshPhysicalMaterial({ vertexColors: true, metalness: 0.2, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08, iridescence: 0.7, iridescenceIOR: 1.5, sheen: 0.3, sheenColor: new THREE.Color('#ffffff'), envMapIntensity: 0.9 });
+  FIN.mirror = std({ vertexColors: true, metalness: 1, roughness: 0.07, envMapIntensity: 1.3 });
+  const C = { cars: [], wheels: null, flames: null, lm: new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(3.4, 3.4, 3.4) }) };
+  for (let i = 0; i < 6; i++) {
+    const g = carGeo(i < 3 ? 0 : 1, 'comet');
+    const root = new THREE.Group();
+    const body = new THREE.Mesh(g.body, CARMAT); body.castShadow = true; body.receiveShadow = true;
+    const lights = new THREE.Mesh(g.lights, C.lm);
+    root.add(body, lights); root.visible = false; scene.add(root);
+    C.cars.push({ root, body, lights, key: '0|comet', fin: 'gloss' });
+  }
+  // tiny swatches of every finish, rendered once by the warm-up compile so a garage paint never hitches a kickoff
+  C.swatch = new THREE.Group();
+  Object.keys(FIN).forEach((k, i) => { const m = new THREE.Mesh(carGeo(0, 'comet').lights, FIN[k]); m.position.set(i * 0.2, -30, 0); m.scale.setScalar(0.01); C.swatch.add(m); });
+  C.swatch.visible = false; scene.add(C.swatch);
+  C.wheels = new THREE.InstancedMesh(MODELS.wheel(), std({ vertexColors: true, roughness: 0.6, metalness: 0.4 }), 24);
   C.wheels.castShadow = true; C.wheels.frustumCulled = false; scene.add(C.wheels);
   // a cone with its wide end at the exhaust and its tip trailing behind; aLen runs 0 (hot) to 1.8 (tip)
   const flameG = new THREE.ConeGeometry(0.26, 2.2, 12, 4, true); flameG.translate(0, 1.1, 0);
@@ -705,10 +810,12 @@ function buildCars(scene) {
   flameG.rotateX(-Math.PI / 2);
   const fm = flameMat();
   C.flames = new THREE.InstancedMesh(flameG, fm, 12); C.flames.frustumCulled = false; scene.add(C.flames);
+  for (let i = 0; i < 12; i++) C.flames.setColorAt(i, _c.set('#ff8a2a'));
+  C.flames.instanceColor.needsUpdate = true;
   C.flameMat = fm;
   // tinted canopy glass over a driver who sits, steers and looks where the ball is
   const glassMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, color: '#9fb4c8', transparent: true, opacity: 0.58, roughness: 0.06, metalness: 0.1, envMapIntensity: 1.4, depthWrite: false });
-  C.glass = new THREE.InstancedMesh(carGeos(0).glass, glassMat, 6); C.glass.frustumCulled = false; C.glass.renderOrder = 3; scene.add(C.glass);
+  C.glass = new THREE.InstancedMesh(carGeos(0, 'comet').glass, glassMat, 6); C.glass.frustumCulled = false; C.glass.renderOrder = 3; scene.add(C.glass);
   // a driver in every seat: a person from the shared people library, seated, hands on the wheel, in a
   // team helmet; the head follows the ball, the body leans against the turn, and a goal gets a fist
   // pump or hands on the helmet a moment later
@@ -764,10 +871,8 @@ const WHEELS = [[0.98, -0.3, 1.3, 1], [-0.98, -0.3, 1.3, 1], [0.98, -0.3, -1.28,
 function poseCars(C, G, t) {
   const r3t = t;
   let wi = 0, fi = 0;
-  const used = [[false, false, false], [false, false, false]];
   G.cars.forEach((c, i) => {
-    const P = G.pose.cars[i], M = C.teams[c.team][c.slot];
-    used[c.team][c.slot] = true;
+    const P = G.pose.cars[i], M = C.cars[i];
     M.root.visible = P.vis;
     _cz.set(P.fx, P.fy, P.fz); _cy.set(P.ux, P.uy, P.uz); _cx.crossVectors(_cy, _cz).normalize();
     _cy.crossVectors(_cz, _cx).normalize();
@@ -831,7 +936,20 @@ function poseCars(C, G, t) {
   [C.glass, C.blob].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
   C.wheels.count = 24; C.flames.count = 12;
   C.wheels.instanceMatrix.needsUpdate = true; C.flames.instanceMatrix.needsUpdate = true;
-  [0, 1].forEach((t2) => C.teams[t2].forEach((M, s) => { if (!used[t2][s]) M.root.visible = false; }));
+  for (let i = G.cars.length; i < 6; i++) C.cars[i].root.visible = false;
+}
+
+// Each car its own body shape, paint finish and boost colour, from the garage (yours) or its seat (the bots).
+function dressCars(G) {
+  const C = R3.C;
+  G.cars.forEach((c, i) => {
+    const M = C.cars[i], key = c.team + '|' + c.body;
+    if (M.key !== key) { const g = carGeo(c.team, c.body); M.body.geometry = g.body; M.lights.geometry = g.lights; M.key = key; }
+    const want = FIN[c.finish] || CARMAT;
+    M.body.material = want; M.fin = c.finish;
+    for (let k = 0; k < 2; k++) C.flames.setColorAt(i * 2 + k, _c.set(boostHex(c)));
+  });
+  C.flames.instanceColor.needsUpdate = true;
 }
 
 /* ------------------------------------------------------------ the ball */
@@ -854,7 +972,17 @@ function buildBall(scene) {
   const ringT = textures().pad;
   const mark = new THREE.Mesh(new THREE.PlaneGeometry(BR * 2.6, BR * 2.6).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: ringT, color: new THREE.Color(1.6, 1.6, 1.8), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
   scene.add(mark);
-  return { ball, mark, mat };
+  // the Snow Puck: a heavy rubber disc with a lit rim and a bevelled face
+  const puck = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(PUCK.r, PUCK.r, PUCK.h * 2, 40, 1), std({ color: '#1a1c22', roughness: 0.55, metalness: 0.15 }));
+  body.castShadow = true;
+  const rimG = new THREE.Mesh(new THREE.TorusGeometry(PUCK.r - 0.02, 0.12, 8, 48).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.6, 2.2, 3.2) }));
+  const face = new THREE.Mesh(new THREE.CircleGeometry(PUCK.r * 0.62, 32).rotateX(-Math.PI / 2), std({ color: '#2a2e38', roughness: 0.35, metalness: 0.5, emissive: '#3ab0ff', emissiveIntensity: 0.25 }));
+  face.position.y = PUCK.h + 0.01;
+  const notch = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, PUCK.r * 1.1), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.4, 1.6) }));
+  notch.position.set(0, PUCK.h + 0.03, 0);
+  puck.add(body, rimG, face, notch); puck.visible = false; scene.add(puck);
+  return { ball, mark, mat, puck };
 }
 
 /* ------------------------------------------------------------ particles */
@@ -931,6 +1059,7 @@ function smoke(x, y, z, n, hex, sz) {
 /* ------------------------------------------------------------ the look: dusk or night */
 const LOOKS = {
   dusk: { top: '#1d2150', mid: '#7a4a7e', hor: '#ff9a62', glow: '#ff8a4a', fog: '#5e4a66', fogD: 0.0021, sun: '#ffb27a', sunDir: [-0.55, 0.06, -0.83], hemiS: '#a99acb', hemiG: '#2a2018', hemiI: 0.95, key: '#fff1dc', keyI: 3.0, fill: '#b9c8ff', fillI: 0.45, exposure: 0.95, lit: 0.42, stars: 0.15, cloud: 0.55, phones: 0.35, env: 0.85 },
+  snow: { top: '#050a1a', mid: '#18284a', hor: '#6a7fa8', glow: '#9ab8ff', fog: '#3c4c6c', fogD: 0.0027, sun: '#e8f0ff', sunDir: [0.4, 0.3, -0.86], hemiS: '#a8c0ee', hemiG: '#3a4458', hemiI: 0.85, key: '#f2f6ff', keyI: 3.2, fill: '#9ab4ff', fillI: 0.5, exposure: 1.0, lit: 0.55, stars: 0.7, cloud: 0.7, phones: 0.8, env: 0.95 },
   night: { top: '#03050f', mid: '#0b1430', hor: '#2a2340', glow: '#c86a3a', fog: '#141729', fogD: 0.0024, sun: '#dfe6ff', sunDir: [0.45, 0.32, -0.83], hemiS: '#5468a8', hemiG: '#141210', hemiI: 0.7, key: '#fff6e8', keyI: 3.3, fill: '#8aa0ff', fillI: 0.35, exposure: 1.0, lit: 0.62, stars: 1, cloud: 0.3, phones: 1, env: 0.75 }
 };
 const SKY_VS = 'varying vec3 vDir; void main(){ vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }';
@@ -1019,6 +1148,8 @@ function sizePost(r, t) {
   POST.w = w; POST.h = h;
 }
 function pass(r, mat, target) { POST.quad.material = mat; r.setRenderTarget(target); r.render(POST.qs, POST.cam); }
+// Where the scene is drawn this tier: the post pass's target, or the canvas.
+function drawTarget() { return POST.ok && R3 && TIERS[Math.max(0, R3.quality)].post ? POST.scene : null; }
 function renderPost(r, scene, camera, t, time, flash, rm) {
   if (!POST.ok || !t.post) { r.setRenderTarget(null); r.render(scene, camera); return; }
   r.setRenderTarget(POST.scene); r.render(scene, camera);
@@ -1079,7 +1210,7 @@ function setup3D(a) {
   TEX_ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   R3.S = buildStadium(scene);
   R3.C = buildCars(scene);
-  R3.B = buildBall(scene);
+  R3.B = MODELS.ball(scene);
   FX = createFX(scene);
   // goal shockwave rings
   for (let i = 0; i < 3; i++) {
@@ -1105,31 +1236,41 @@ function cheapOf(m) {
   }
   return c;
 }
-function applyTier() {
+// A tier has two halves. The cheap half (counts, densities, map size, visibility of whole objects) applies at
+// once. The half that rebuilds shader programs (material swaps, shadows on or off, lights, the environment)
+// never applies during play: it waits for the next menu, pause or results moment (progPending).
+const inPlay = () => !!(ARC && ARC.state === 'play' && R3 && R3.G && !R3.G.cfg.attract);
+function applyTier(force) {
   const r = R3, t = TIERS[r.quality];
-  r.scene.traverse((o) => {
-    if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && o !== r.B.ball && o !== r.S.crowd && !(o.material.userData && o.material.userData.keepMat)) {
-      const full = o.material.userData && o.material.userData.full ? o.material.userData.full : o.material;
-      const want = t.cheap ? cheapOf(full) : full;
-      if (o.material !== want) o.material = want;
-    }
-  });
+  if (force || !inPlay()) {
+    r.progPending = false; r.progQ = r.quality;
+    r.scene.traverse((o) => {
+      if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && o !== r.B.ball && o !== r.S.crowd && !(o.material.userData && o.material.userData.keepMat)) {
+        const full = o.material.userData && o.material.userData.full ? o.material.userData.full : o.material;
+        const want = t.cheap ? cheapOf(full) : full;
+        if (o.material !== want) o.material = want;
+      }
+    });
+    QUAL.forEach((m) => { m.castShadow = t.shadow && r.quality >= 3; });
+    r.renderer.shadowMap.enabled = t.shadow; r.key.castShadow = t.shadow;
+    r.fill.visible = !t.lite; r.flashL.visible = r.quality >= 2;
+    if (!t.cheap && r.look) makeEnv(r.look);
+    r.scene.environment = t.cheap ? null : (r.look ? r.envs[r.look] || null : null);
+  } else r.progPending = true;
+  // from here on nothing changes a shader program
+  const pt = TIERS[r.progQ == null ? r.quality : r.progQ];
   TEX_ANISO = Math.min(t.aniso, r.renderer.capabilities.getMaxAnisotropy());
   ALL_TEX.forEach((tx) => { if (tx.anisotropy !== TEX_ANISO) { tx.anisotropy = TEX_ANISO; tx.needsUpdate = true; } });
-  QUAL.forEach((m) => { m.castShadow = t.shadow && r.quality >= 3; });
-  r.renderer.shadowMap.enabled = t.shadow; r.key.castShadow = t.shadow;
-  if (r.key.shadow.mapSize.x !== t.map) { r.key.shadow.mapSize.set(t.map, t.map); if (r.key.shadow.map) { r.key.shadow.map.dispose(); r.key.shadow.map = null; } }
+  if (pt.shadow && r.key.shadow.mapSize.x !== t.map) { r.key.shadow.mapSize.set(t.map, t.map); if (r.key.shadow.map) { r.key.shadow.map.dispose(); r.key.shadow.map = null; } }
   r.S.crowd.count = Math.floor(r.S.crowdN * t.crowd); r.S.crowd.visible = t.crowd > 0;
   r.S.glarePts.visible = !t.lite; r.S.phonePts.visible = !t.lite; r.S.city.count = t.lite ? 110 : r.S.cityN;
   r.skyU.uCloudOn.value = t.lite ? 0 : 1;
-  r.fill.visible = !t.lite; r.flashL.visible = r.quality >= 2;
   FX.density = t.fx;
   if (VFX) VFX.setQuality(r.quality);
   r.C.skidOn = r.quality >= 1 && !(r.soft && !r.lockQ); r.C.skid.visible = r.C.skidOn;
-  r.C.blob.material.opacity = t.shadow ? 0.5 : 0.85;
-  r.scene.environment = t.cheap ? null : (r.look ? r.envs[r.look] : null);
-  r.hemi.intensity = (r.look ? LOOKS[r.look].hemiI : 0.9) * (t.cheap ? 1.7 : 1);
-  r.key.intensity = (r.look ? LOOKS[r.look].keyI : 3) * (t.cheap ? 0.9 : 1);
+  r.C.blob.material.opacity = pt.shadow ? 0.5 : 0.85;
+  r.hemi.intensity = (r.look ? LOOKS[r.look].hemiI : 0.9) * (pt.cheap ? 1.7 : 1);
+  r.key.intensity = (r.look ? LOOKS[r.look].keyI : 3) * (pt.cheap ? 0.9 : 1);
 }
 function setQuality(q) {
   if (!R3) return;
@@ -1142,7 +1283,7 @@ let ARC = null;
 function resize3D(a) {
   if (!R3 || !a) return;
   const t = TIERS[Math.max(0, R3.quality)];
-  const pr = Math.min(a.dpr * t.px, Math.sqrt(t.budget / Math.max(1, a.w * a.h)));
+  const pr = Math.min(a.dpr * t.px, Math.sqrt(t.budget / Math.max(1, a.w * a.h))) * (R3.rs || 1);
   R3.renderer.setPixelRatio(Math.max(0.3, pr));
   R3.renderer.setSize(a.w, a.h, false);
   R3.camera.aspect = a.w / a.h; R3.camera.updateProjectionMatrix();
@@ -1163,7 +1304,20 @@ function setLook(name) {
   [r.S.cityMat].concat(r.S.nets).forEach((m) => { m.uniforms.fogColor.value.copy(fogC); m.uniforms.fogDensity.value = L.fogD; });
   r.S.cityMat.uniforms.uLit.value = L.lit;
   r.S.phones.uniforms.uOn.value = L.phones;
+  const t = TIERS[Math.max(0, r.quality)];
+  if (!t.cheap) makeEnv(name);
+  r.scene.environment = t.cheap ? null : (r.envs[name] || null);
+  r.scene.environmentIntensity = L.env;
+  r.hemi.intensity = L.hemiI * (t.cheap ? 1.7 : 1);
+  r.key.intensity = L.keyI * (t.cheap ? 0.9 : 1);
+}
+// The image based light for a look: its sky plus the four lamp banks. Made once per look, behind the menu.
+function makeEnv(name) {
+  const r = R3, L = LOOKS[name] || LOOKS.dusk;
   if (!r.envs[name]) {
+    const keep = [r.skyU.uTop.value.clone(), r.skyU.uMid.value.clone(), r.skyU.uHor.value.clone(), r.skyU.uGlow.value.clone(), r.skyU.uSun.value.clone(), r.skyU.uSunDir.value.clone(), r.skyU.uCloud.value, r.skyU.uStars.value];
+    const u = r.skyU;
+    u.uTop.value.set(L.top); u.uMid.value.set(L.mid); u.uHor.value.set(L.hor); u.uGlow.value.set(L.glow); u.uSun.value.set(L.sun); u.uCloud.value = L.cloud; u.uStars.value = L.stars; u.uSunDir.value.set(L.sunDir[0], L.sunDir[1], L.sunDir[2]).normalize();
     // image based light: this sky, plus the four lamp banks, so paint and chrome catch the floodlights
     const es = new THREE.Scene(), em = new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), r.skyMat); es.add(em);
     const lampM = new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 5.6, 5.2) });
@@ -1173,12 +1327,8 @@ function setLook(name) {
     const keepFog = r.scene.fog;
     r.envs[name] = r.pmrem.fromScene(es, 0.03, 0.1, 300).texture;
     em.geometry.dispose(); r.scene.fog = keepFog;
+    u.uTop.value.copy(keep[0]); u.uMid.value.copy(keep[1]); u.uHor.value.copy(keep[2]); u.uGlow.value.copy(keep[3]); u.uSun.value.copy(keep[4]); u.uSunDir.value.copy(keep[5]); u.uCloud.value = keep[6]; u.uStars.value = keep[7];
   }
-  const t = TIERS[Math.max(0, r.quality)];
-  r.scene.environment = t.cheap ? null : r.envs[name];
-  r.scene.environmentIntensity = L.env;
-  r.hemi.intensity = L.hemiI * (t.cheap ? 1.7 : 1);
-  r.key.intensity = L.keyI * (t.cheap ? 0.9 : 1);
 }
 
 /* ------------------------------------------------------------ the camera */
@@ -1202,7 +1352,16 @@ function camera(a, G, dt) {
   const r = R3, cam = r.camera, port = a.w / a.h < 0.85, rm = a.reducedMotion, ph = G.phase;
   const pi = G.player.id, P = G.pose.cars[pi], B = G.pose.ball;
   let fov = port ? 76 : 62, kPos = 1 - Math.exp(-dt * (rm ? 5 : 8)), kTgt = 1 - Math.exp(-dt * (rm ? 6 : 11)), snap = false;
-  if (G.cfg.attract) {
+  if (G.cfg.attract && G.showcase) {
+    // the garage: a slow turntable round your car, framed to the side of the panel
+    const C0 = G.pose.cars[0];
+    r.orbit += dt * 0.35;
+    const an = r.orbit, rad = port ? 11 : 14;
+    _cp.set(C0.x + Math.cos(an) * rad, C0.y + 2.6, C0.z + Math.sin(an) * rad);
+    const ox = port ? 0 : -Math.sin(an) * 4.6, oz = port ? 0 : Math.cos(an) * 4.6;
+    _ct.set(C0.x + ox, C0.y + (port ? -1.6 : 0.4), C0.z + oz);
+    fov = port ? 58 : 34; kPos = 1 - Math.exp(-dt * 3); kTgt = 1 - Math.exp(-dt * 4);
+  } else if (G.cfg.attract) {
     // broadcast: a slow orbit high over the stands, always on the ball
     r.orbit += dt * 0.045;
     const an = r.orbit + 0.6;
@@ -1228,13 +1387,19 @@ function camera(a, G, dt) {
     } else {
       // the goal camera, low in the corner of the net looking out at the ball
       const s = gi.side, cx = (gi.x > 0 ? -1 : 1) * (GW - 1.6);
-      _cp.set(cx, 1.6, s * (HL + GD - 1.2)); _ct.set(B.x, B.y, B.z); fov = 58;
-      if (!B.vis || R.t > R.tg) _ct.set(gi.x * 0.5, 3, s * (HL - 6));
+      if (RULE.hoops) {
+        // under the rim, looking up through the net as the ball drops in
+        _cp.set(cx * 0.5, 3.2, s * (HL - HOOP.off - 17)); _ct.set(B.x, B.y, B.z); fov = 54;
+        if (!B.vis || R.t > R.tg) _ct.set(0, HOOP.y, s * (HL - HOOP.off));
+      } else {
+        _cp.set(cx, 1.6, s * (HL + GD - 1.2)); _ct.set(B.x, B.y, B.z); fov = 58;
+        if (!B.vis || R.t > R.tg) _ct.set(gi.x * 0.5, 3, s * (HL - 6));
+      }
     }
     kPos = 1 - Math.exp(-dt * 6); kTgt = 1 - Math.exp(-dt * 14);
   } else if (ph === 'over') {
     r.orbit += dt * 0.22;
-    const R = 17, an = r.orbit + Math.PI;
+    const R = port ? 25 : 17, an = r.orbit + Math.PI;
     _cp.set(Math.sin(an) * R, 4.2 + Math.sin(r.orbit) * 1.2, -Math.cos(an) * R);
     _ct.set(0, 1.2, 0); fov = port ? 70 : 50; kPos = 1 - Math.exp(-dt * 3);
   } else if (G.player.demoT > 0 && r.demoAt) {
@@ -1269,13 +1434,13 @@ function camera(a, G, dt) {
       // the reaction shot: rise a little and turn to the goal mouth as it erupts
       const gi = G.goalInfo, k = smooth01(G.pt / 0.6);
       _cp.y += k * 3.5;
-      _ct.x = lerp(_ct.x, gi.x * 0.6, k); _ct.y = lerp(_ct.y, GH * 0.55, k); _ct.z = lerp(_ct.z, gi.side * HL, k);
+      _ct.x = lerp(_ct.x, gi.x * 0.6, k); _ct.y = lerp(_ct.y, RULE.hoops ? HOOP.y : GH * 0.55, k); _ct.z = lerp(_ct.z, gi.side * (RULE.hoops ? HL - HOOP.off : HL), k);
       kTgt = 1 - Math.exp(-dt * 5);
     }
     const kick = rm ? 0 : clamp((sp - 12) / 20, 0, 1) * 6 + (P.boost ? 4 : 0) + (P.sonic ? 3 : 0);
     fov += kick;
   }
-  keepInside(_cp, G.cfg.attract || ph === 'intro' || ph === 'introOut' || ph === 'over' ? -9999 : 1.6);
+  keepInside(_cp, (G.cfg.attract && !G.showcase) || ph === 'intro' || ph === 'introOut' || ph === 'over' ? -9999 : (ph === 'replay' || ph === 'replayOut' ? 1.2 : 3.0));
   if (!r.camInit || snap && (ph === 'replay')) { r.camPos.copy(_cp); r.camTgt.copy(_ct); r.camInit = true; }
   else if (snap) { r.camPos.copy(_cp); r.camTgt.copy(_ct); }
   else { r.camPos.lerp(_cp, kPos); r.camTgt.lerp(_ct, kTgt); }
@@ -1298,13 +1463,13 @@ function camera(a, G, dt) {
 // streaks frame the screen at supersonic, the ball draws a ribbon when it flies, and full time ends in
 // a victory shower over the pitch.
 let VFX = null, VBT = null;
-const VNI = [];
+const VNI = [], VNC = [];
 const _vp = new THREE.Vector3(), _vn = new THREE.Vector3();
 function vfxFrame(G, dt) {
   // created a few frames in, once the menu is up, so it never delays the first paint
   if (!VFX && !R3.vfxTried && (R3.vfxWait = (R3.vfxWait || 0) + 1) > 3) {
     R3.vfxTried = true;
-    try { VFX = createVFX(R3.renderer, R3.scene, R3.camera, { quality: Math.max(0, R3.quality), unit: 1, groundY: 0, soft: R3.soft }); VFX.warm(); } catch (e) { VFX = null; }
+    try { VFX = createVFX(R3.renderer, R3.scene, R3.camera, { quality: Math.max(0, R3.quality), unit: 1, groundY: 0, soft: R3.soft }); R3.renderer.setRenderTarget(drawTarget()); const w = VFX.warm(); R3.renderer.setRenderTarget(null); if (w && w.catch) w.catch(() => {}); } catch (e) { VFX = null; }
   }
   if (!VFX) return;
   const B = G.pose.ball, bs = Math.hypot(B.vx, B.vy, B.vz);
@@ -1312,8 +1477,8 @@ function vfxFrame(G, dt) {
   else if ((!B.vis || bs < 12) && VBT) { VBT.stop(); VBT = null; }
   let speed = 0;
   G.cars.forEach((c, i) => {
-    const P = G.pose.cars[i], M = R3.C.teams[c.team][c.slot];
-    if (!VNI[i] || VNI[i].obj !== M.root) { if (VNI[i]) VNI[i].stop(); VNI[i] = VFX.nitro(M.root, { offset: [0, -0.22, -2.35], color: TEAM[c.team].glow, size: 0.9 }); VNI[i].obj = M.root; }
+    const P = G.pose.cars[i], M = R3.C.cars[i], bc = boostHex(c);
+    if (!VNI[i] || VNI[i].obj !== M.root || VNC[i] !== bc) { if (VNI[i]) VNI[i].stop(); VNI[i] = VFX.nitro(M.root, { offset: [0, -0.22, -2.35], color: bc, size: 0.9 }); VNC[i] = bc; }
     VNI[i].set(P.boost && P.vis ? 1 : 0);
     if (c.isPlayer && P.vis && G.phase === 'live') speed = P.sonic ? 0.85 : P.boost ? 0.4 : 0;
   });
@@ -1321,10 +1486,41 @@ function vfxFrame(G, dt) {
   VFX.setReduced(!!(ARC && ARC.reducedMotion));
   VFX.update(dt);
 }
+// The scorer's goal explosion, from the garage: six original styles, each built from the shared library.
+const _ga = new THREE.Vector3(), _gb = new THREE.Vector3();
+function goalExplosion(d) {
+  const t = d.team, col = TEAM[t].col, glow = TEAM[t].glow, s = d.side, kind = d.explosion || 'classic';
+  const gx = RULE.hoops ? 0 : d.x, gy = RULE.hoops ? HOOP.y : Math.max(2, d.y), gz = RULE.hoops ? s * (HL - HOOP.off) : s * (HL - 1);
+  _vp.set(gx, gy, gz);
+  if (kind === 'marigold') {
+    VFX.goalBurst(_vp, { color: '#ff8a1a', color2: '#ffd23d', size: 1.3 });
+    VFX.confetti(_ga.set(gx, gy + 4, gz), { count: 260, size: 1.3, colors: ['#ff8a1a', '#ffb42a', '#ffd23d', '#fff1c0'] });
+    for (let i = 0; i < 3; i++) VFX.fireworks(_ga.set(-20 + i * 20, 46 + i * 6, s * (HL + 18)), { burst: 'peony', color: '#ff9a2a', color2: '#ffd23d', size: 1.2, launch: true, delay: 0.2 + i * 0.35 });
+  } else if (kind === 'thunder') {
+    VFX.explosion(_vp, { size: 1.6, color: '#a8d8ff' });
+    for (let i = 0; i < 3; i++) VFX.lightning(_ga.set(gx + (i - 1) * 9, 60, gz + s * 14), _gb.set(gx + (i - 1) * 3, gy, gz), { color: '#cfe6ff', size: 1.4, duration: 0.5 + i * 0.15, branches: 3 });
+    VFX.ring(_gb.set(gx, 0.2, gz - s * 4), '#bfe0ff', { size: 22, kind: 'shock' });
+    VFX.shake(0.7);
+  } else if (kind === 'monsoon') {
+    VFX.splash(_ga.set(gx, 0.3, gz - s * 3), { size: 3 });
+    VFX.ring(_gb.set(gx, 0.2, gz - s * 3), '#7ad0ff', { size: 26, kind: 'ripple' });
+    VFX.confetti(_vp, { count: 160, size: 1.1, colors: ['#2ab8ff', '#8be3ff', '#ffffff'] });
+    VFX.smokePlume(_ga.set(gx, 0.5, gz), { size: 2, duration: 2.5, color: '#9ec8e8' });
+  } else if (kind === 'diya') {
+    VFX.burst(_vp, { color: '#ffcf5a', size: 2.2 });
+    for (let i = 0; i < 5; i++) VFX.fireworks(_ga.set(-30 + i * 15, 40 + (i % 2) * 12, s * (HL + 12 + (i % 3) * 6)), { burst: i % 2 ? 'willow' : 'crackle', color: '#ffcf5a', color2: '#ff7a2a', size: 1.1, launch: true, delay: 0.1 + i * 0.25 });
+  } else if (kind === 'nova') {
+    VFX.explosion(_vp, { size: 2.6, color: glow });
+    VFX.ring(_ga.set(gx, gy, gz), '#ffffff', { size: 30, kind: 'shock', normal: _gb.set(0, 0, -s) });
+    VFX.ring(_ga.set(gx, 0.2, gz), glow, { size: 34, kind: 'shock' });
+    VFX.fireworks(_ga.set(0, 70, s * (HL + 20)), { burst: 'ring', color: '#ffffff', color2: glow, size: 1.8 });
+    VFX.shake(0.9);
+  } else VFX.goalBurst(_vp, { color: col, color2: glow, size: 1.4 });
+}
 function fx(type, d, G) {
   if (!FX || !R3 || R3.lost) return;
   if (VFX) {
-    if (type === 'goal') { _vp.set(d.x, Math.max(2, d.y), d.side * (HL - 1)); VFX.goalBurst(_vp, { color: TEAM[d.team].col, color2: TEAM[d.team].glow, size: 1.4 }); VFX.timeWarp(0.35, 1.4); }
+    if (type === 'goal') { goalExplosion(d); if (!d.train) VFX.timeWarp(0.35, 1.4); }
     else if (type === 'demo') { _vp.set(d.x, d.y, d.z); VFX.explosion(_vp, { size: 1.5, color: '#ffb060' }); }
     else if (type === 'hit' && d.k > 0.55) { _vp.set(d.x, d.y, d.z); _vn.set(d.x - d.car.p.x, d.y - d.car.p.y, d.z - d.car.p.z).normalize(); VFX.impact(_vp, _vn, { kind: 'spark', color: TEAM[d.car.team].glow, size: 0.8 + d.k }); VFX.ring(_vp, TEAM[d.car.team].glow, { size: 2 + d.k * 3, normal: _vn, kind: 'shock' }); }
     else if (type === 'end') { _vp.set(0, 10, 0); VFX.winBurst(_vp, { colors: [TEAM[d.team == null ? 0 : d.team].col, '#ffd36a', '#ffffff'], size: 1.6 }); }
@@ -1343,13 +1539,17 @@ function fx(type, d, G) {
   } else if (type === 'goal') {
     const t = d.team, col = TEAM[t].col, glow = TEAM[t].glow, s = d.side;
     R3.flash = 0.55; R3.flashCol.set(glow); R3.excite = 1; R3.exAge = 0; R3.exTeam = t;
-    R3.flashL.position.set(d.x, Math.max(2, d.y), s * (HL - 2)); R3.flashL.color.set(glow); R3.flashL.intensity = 4000;
-    burst(d.x, Math.max(2, d.y), s * (HL - 1), 280, 22, [col, glow, '#ffffff', '#ffd36a'], 6, 4.2);
+    const bz = RULE.hoops ? d.z : s * (HL - 1), by = Math.max(2, d.y);
+    R3.flashL.position.set(d.x, by, RULE.hoops ? d.z : s * (HL - 2)); R3.flashL.color.set(glow); R3.flashL.intensity = 4000;
+    burst(d.x, by, bz, 280, 22, [col, glow, '#ffffff', '#ffd36a'], 6, 4.2);
     sparks(d.x, d.y, d.z, 120, 28, '#fff2cc', 1.1);
-    smoke(d.x, d.y, s * (HL - 1), 14, glow, 2.2);
-    shockAt(0, GH / 2, s * (HL - 0.4), 0, 0, -s, glow, 34, 1.1);
-    shockAt(0, GH / 2, s * (HL - 0.6), 0, 0, -s, '#ffffff', 22, 0.8);
-    const m = R3.S.nets[s > 0 ? 1 : 0]; m.uniforms.uHit.value.set(d.x, d.y, s * (HL + GD)); m.uniforms.uT.value = 0; m.uniforms.uAmp.value = 1.6;
+    smoke(d.x, d.y, bz, 14, glow, 2.2);
+    if (RULE.hoops) { shockAt(0, HOOP.y, s * (HL - HOOP.off), 0, 1, 0, glow, 20, 1.0); shockAt(0, 0.2, s * (HL - HOOP.off), 0, 1, 0, '#ffffff', 26, 1.1); }
+    else {
+      shockAt(0, GH / 2, s * (HL - 0.4), 0, 0, -s, glow, 34, 1.1);
+      shockAt(0, GH / 2, s * (HL - 0.6), 0, 0, -s, '#ffffff', 22, 0.8);
+      const m = R3.S.nets[s > 0 ? 1 : 0]; m.uniforms.uHit.value.set(d.x, d.y, s * (HL + GD)); m.uniforms.uT.value = 0; m.uniforms.uAmp.value = 1.6;
+    }
     // fireworks over the stand behind the goal
     R3.fireworks = [{ at: 0.2, x: -24, z: s * (HL + 26) }, { at: 0.55, x: 22, z: s * (HL + 22) }, { at: 0.9, x: 0, z: s * (HL + 34) }, { at: 1.3, x: -10, z: s * (HL + 18) }].map((f) => Object.assign(f, { col: [col, glow, '#ffffff'] }));
     R3.fwT = 0;
@@ -1377,6 +1577,7 @@ function fx(type, d, G) {
     sparks(d.x, d.y, d.z, 10 + d.k * 20, 8, '#ffe0a0', 0.4);
   } else if (type === 'end') {
     R3.excite = 1; R3.exAge = 0; R3.exTeam = d.team == null ? -1 : d.team; R3.endT = 0; R3.endTeam = d.team;
+    R3.mvpAt = d.mvp ? 1.4 : 0; R3.mvp = d.mvp || null; R3.mvpT = 0;
   }
 }
 
@@ -1390,7 +1591,9 @@ function frame(a, G, dt) {
   poseCars(r.C, G, r.time);
   // ball
   const B = G.pose.ball, bm = r.B.ball;
-  bm.visible = B.vis; bm.position.set(B.x, B.y, B.z); bm.quaternion.set(B.q[0], B.q[1], B.q[2], B.q[3]);
+  if (RULE.puck) { const pk = r.B.puck; bm.visible = false; pk.visible = B.vis; pk.position.set(B.x, B.y, B.z); pk.quaternion.set(B.q[0], B.q[1], B.q[2], B.q[3]); }
+  else { bm.visible = B.vis; r.B.puck.visible = false; }
+  bm.position.set(B.x, B.y, B.z); bm.quaternion.set(B.q[0], B.q[1], B.q[2], B.q[3]);
   r.ballGlow = Math.max(0, (r.ballGlow || 0) - dt * 2.4);
   if (r.ballShader) r.ballShader.uniforms.uGlow.value = 0.7 + r.ballGlow + clamp(Math.hypot(B.vx, B.vy, B.vz) / 40, 0, 1) * 0.6;
   const onPitch = Math.abs(B.x) < PW && Math.abs(B.z) < PL + (Math.abs(B.x) < GW ? 20 : 0);
@@ -1412,7 +1615,7 @@ function frame(a, G, dt) {
           _v1.set(k ? -0.35 : 0.35, -0.22, -2.4); _v2.set(P.fx, P.fy, P.fz); _v3.set(P.ux, P.uy, P.uz);
           const rx = _v3.y * _v2.z - _v3.z * _v2.y, ry = _v3.z * _v2.x - _v3.x * _v2.z, rz = _v3.x * _v2.y - _v3.y * _v2.x;
           const x = P.x + rx * _v1.x + _v3.x * _v1.y + _v2.x * _v1.z, y = P.y + ry * _v1.x + _v3.y * _v1.y + _v2.y * _v1.z, z = P.z + rz * _v1.x + _v3.z * _v1.y + _v2.z * _v1.z;
-          FX.emit('add', x, y, z, -P.fx * 8 + rand(1.2), -P.fy * 8 + rand(1.2), -P.fz * 8 + rand(1.2), 0.22 + Math.random() * 0.1, 0.38, Math.random() < 0.5 ? '#ffb347' : TEAM[c.team].glow, 0.9, -1, 2, -0.6);
+          FX.emit('add', x, y, z, -P.fx * 8 + rand(1.2), -P.fy * 8 + rand(1.2), -P.fz * 8 + rand(1.2), 0.22 + Math.random() * 0.1, 0.38, Math.random() < 0.5 ? (BOOST_COL[c.boostCol] ? '#ffffff' : '#ffb347') : boostHex(c), 0.9, -1, 2, -0.6);
           if (Math.random() < 0.25) FX.emit('soft', x, y, z, -P.fx * 3 + rand(1), 0.6, -P.fz * 3 + rand(1), 0.9, 0.7, '#8a8590', 0.18, -0.3, 1.5, 2.5);
         }
       }
@@ -1446,6 +1649,17 @@ function frame(a, G, dt) {
     if (G.phase === 'over' && chance(1)) for (let i = 0; i < 3; i++) FX.emit('conf', rand(30), 22 + Math.random() * 4, rand(30), rand(2), -1, rand(2), 6, 0.45, [TEAM[G.winner == null ? 0 : G.winner].col, '#ffd36a', '#ffffff'][i], 1, 1.2, 0.6, 0);
     FX.update(dt, a.h * r.renderer.getPixelRatio() * 0.5 / Math.tan(r.camera.fov * Math.PI / 360));
   }
+  // the MVP moment on the podium: a burst and a warm key light over their car
+  if (G.phase === 'over' && r.mvp && r.mvp.demoT <= 0) {
+    r.mvpT += dt;
+    const m = r.mvp;
+    if (r.mvpAt && r.mvpT >= r.mvpAt) { r.mvpAt = 0; if (VFX) { _vp.set(m.p.x, 1.5, m.p.z); VFX.burst(_vp, { color: '#ffd36a', size: 1.6 }); VFX.ring(_vp.set(m.p.x, 0.15, m.p.z), '#ffd36a', { size: 8, kind: 'energy' }); } }
+    if (r.mvpT > 1.4 && r.flashL.visible) { r.flashL.position.set(m.p.x, 7, m.p.z + 3); r.flashL.color.set('#ffe2b0'); r.flashL.intensity = Math.max(r.flashL.intensity, 700); }
+  } else if (G.phase !== 'over') r.mvp = null;
+  // snow falling over the rink, round the camera
+  if (FX && RULE.puck && t.fx > 0.5 && !a.reducedMotion) {
+    for (let i = 0; i < 2; i++) if (chance(0.9)) FX.emit('soft', r.camera.position.x + rand(70), r.camera.position.y + 18 + Math.random() * 12, r.camera.position.z + rand(70), rand(1.4), -2.2 - Math.random(), rand(1.4), 7, 0.22 + Math.random() * 0.14, '#f4f8ff', 0.75, 0.4, 0.6, 0);
+  }
   // shockwaves
   r.shock.forEach((s) => {
     if (s.t > s.dur) { s.m.visible = false; return; }
@@ -1465,6 +1679,7 @@ function frame(a, G, dt) {
   r.C.flameMat.uniforms.uTime.value = r.time;
   r.skyU.uTime.value = r.time;
   updatePads(r.pads, G, r.time);
+  if (RULE.hoops && S.rims) { const k = RULE.hoopR / HOOP.r; if (S.rims[0].scale.x !== k) S.rims.forEach((m) => m.scale.set(k, 1, k)); }
   camera(a, G, dt);
   r.sky.position.copy(r.camera.position);
   const scale = a.h * r.renderer.getPixelRatio() * 0.5 / Math.tan(r.camera.fov * Math.PI / 360);
@@ -1478,9 +1693,14 @@ function measureFps(dt) {
   const r = R3;
   if (r.qWarm < 6) { r.qWarm++; return; }
   r.qT += dt; r.qN++;
-  if (r.qT >= 1.2) {
+  if (r.qT >= 0.8) {
     r.fps = r.qN / r.qT; r.qT = 0; r.qN = 0;
-    if (!r.lockQ && r.fps < 38 && r.quality > 0) { setQuality(r.fps < 18 ? Math.max(0, r.quality - 2) : r.quality - 1); r.qWarm = 0; }
+    if (r.lockQ) return;
+    // dynamic resolution first: shave the pixel count, and give it back when there is room
+    const rs = r.rs || 1;
+    if (r.fps < 50 && rs > 0.62) { r.rs = Math.max(0.62, rs - (r.fps < 34 ? 0.14 : 0.07)); resize3D(ARC); }
+    else if (r.fps > 58 && rs < 1) { r.rs = Math.min(1, rs + 0.04); resize3D(ARC); }
+    else if (r.fps < 36 && rs <= 0.62 && r.quality > 0) { r.rs = 0.85; setQuality(r.fps < 18 ? Math.max(0, r.quality - 2) : r.quality - 1); r.qWarm = 0; }
   }
 }
 const view = {
@@ -1502,9 +1722,14 @@ const view = {
   graphics(level) { if (!R3) return; if (level === 'auto') { R3.lockQ = false; return; } R3.lockQ = true; setQuality(level === 'sharp' ? 3 : 1); },
   newMatch(G, a) {
     const r = R3; if (!r) return;
-    setLook(G.cfg.sky === 'night' ? 'night' : 'dusk');
+    setLook(G.cfg.sky === 'snow' ? 'snow' : G.cfg.sky === 'night' ? 'night' : 'dusk');
     applyTier();
     if (!r.pads) { r.pads = buildPads(r.scene, G); applyTier(); }
+    dressCars(G);
+    setVariant(G);
+    r.G = G;
+    applyTier(true);
+
     if (!G.cfg.attract) { FX.clear(); r.camInit = false; r.demoAt = null; r.fireworks = null; r.orbit = 0; }
     r.hd.set(G.player.f.x, G.player.f.z);
     r.qWarm = 0;
@@ -1520,6 +1745,32 @@ const view = {
       return false;
     }
     measureFps(dtRaw);
+    R3.G = G;
+    if (r.progPending && !inPlay()) applyTier(true);
+    // once the menu has settled, compile the arenas, the puck and every paint finish in the background
+    // (parallel shader compile), so the first Hoops match or a garage paint never hitches
+    if (!r.preTried && G.cfg.attract && (r.preN = (r.preN || 0) + 1) > 120) {
+      r.preTried = true;
+      try {
+        r.C.swatch.visible = true; r.S.hoopGrp.visible = true; r.S.coverGrp.visible = true; r.B.puck.visible = true;
+        // parallel compile where the driver offers it; otherwise one synchronous compile now, behind the menu
+        // compiled for the target the frame really draws into (the post pass's scene target when post is on),
+        // or the programs would be built for the canvas and built again at the first real draw
+        const par = r.renderer.extensions && r.renderer.extensions.has('KHR_parallel_shader_compile');
+        r.renderer.setRenderTarget(drawTarget());
+        const pr = par && r.renderer.compileAsync ? r.renderer.compileAsync(r.scene, r.camera) : (r.renderer.compile(r.scene, r.camera), null);
+        r.renderer.setRenderTarget(null);
+        if (pr && pr.then) pr.then(() => { r.preShadow = true; }, () => { r.preShadow = true; }); else r.preShadow = true;
+      } catch (e) { r.preShadow = true; /* compiled when first drawn instead */ }
+      r.C.swatch.visible = false; setVariant(G);
+    } else if (r.preShadow && G.cfg.attract) {
+      // once the programs exist, draw one hidden frame with the arenas and the puck in it, so their shadow
+      // passes are built too (compile() does not build shadow programs); the real frame draws over it
+      r.preShadow = false;
+      try { r.S.hoopGrp.visible = true; r.S.coverGrp.visible = true; r.B.puck.visible = true; r.renderer.setRenderTarget(drawTarget()); r.renderer.render(r.scene, r.camera); r.renderer.setRenderTarget(null); } catch (e) { /* drawn later instead */ }
+      setVariant(G);
+    }
+    if (G.cfg.attract && r.preTried && !r.envDone && r.preN > 150) { r.preN++; const want = ['dusk', 'night', 'snow'].find((k) => !r.envs[k]); if (!want) r.envDone = true; else if (r.preN % 20 === 0) { try { makeEnv(want); } catch (e) { r.envDone = true; } } }
     frame(a, G, a.state === 'pause' ? 0 : dt);
     view.camPos.copy(r.camera.position);
     return true;

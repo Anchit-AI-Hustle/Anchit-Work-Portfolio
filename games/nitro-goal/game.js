@@ -7,12 +7,13 @@
 (function () {
   'use strict';
   import('/games/nitro-goal/core.js').then(function (M) {
-    var HW = M.HW, HL = M.HL, RC = M.RC, GW = M.GW, GH = M.GH, GD = M.GD, BR = M.BR, TEAM = M.TEAM, TAU = M.TAU, clamp = M.clamp, lerp = M.lerp;
+    var HW = M.HW, HL = M.HL, RC = M.RC, GW = M.GW, GH = M.GH, GD = M.GD, BR = M.BR, TEAM = M.TEAM, TAU = M.TAU, clamp = M.clamp, lerp = M.lerp, RULE = M.RULE, HOOP = M.HOOP, PUCK = M.PUCK, BOOST_COL = M.BOOST_COL;
     var PW = HW - RC, PL = HL - RC;
     var ARC = null, cam = { x: 0, z: 0, s: 8, init: false }, parts = [], flash = 0, W = 0, H = 0;
     var LOOK = {
       dusk: { bg0: '#2a1f3a', bg1: '#0d0b14', turf: '#2f6b2a', ramp: '#3a3d46', glow: '#ff8a4a' },
-      night: { bg0: '#0d1430', bg1: '#05060c', turf: '#2a6126', ramp: '#30333b', glow: '#4a6ad8' }
+      night: { bg0: '#0d1430', bg1: '#05060c', turf: '#2a6126', ramp: '#30333b', glow: '#4a6ad8' },
+      snow: { bg0: '#1a2a4c', bg1: '#060b1a', turf: '#dfeefa', ramp: '#6c7a92', glow: '#9ab8ff' }
     };
     var look = LOOK.dusk;
     // world to screen: the team-0 attacking direction (+z) points up the screen
@@ -47,6 +48,16 @@
       // goals
       [0, 1].forEach(function (t) {
         var s = t === 0 ? -1 : 1, zf = s * HL, zb = s * (HL + GD);
+        if (RULE.hoops) {
+          // the shutter over the closed goal, and the hoop over the end
+          g.fillStyle = look.ramp; g.fillRect(sx(GW), Math.min(sy(s * PL), sy(zf)), sx(-GW) - sx(GW), Math.abs(sy(zf) - sy(s * PL)));
+          g.strokeStyle = TEAM[t].col; g.lineWidth = 2; g.beginPath(); g.moveTo(sx(GW), sy(zf)); g.lineTo(sx(-GW), sy(zf)); g.stroke();
+          var hz = s * (HL - HOOP.off);
+          g.beginPath(); g.ellipse(sx(0), sy(hz), HOOP.r * cam.s * 0.9, HOOP.r * cam.s * 0.9, 0, 0, TAU); g.fillStyle = 'rgba(255,255,255,0.06)'; g.fill();
+          g.beginPath(); g.ellipse(sx(0), sy(hz, HOOP.y), HOOP.r * cam.s, HOOP.r * cam.s, 0, 0, TAU);
+          g.strokeStyle = TEAM[t].col; g.lineWidth = Math.max(3, HOOP.tube * 2 * cam.s); g.shadowColor = TEAM[t].col; g.shadowBlur = 14; g.stroke(); g.shadowBlur = 0;
+          return;
+        }
         g.fillStyle = t === 0 ? '#3a2a1c' : '#1c2a36'; g.fillRect(sx(GW), Math.min(sy(zf), sy(zb)), sx(-GW) - sx(GW), Math.abs(sy(zb) - sy(zf)));
         g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 1;
         for (var k = -GW; k <= GW; k += 1.4) { g.beginPath(); g.moveTo(sx(k), sy(zf)); g.lineTo(sx(k), sy(zb)); g.stroke(); }
@@ -98,6 +109,15 @@
     }
     function drawBall(g, P, t) {
       if (!P.vis) return;
+      if (RULE.puck) {
+        var pr = PUCK.r * cam.s, px = sx(P.x), py = sy(P.z, P.y);
+        g.beginPath(); g.ellipse(px + 2, py + 3, pr, pr * 0.9, 0, 0, TAU); g.fillStyle = 'rgba(0,0,0,0.3)'; g.fill();
+        g.beginPath(); g.arc(px, py, pr, 0, TAU); g.fillStyle = '#1b1d22'; g.fill();
+        g.strokeStyle = '#6ad4ff'; g.lineWidth = Math.max(2, cam.s * 0.25); g.stroke();
+        var ang = 2 * Math.atan2(P.q[1], P.q[3]);
+        g.save(); g.translate(px, py); g.rotate(-ang); g.fillStyle = '#ffe9a8'; g.fillRect(-0.15 * cam.s, -pr * 0.55, 0.3 * cam.s, pr * 1.1); g.restore();
+        return;
+      }
       var r = BR * cam.s * (1 + P.y * 0.02);
       g.beginPath(); g.ellipse(sx(P.x) + P.y * 0.6, sy(P.z) + P.y * 0.5, BR * cam.s, BR * cam.s * 0.85, 0, 0, TAU); g.fillStyle = 'rgba(0,0,0,' + clamp(0.4 - P.y * 0.015, 0.08, 0.4) + ')'; g.fill();
       var x = sx(P.x), y = sy(P.z, P.y);
@@ -144,6 +164,7 @@
       init: function (a) { ARC = a; return true; },
       resize: function () {},
       newMatch: function (G) { look = LOOK[G.cfg.sky] || LOOK.dusk; parts.length = 0; cam.init = false; },
+      // snow over the rink, drawn as drifting flakes
       render: function (a, G, g) {
         W = a.w; H = a.h;
         var dt = a.state === 'pause' ? 0 : 1 / 60;
@@ -156,7 +177,8 @@
         order.forEach(function (i) { drawCar(g, G.cars[i], G.pose.cars[i]); });
         if (ballHigh) drawBall(g, B, a.time);
         // boost trails and supersonic streaks
-        G.cars.forEach(function (c, i) { var P = G.pose.cars[i]; if (P.vis && P.boost && Math.random() < 0.7) emit(P.x - P.fx * 2.4, P.y, P.z - P.fz * 2.4, -P.fx * 6 + (Math.random() - 0.5) * 2, 0.5, -P.fz * 6 + (Math.random() - 0.5) * 2, 0.35, 0.3, Math.random() < 0.5 ? '#ffb347' : TEAM[c.team].glow); });
+        G.cars.forEach(function (c, i) { var P = G.pose.cars[i]; if (P.vis && P.boost && Math.random() < 0.7) emit(P.x - P.fx * 2.4, P.y, P.z - P.fz * 2.4, -P.fx * 6 + (Math.random() - 0.5) * 2, 0.5, -P.fz * 6 + (Math.random() - 0.5) * 2, 0.35, 0.3, Math.random() < 0.5 ? '#ffb347' : (BOOST_COL[c.boostCol] || TEAM[c.team].glow)); });
+        if (RULE.puck && !a.reducedMotion) { g.fillStyle = 'rgba(240,246,255,0.7)'; for (var k = 0; k < 60; k++) { var fx = ((k * 97.3 + a.time * (18 + k % 7)) % (W + 20)) - 10, fy = ((k * 53.1 + a.time * (40 + k % 11)) % (H + 20)) - 10; g.fillRect(fx, fy, 2, 2); } }
         drawParts(g);
         if (flash > 0 && !a.reducedMotion) { g.fillStyle = 'rgba(255,255,255,' + flash * 0.35 + ')'; g.fillRect(0, 0, W, H); }
         var vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
