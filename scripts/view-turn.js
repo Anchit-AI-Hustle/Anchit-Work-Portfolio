@@ -248,6 +248,22 @@ const check = (ok, label, detail) => {
       check(mid.warp === 'block', `${name}: the warp fires on the route change`, mid.warp);
       await pg.waitForTimeout(900);
       check(await pg.evaluate(() => getComputedStyle(document.getElementById('fdWarp')).display) === 'none', `${name}: the warp is gone once it has played`);
+      // The arrival: the destination's name is written in dust, then leaves
+      // nothing behind. Drawing is counted at the source (a WebGL canvas read
+      // back is blank), and a held frame is asked for, since a software
+      // renderer is too slow to catch one mid-air.
+      const form = await pg.evaluate(() => ({ ...window.__form }));
+      check(form.plays >= 1 && form.word.length > 1 && form.points >= 500, `${name}: the destination's name is written in dust on arrival`, JSON.stringify(form));
+      await pg.waitForTimeout(1300);
+      const after = await pg.evaluate(() => ({ cv: getComputedStyle(document.getElementById('fdForm')).display, dim: getComputedStyle(document.getElementById('fdFormDim')).display, draws: window.__form.draws }));
+      check(after.cv === 'none' && after.dim === 'none' && after.draws >= 2, `${name}: the word and its dimmer are gone once it has played`, JSON.stringify(after));
+      const held = await pg.evaluate(() => {
+        const ok = window.__formAt('now', 0.5), dim = document.getElementById('fdFormDim');
+        const r = { ok, word: window.__form.word, dim: +getComputedStyle(dim).opacity, hit: document.elementFromPoint(innerWidth / 2, innerHeight * 0.44).id };
+        window.__formStop();
+        return r;
+      });
+      check(held.ok && /now/i.test(held.word) && held.dim > 0.9 && held.hit !== 'fdForm' && held.hit !== 'fdFormDim', `${name}: mid-flight the page is dimmed behind the word and still takes clicks`, JSON.stringify(held));
     }
     await pg.keyboard.press('Control+k');
     await pg.waitForTimeout(300);
@@ -523,6 +539,7 @@ const check = (ok, label, detail) => {
     await po.evaluate(() => window.switchView('contact'));
     await po.waitForTimeout(3500);
     check(await po.evaluate(() => [...document.querySelectorAll('.lv-beam > i')].every(i => i.getAnimations().length === 0)), 'live edges: nothing animates with Motion off');
+    check(await po.evaluate(() => window.__form.plays === 0 && getComputedStyle(document.getElementById('fdForm')).display === 'none'), 'arrival word: never plays with Motion off');
     await off.close();
     for (const [href, want] of [['/freelancer', true], ['/growth-school', true], ['/deli-chic/', false]]) {
       const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });

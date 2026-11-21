@@ -14995,6 +14995,16 @@
   /* ── warp ── */
   #fdWarp { position: fixed; inset: 0; z-index: 59; pointer-events: none; display: none; width: 100%; height: 100%; }
   html[data-motion="off"] #fdWarp { display: none !important; }
+  /* The arrival: the destination's name gathers out of loose gold dust, holds
+     for a breath and blows away. One WebGL draw call for the whole thing, and
+     the canvas only exists on screen for the second and a half it plays. */
+  #fdForm { position: fixed; inset: 0; z-index: 58; pointer-events: none; display: none; width: 100%; height: 100%; }
+  /* The page steps back while the word is written, so gold dust is read
+     against dark and not against a paragraph. Opacity only. */
+  #fdFormDim { position: fixed; inset: 0; z-index: 57; pointer-events: none; display: none; opacity: 0;
+    background: radial-gradient(120% 90% at 50% 44%, color-mix(in srgb, var(--bg) 94%, transparent) 0 46%, color-mix(in srgb, var(--bg) 70%, transparent) 100%); }
+  html[data-motion="off"] #fdFormDim, html[data-ambient="still"] #fdFormDim, html[data-lean] #fdFormDim { display: none !important; }
+  html[data-motion="off"] #fdForm, html[data-ambient="still"] #fdForm, html[data-lean] #fdForm { display: none !important; }
 
   /* ── rail ── */
   .fd-rail {
@@ -15091,6 +15101,8 @@
   }
 </style>
 <canvas id="fdWarp" aria-hidden="true"></canvas>
+<div id="fdFormDim" aria-hidden="true"></div>
+<canvas id="fdForm" aria-hidden="true"></canvas>
 <div class="fd-rail" id="fdRail" aria-hidden="true">
   <span class="fd-rail-txt fd-rail-sector" data-fd-sector></span>
   <span class="fd-rail-line"></span>
@@ -15313,6 +15325,144 @@
       t0 = performance.now();
       raf = requestAnimationFrame(frame);
     });
+  })();
+
+  /* ── form: the name of where you have arrived, written in dust ────────── */
+  // Every point knows where it starts (anywhere on screen), where it belongs
+  // (a pixel of the word) and when it leaves. The whole flight is worked out
+  // in the vertex shader from one number, the time, so script does nothing per
+  // point and the page pays for one draw call per frame while it plays.
+  (function form() {
+    var cv = document.getElementById('fdForm');
+    if (!cv) return;
+    var gl = null, prog = null, buf = null, uT = null, uRes = null, uSize = null, count = 0, raf = 0, t0 = 0, dead = false;
+    var D = 1350, stat = { plays: 0, draws: 0, points: 0, word: '' };
+    window.__form = stat;
+    var VS = 'attribute vec2 aFrom;attribute vec2 aTo;attribute vec3 aR;uniform float uT;uniform vec2 uRes;uniform float uSize;varying float vA;varying float vHot;' +
+      'void main(){' +
+      // gather: each point sets off a little late and eases in; drift: it never sits dead still; leave: up and away, in a gust from the left.
+      'float g=clamp((uT-aR.x*0.16)/0.36,0.0,1.0);g=1.0-pow(1.0-g,3.0);' +
+      'float l=clamp((uT-0.60-aR.y*0.14)/0.26,0.0,1.0);l=l*l;' +
+      'vec2 p=mix(aFrom,aTo,g);' +
+      'p+=vec2(sin(uT*9.0+aR.z*40.0),cos(uT*7.0+aR.x*40.0))*1.4*g*(1.0-l);' +
+      'p+=vec2((0.25+aR.z)*uRes.x*0.22,-(0.3+aR.x)*uRes.y*0.2)*l;' +
+      'vA=min(g*1.6,1.0)*(1.0-l)*(0.45+0.55*aR.z);vHot=step(0.86,aR.y);' +
+      'gl_Position=vec4(p/uRes*2.0-1.0,0.0,1.0);gl_Position.y=-gl_Position.y;' +
+      'gl_PointSize=uSize*(0.7+aR.z*1.5)*(1.0+l*1.5);}';
+    var FS = 'precision mediump float;varying float vA;varying float vHot;uniform vec3 uGold;uniform vec3 uHot;' +
+      'void main(){float d=length(gl_PointCoord-0.5);float a=smoothstep(0.5,0.0,d);' +
+      'gl_FragColor=vec4(mix(uGold,uHot,vHot)*a*vA,a*vA);}';
+    function rgb(v) {
+      var c = document.createElement('canvas').getContext('2d'); c.fillStyle = v || '#FFB736'; c.fillRect(0, 0, 1, 1);
+      var d = c.getImageData(0, 0, 1, 1).data; return [d[0] / 255, d[1] / 255, d[2] / 255];
+    }
+    function setup() {
+      try { gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' }); } catch (e) { gl = null; }
+      if (!gl) { dead = true; return false; }
+      function sh(type, src) { var o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; }
+      prog = gl.createProgram();
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { dead = true; return false; }
+      gl.useProgram(prog);
+      buf = gl.createBuffer();
+      uT = gl.getUniformLocation(prog, 'uT'); uRes = gl.getUniformLocation(prog, 'uRes'); uSize = gl.getUniformLocation(prog, 'uSize');
+      gl.uniform3fv(gl.getUniformLocation(prog, 'uGold'), rgb(css('--accent-warm')));
+      gl.uniform3fv(gl.getUniformLocation(prog, 'uHot'), rgb(css('--ink')));
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+      cv.addEventListener('webglcontextlost', function (e) { e.preventDefault(); gl = null; stop(); });
+      return true;
+    }
+    var dim = document.getElementById('fdFormDim'), dimAnim = null;
+    function stop() {
+      if (raf) cancelAnimationFrame(raf); raf = 0; cv.style.display = 'none';
+      if (dimAnim) { dimAnim.cancel(); dimAnim = null; }
+      if (dim) dim.style.display = 'none';
+    }
+    function wordFor(view) {
+      var w = navLabel(/^project-/.test(view) ? '' : view);
+      if (!w) {
+        var h = document.querySelector('#view-' + view + ' h1, #view-' + view + ' h2');
+        w = h ? h.textContent.replace(/\s+/g, ' ').trim() : '';
+      }
+      if (w.length > 22) w = w.split(' ').slice(0, 2).join(' ');
+      return w.length > 22 ? '' : w;
+    }
+    function play(view) {
+      if (dead || motionOff() || root.getAttribute('data-ambient') === 'still' || root.hasAttribute('data-lean')) return;
+      var word = wordFor(view);
+      if (!word) return;
+      if (!gl && !setup()) return;
+      var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var main = document.querySelector('main'), mr = main ? main.getBoundingClientRect() : { left: 0, width: W };
+      var left = Math.max(0, mr.left), room = Math.min(W - left, mr.width);
+      // The word, drawn once off screen in the page's own display face, is the
+      // map of where the dust belongs.
+      var oc = document.createElement('canvas'), ox = oc.getContext('2d'), fam = css('--font-display') || css('--font-serif') || 'Fraunces, Georgia, serif';
+      var fs = Math.min(H * 0.24, 220);
+      ox.font = '600 ' + fs + 'px ' + fam;
+      fs = Math.max(34, Math.min(fs, fs * (room * 0.86) / Math.max(1, ox.measureText(word).width)));
+      oc.width = Math.ceil(room); oc.height = Math.ceil(fs * 1.5);
+      ox.font = '600 ' + fs + 'px ' + fam; ox.textAlign = 'center'; ox.textBaseline = 'middle'; ox.fillStyle = '#fff';
+      ox.fillText(word, oc.width / 2, oc.height / 2);
+      var img;
+      try { img = ox.getImageData(0, 0, oc.width, oc.height).data; } catch (e) { return; }
+      var spots = [], step = W < 700 ? 2 : 3;
+      for (var y = 0; y < oc.height; y += step) for (var x = 0; x < oc.width; x += step) if (img[(y * oc.width + x) * 4 + 3] > 120) spots.push(x, y);
+      var have = spots.length / 2;
+      if (have < 60) return;
+      count = Math.min(have, W < 700 ? 2600 : 7000);
+      var top = H * 0.44 - oc.height / 2, data = new Float32Array(count * 7), skip = have / count;
+      for (var i = 0; i < count; i++) {
+        var k = Math.floor(i * skip) * 2, a = Math.random() * 6.283, far = (0.25 + Math.random() * 0.6) * Math.max(W, H);
+        data[i * 7] = left + room / 2 + Math.cos(a) * far;        // from: a ring of loose dust around the page
+        data[i * 7 + 1] = H * 0.44 + Math.sin(a) * far * 0.7;
+        data[i * 7 + 2] = left + spots[k] + (Math.random() - 0.5) * step;
+        data[i * 7 + 3] = top + spots[k + 1] + (Math.random() - 0.5) * step;
+        data[i * 7 + 4] = Math.random(); data[i * 7 + 5] = Math.random(); data[i * 7 + 6] = Math.random();
+      }
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      gl.viewport(0, 0, cv.width, cv.height);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+      var names = ['aFrom', 'aTo', 'aR'], sizes = [2, 2, 3], off = 0;
+      for (var n = 0; n < 3; n++) {
+        var loc = gl.getAttribLocation(prog, names[n]);
+        gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, sizes[n], gl.FLOAT, false, 28, off); off += sizes[n] * 4;
+      }
+      gl.uniform2f(uRes, W, H); gl.uniform1f(uSize, (W < 700 ? 2.4 : 3.0) * dpr);
+      stat.plays++; stat.points = count; stat.word = word;
+      if (raf) cancelAnimationFrame(raf);
+      cv.style.display = 'block';
+      if (dim && dim.animate) {
+        if (dimAnim) dimAnim.cancel();
+        dim.style.display = 'block';
+        dimAnim = dim.animate([{ opacity: 0 }, { opacity: 1, offset: 0.2 }, { opacity: 1, offset: 0.66 }, { opacity: 0 }], { duration: D, easing: 'ease-in-out' });
+      }
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+    function frame(now) {
+      if (!gl) return stop();
+      var p = Math.min(1, (now - t0) / D);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(uT, p);
+      gl.drawArrays(gl.POINTS, 0, count); stat.draws++;
+      if (p < 1) raf = requestAnimationFrame(frame);
+      else { gl.clear(gl.COLOR_BUFFER_BIT); stop(); }
+    }
+    document.addEventListener('viewChanged', function (e) { play(String((e && e.detail) || '')); });
+    // One still frame at a chosen point of the flight, for the suites and for
+    // screenshots: a software renderer is too slow to be caught mid-air.
+    window.__formAt = function (view, p) {
+      play(view);
+      if (!raf) return false;
+      cancelAnimationFrame(raf); raf = 0;
+      if (dimAnim) { dimAnim.pause(); dimAnim.currentTime = D * p; }
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(uT, p); gl.drawArrays(gl.POINTS, 0, count); stat.draws++;
+      return true;
+    };
+    window.__formStop = stop;
   })();
 
   /* ── rail: sector, depth, time ────────────────────────────────────────── */
