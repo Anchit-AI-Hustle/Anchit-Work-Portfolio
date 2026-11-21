@@ -14907,52 +14907,47 @@
   /* Light: three pools of champagne, ember and gold, drifting across each other. */
   .lux-glow { width: 78vmax; height: 78vmax; border-radius: 50%; }
   .lux-a { left: -18vmax; top: -30vmax;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-warm) 26%, transparent), transparent 72%);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-warm) 9%, transparent), transparent 70%);
     animation: luxA 47s ease-in-out infinite alternate; }
   .lux-b { right: -26vmax; top: 8vmax;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 7%, transparent), transparent 68%);
     animation: luxB 61s ease-in-out infinite alternate; }
   .lux-c { left: 18vmax; bottom: -46vmax;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 24%, transparent), transparent 72%);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%);
     animation: luxC 73s ease-in-out infinite alternate; }
   @keyframes luxA { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(22vmax, 16vmax, 0) scale(1.18); } }
   @keyframes luxB { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-26vmax, 14vmax, 0) scale(.9); } }
   @keyframes luxC { from { transform: translate3d(-10vmax, 0, 0) scale(.92); } to { transform: translate3d(18vmax, -20vmax, 0) scale(1.14); } }
 
   /* Orbit lines: two hairline rings, one carrying a point of light. */
-  .lux-ring { left: 58%; top: 44%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent-warm) 20%, transparent); }
+  .lux-ring { left: 58%; top: 44%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent-warm) 13%, transparent); }
   .lux-r1 { width: 96vmin; height: 96vmin; margin: -48vmin 0 0 -48vmin; animation: luxSpin 120s linear infinite; }
   .lux-r1::after { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%;
     background: var(--accent-warm); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--accent-warm) 70%, transparent); }
   .lux-r2 { width: 132vmin; height: 132vmin; margin: -66vmin 0 0 -66vmin; border-style: dashed;
-    border-color: color-mix(in srgb, var(--primary) 16%, transparent); animation: luxSpin 180s linear infinite reverse; }
+    border-color: color-mix(in srgb, var(--accent-warm) 9%, transparent); animation: luxSpin 180s linear infinite reverse; }
   @keyframes luxSpin { to { transform: rotate(360deg); } }
 
   /* Dust in depth: far dust is small and slow, near dust larger and quicker.
      Each sheet is exactly one tile taller than the screen and rises by exactly
      one tile, so the loop has no seam. */
   .lux-dust { left: 0; right: 0; top: 0; }
-  .lux-d1 { height: calc(100% + 720px); opacity: .7;
-    background-image:
-      radial-gradient(circle, color-mix(in srgb, var(--accent-warm) 80%, transparent) 0 1px, transparent 1.6px),
-      radial-gradient(circle, color-mix(in srgb, var(--ink) 60%, transparent) 0 .8px, transparent 1.4px);
-    background-size: 220px 240px, 340px 360px; background-position: 30px 60px, 170px 20px;
-    animation: luxRise1 96s linear infinite; }
-  .lux-d2 { height: calc(100% + 480px);
-    background-image:
-      radial-gradient(circle, color-mix(in srgb, var(--accent-warm) 95%, transparent) 0 1.6px, transparent 2.6px),
-      radial-gradient(circle, color-mix(in srgb, var(--primary) 80%, transparent) 0 1.2px, transparent 2.2px);
-    background-size: 420px 480px, 560px 240px; background-position: 90px 130px, 310px 40px;
-    animation: luxRise2 52s linear infinite, luxTwinkle 7s ease-in-out infinite alternate; }
-  @keyframes luxRise1 { to { transform: translate3d(0, -720px, 0); } }
-  @keyframes luxRise2 { to { transform: translate3d(0, -480px, 0); } }
-  @keyframes luxTwinkle { from { opacity: .35; } to { opacity: .9; } }
+  /* The specks are scattered by script into one sprite per sheet (see
+     lux-dust in the flight deck script). Tiled CSS dots sat in a visible
+     lattice, which is the cheapest-looking thing a backdrop can do. */
+  .lux-d1 { height: calc(100% + 1024px); opacity: .55; background-size: 1024px 1024px;
+    animation: luxRise1 120s linear infinite; }
+  .lux-d2 { height: calc(100% + 1024px); background-size: 1024px 1024px;
+    animation: luxRise2 70s linear infinite, luxTwinkle 9s ease-in-out infinite alternate; }
+  @keyframes luxRise1 { to { transform: translate3d(0, -1024px, 0); } }
+  @keyframes luxRise2 { to { transform: translate3d(0, -1024px, 0); } }
+  @keyframes luxTwinkle { from { opacity: .3; } to { opacity: .75; } }
 
   /* Foil: a band of light crosses the room, then the room rests. */
-  .lux-sheen { top: -30vh; left: 0; width: 34vw; height: 160vh; opacity: 0;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-warm) 11%, transparent) 46%,
-      color-mix(in srgb, var(--ink) 9%, transparent) 50%, color-mix(in srgb, var(--accent-warm) 11%, transparent) 54%, transparent);
-    animation: luxSheen 17s cubic-bezier(.45, 0, .2, 1) infinite; }
+  .lux-sheen { top: -30vh; left: 0; width: 10vw; height: 160vh; opacity: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-warm) 5%, transparent) 44%,
+      color-mix(in srgb, var(--accent-warm) 22%, transparent) 50%, color-mix(in srgb, var(--accent-warm) 5%, transparent) 56%, transparent);
+    animation: luxSheen 23s cubic-bezier(.45, 0, .2, 1) infinite; }
   @keyframes luxSheen {
     0% { transform: translate3d(-60vw, 0, 0) rotate(16deg); opacity: 0; }
     8% { opacity: 1; }
@@ -15157,6 +15152,31 @@
     return el.textContent.replace(/\s+/g, ' ').trim();
   };
   var navLabel = function (view) { return labelOf(document.querySelector('.sidebar-item[data-view="' + view + '"]')); };
+
+  /* ── lux-dust: scatter the specks once ────────────────────────────────── */
+  // One 1024px sprite per sheet, drawn a single time. Positions are random
+  // and wrap at the edges, so the tile has no seam and no lattice.
+  window.__dustSprite = function (count, maxR, tones, seed) {
+    var c = document.createElement('canvas'); c.width = c.height = 1024;
+    var x = c.getContext('2d'); if (!x) return '';
+    var r = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (var i = 0; i < count; i++) {
+      var px = r() * 1024, py = r() * 1024, rad = 0.35 + r() * r() * maxR, al = 0.25 + r() * 0.75;
+      x.fillStyle = tones[(r() * tones.length) | 0]; x.globalAlpha = al;
+      for (var dx = -1024; dx <= 1024; dx += 1024) for (var dy = -1024; dy <= 1024; dy += 1024) {
+        if (px + dx < -4 || px + dx > 1028 || py + dy < -4 || py + dy > 1028) continue;
+        x.beginPath(); x.arc(px + dx, py + dy, rad, 0, 6.2832); x.fill();
+      }
+    }
+    try { return 'url(' + c.toDataURL('image/png') + ')'; } catch (e) { return ''; }
+  };
+  (function dust() {
+    var d1 = document.querySelector('.lux-d1'), d2 = document.querySelector('.lux-d2');
+    if (!d1 || motionOff()) return;
+    var gold = css('--accent-warm') || '#FFB736', ink = css('--ink') || '#FBF5EC', champ = css('--accent') || '#c9a96e';
+    d1.style.backgroundImage = window.__dustSprite(150, 1.0, [champ, ink, gold], 7);
+    if (d2) d2.style.backgroundImage = window.__dustSprite(46, 1.9, [gold, champ], 131);
+  })();
 
   /* ── orbit: the main destinations circle the portrait ─────────────────── */
   (function orbit() {

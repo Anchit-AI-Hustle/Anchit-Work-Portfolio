@@ -431,6 +431,23 @@ const check = (ok, label, detail) => {
     const offAgain = await pf.evaluate(() => { const r = document.querySelector('.cin-room'); return !r || getComputedStyle(r).display === 'none'; });
     check(!before && on && offAgain, '/freelancer: the room follows the Motion switch in both directions after load', JSON.stringify({ before, on, offAgain }));
     await cf.close();
+
+    // The room follows a page's own theme switch: gone on light, back on dark.
+    const pt = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pt.goto(BASE + '/lifecycle-os', { waitUntil: 'load' });
+    await pt.waitForTimeout(3000);
+    const shown = () => pt.evaluate(() => { const r = document.querySelector('.cin-room'); return !!r && getComputedStyle(r).display !== 'none'; });
+    const theme = () => pt.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    const t0 = await theme(), dark0 = await shown();
+    const btn = pt.locator('button:has-text("Theme")').first();
+    await btn.click();
+    await pt.waitForTimeout(1500);
+    const t1 = await theme(), light = await shown();
+    await btn.click();
+    await pt.waitForTimeout(1500);
+    const dark1 = await shown();
+    check(dark0 && t1 !== t0 && !light && dark1, '/lifecycle-os: the room hides on the light theme and returns on dark', JSON.stringify({ t0, t1, dark0, light, dark1 }));
+    await pt.close();
   }
 
   // Motion off, saved on the origin, must hold on the incoming page before its
