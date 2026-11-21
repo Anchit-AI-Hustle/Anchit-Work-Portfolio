@@ -40,12 +40,12 @@ function chosenClass() {
 /* ------------------------------------------------------------ input */
 const MOUSE = { left: false, right: false, leftHit: false, dx: 0, dy: 0, lx: null, ly: null, wheel: 0, lockLostAt: -1e9 };
 const TOUCH = { move: null, look: null, mx: 0, mz: 0, ldx: 0, ldy: 0, tap: false, hold: false, aim: false, crouch: false, lean: 0 };
-const PADS = { sprint: false, l3: false, r3: false, lb: false, rb: false, y: 0, yUsed: false, lean: 0 };
+const PADS = { sprint: false, l3: false, r3: false, lb: false, rb: false, y: 0, yUsed: false, lean: 0, yDown: false };
 const HOLD = { c: 0, cProne: false };
 const locked = () => !!ARC && document.pointerLockElement === ARC.canvas;
 function requestLock() { if (!ARC || ARC.touchMode || locked() || (VIEW && VIEW.flat)) return; try { const p = ARC.canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* not here */ } }
 function releaseLock() { try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { /* fine */ } }
-function clearInput() { MOUSE.left = MOUSE.right = MOUSE.leftHit = false; MOUSE.dx = MOUSE.dy = MOUSE.wheel = 0; TOUCH.move = TOUCH.look = null; TOUCH.mx = TOUCH.mz = TOUCH.ldx = TOUCH.ldy = 0; TOUCH.tap = TOUCH.hold = false; TOUCH.aim = false; TOUCH.crouch = false; TOUCH.lean = 0; PADS.lean = 0; HOLD.c = 0; }
+function clearInput() { MOUSE.left = MOUSE.right = MOUSE.leftHit = false; MOUSE.dx = MOUSE.dy = MOUSE.wheel = 0; TOUCH.move = TOUCH.look = null; TOUCH.mx = TOUCH.mz = TOUCH.ldx = TOUCH.ldy = 0; TOUCH.tap = TOUCH.hold = false; TOUCH.aim = false; TOUCH.crouch = false; TOUCH.lean = 0; PADS.lean = 0; PEND = null; HOLD.c = 0; }
 function wireInput(a) {
   const cv = a.canvas;
   cv.addEventListener('mousedown', (e) => {
@@ -127,12 +127,14 @@ function gatherInput(a, dt) {
   // a controller: right stick looks, bumpers throw, clicks sprint and strike, a held Y calls a streak
   const gp = a.gamepad ? firstPad() : null;
   let padLook = false;
+  PADS.yDown = false;
   if (gp) {
     const dz = (v) => (Math.abs(v) < 0.14 ? 0 : Math.sign(v) * Math.pow((Math.abs(v) - 0.14) / 0.86, 1.7));
     const rx = dz(gp.axes[2] || 0), ry = dz(gp.axes[3] || 0);
     if (rx || ry) { padLook = true; I.lx += rx * 3.2 * dt / zoom; I.ly += ry * 2.4 * dt / zoom; }
     const b = (i) => !!(gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
     const l3 = b(10), r3 = b(11), lb = b(4), rb = b(5), y = b(3);
+    PADS.yDown = y;
     if (l3 && !PADS.l3) PADS.sprint = !PADS.sprint;
     if (r3 && !PADS.r3) I.meleeHit = true;
     I.fragDown = lb;
@@ -164,7 +166,8 @@ function gatherInput(a, dt) {
   if (gp && PADS.lean) I.lean = PADS.lean;
   if (a.touchMode) { if (inp.hit('KeyL')) TOUCH.lean = TOUCH.lean === 0 ? 1 : TOUCH.lean === 1 ? -1 : 0; if (TOUCH.lean) I.lean = TOUCH.lean; if (Math.hypot(I.mx, I.mz) > 0.6) TOUCH.lean = 0; }
   if (inp.hit('Digit1')) I.weaponTo = 0; if (inp.hit('Digit2')) I.weaponTo = 1;
-  if (inp.hit('KeyY') || inp.hit('Tab') && false) I.nextWeapon = true;
+  // a controller's Y switches on its release (a tap) and calls a streak when held; the KeyY the shell sends for it is not a second switch
+  if (inp.hit('KeyY') && !PADS.yDown) I.nextWeapon = true;
   if (MOUSE.wheel) { I.nextWeapon = true; MOUSE.wheel = 0; }
   if (inp.down('KeyG') || inp.down('KeyN')) I.fragDown = true;
   if (inp.hit('KeyX')) I.tacHit = true;
@@ -444,10 +447,27 @@ function debugState() {
 /* ------------------------------------------------------------ the loop */
 let acc = 0;
 const STEP = 1 / 60;
+// the one frame presses; on a screen faster than 60 Hz a frame can run no fixed step, so these wait for the next frame that does
+const EDGES = ['fireHit', 'reloadHit', 'jumpHit', 'crouchHit', 'proneHit', 'tacHit', 'useHit', 'meleeHit', 'nextWeapon', 'skip', 'streak_drone', 'streak_supply', 'streak_mortar'];
+let PEND = null;
+function holdOver(I) {
+  if (!PEND) PEND = { lx: 0, ly: 0, weaponTo: -1 };
+  PEND.lx += I.lx || 0; PEND.ly += I.ly || 0;
+  for (const k of EDGES) if (I[k]) PEND[k] = true;
+  if (I.weaponTo >= 0) PEND.weaponTo = I.weaponTo;
+}
+function takeOver(I) {
+  if (!PEND) return;
+  I.lx = (I.lx || 0) + PEND.lx; I.ly = (I.ly || 0) + PEND.ly;
+  for (const k of EDGES) if (PEND[k]) I[k] = true;
+  if (I.weaponTo < 0 && PEND.weaponTo >= 0) I.weaponTo = PEND.weaponTo;
+  PEND = null;
+}
 function advance(a, dt, I) {
   // fixed steps; the look and the one frame presses go to the first one only
   W.slow = W.phase === 'final' ? 0.3 : (W.downCam && !W.P.alive && W.downCam.t < 0.8 && W.kind === 'mp') ? 0.5 : 1;
   acc += dt * W.slow;
+  if (I) { if (acc >= STEP) takeOver(I); else holdOver(I); }
   let n = 0;
   while (acc >= STEP && n < 13) {
     S.step(W, STEP, n === 0 || !I ? I : Object.assign({}, I, { lx: 0, ly: 0, fireHit: false, reloadHit: false, jumpHit: false, crouchHit: false, proneHit: false, tacHit: false, useHit: false, meleeHit: false, weaponTo: -1, nextWeapon: false, skip: false, streak_drone: false, streak_supply: false, streak_mortar: false }));
