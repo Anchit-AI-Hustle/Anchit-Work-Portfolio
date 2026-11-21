@@ -58,8 +58,8 @@ func heading(_ title:String,_ dates:String,_ y:inout CGFloat){
 func richBullet(_ lead:String,_ rest:String,_ y:inout CGFloat,_ size:CGFloat=9.5,_ draws:Bool=true)->CGFloat{
  let a=NSMutableAttributedString(attributedString:attr(lead+" ",.sansBold,size,ink));a.append(attr(rest,.sans,size,dim))
  let h=measure(a,CW-12)
- if draws{fill(orange,CGRect(x:M+1.5,y:y+4.6,width:3.4,height:3.4));draw(a,M+12,y,CW-12);y+=h+3.2}
- return h+3.2
+ if draws{fill(orange,CGRect(x:M+1.5,y:y+4.6,width:3.4,height:3.4));draw(a,M+12,y,CW-12);y+=h+2.6}
+ return h+2.6
 }
 func plainBullet(_ s:String,_ y:inout CGFloat,_ draws:Bool=true)->CGFloat{
  let a=attr(s,.sans,9.2,dim);let h=measure(a,CW-12)
@@ -107,7 +107,7 @@ for (i,w) in wins.enumerated(){
  text(w["title"]!.uppercased(),x+10,y+30,cardW-20,.monoBold,6.6,ink,nil,0.6)
  text(w["text"]!,x+10,y+39.5,cardW-14,.sans,7.4,dim)
 }
-y+=cardH+8
+y+=cardH+7
 // secondary metrics line
 let ms=NSMutableAttributedString()
 for (i,m) in (content["metrics"] as! [[String]]).enumerated(){
