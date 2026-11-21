@@ -116,6 +116,136 @@ const check = (ok, label, detail) => {
     const got = await nav.evaluate(() => sessionStorage.getItem('vt:' + location.pathname));
     check(got === 'yes', `page turn runs on navigation to ${href}`, String(got));
   }
+  // Entrances outlive the first four seconds. The shared runtime used to bail
+  // on a timer, which switched off every entrance below the fold before anyone
+  // scrolled to it: the first screen performed and the rest of the page sat.
+  for (const href of ['/', '/lifecycle-os']) {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + href, { waitUntil: 'load' });
+    await pg.waitForTimeout(6000);
+    const before = await pg.evaluate(() => ({
+      bail: document.documentElement.classList.contains('cin-bail'),
+      played: document.querySelectorAll('.cin-in').length,
+      waiting: document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)').length }));
+    check(!before.bail, `${href}: entrances are not switched off after six seconds`);
+    check(before.waiting > 0, `${href}: blocks below the fold are still waiting for their entrance`, String(before.waiting));
+    for (let i = 0; i < 4; i++) { await pg.mouse.wheel(0, 700); await pg.waitForTimeout(500); }
+    await pg.waitForTimeout(1500);
+    const after = await pg.evaluate(() => ({
+      played: document.querySelectorAll('.cin-in').length,
+      stuck: [...document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)')].filter(e => {
+        const r = e.getBoundingClientRect(); return r.height > 0 && r.top < innerHeight && r.bottom > 0; }).length }));
+    check(after.played > before.played, `${href}: scrolling plays new entrances`, `${before.played} -> ${after.played}`);
+    check(after.stuck === 0, `${href}: nothing on screen is left unrevealed`, String(after.stuck));
+    await pg.close();
+  }
+
+  // The Projects book turns a real, two-sided page. What it replaced was a
+  // blank flap rotating with no perspective while the pages slid sideways.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = [];
+    pg.on('pageerror', e => errors.push(e.message));
+    await pg.goto(BASE + '/#projects', { waitUntil: 'load' });
+    await pg.waitForTimeout(3200);
+    await pg.mouse.move(1100, 500);
+    await pg.keyboard.press('ArrowRight');
+    await pg.waitForTimeout(1300);
+    await pg.keyboard.press('ArrowRight');
+    // Wait for the turn to be under way rather than for a fixed delay: on a
+    // loaded machine the first animation frame can land late, and a leaf at
+    // exactly 0deg reports a 2D matrix.
+    await pg.waitForFunction(() => {
+      const l = document.querySelector('.folio-leaf');
+      return l && getComputedStyle(l).transform.startsWith('matrix3d');
+    }, null, { timeout: 2000 }).catch(() => {});
+    const mid = await pg.evaluate(() => {
+      const st = document.querySelector('.folio-stage'), l = document.querySelector('.folio-leaf'), c = document.querySelector('.folio-cover');
+      const g = document.querySelector('.builds-grid[data-folio]');
+      // Any page will do for size: every page in a spread is half the grid.
+      const right = g.children[2];
+      return l && c && right ? {
+        persp: getComputedStyle(st).perspective, faces: l.querySelectorAll('.folio-face').length,
+        is3d: getComputedStyle(l).transform.startsWith('matrix3d'),
+        aligned: Math.abs(l.offsetWidth - right.offsetWidth) < 2 && Math.abs(l.offsetHeight - right.offsetHeight) < 2 && Math.abs(c.offsetTop - l.offsetTop) < 2,
+        bothFilled: [...l.querySelectorAll('.folio-face')].every(f => f.querySelector('.build-card, .folio-preface, .folio-colophon')),
+      } : null;
+    });
+    check(!!mid, 'book: a leaf and a cover exist mid-turn');
+    if (mid) {
+      check(mid.persp !== 'none', 'book: the stage has a camera', mid.persp);
+      check(mid.faces === 2 && mid.bothFilled, 'book: the leaf has two faces and both carry a real page', JSON.stringify(mid));
+      check(mid.is3d, 'book: the leaf is rotating in 3D');
+      check(mid.aligned, 'book: leaf and cover match the pages they stand in for');
+    }
+    await pg.waitForTimeout(1400);
+    const end = await pg.evaluate(() => {
+      const g = document.querySelector('.builds-grid[data-folio]');
+      const on = [...g.children].filter(k => { const x = k.offsetLeft - g.scrollLeft; return x > -3 && x < g.clientWidth - 3; });
+      return { leftover: document.querySelectorAll('.folio-leaf,.folio-cover,.folio-cast').length,
+        label: document.querySelector('[data-folio-progress]').textContent,
+        level: on.length === 2 && Math.abs(on[0].getBoundingClientRect().top - on[1].getBoundingClientRect().top) < 2 };
+    });
+    check(end.leftover === 0, 'book: nothing is left on the stage after the turn', String(end.leftover));
+    check(/4.5 of/.test(end.label), 'book: two turns land on the third spread', end.label);
+    check(errors.length === 0, 'book: no script errors', errors.slice(0, 2).join(' | '));
+    await pg.close();
+  }
+
+  // The flight deck: orbit, warp, command deck, rail. Each is checked for what
+  // it does, not that it exists: the orbit once had all four nodes pinned to
+  // one point by another script's fill mode, and looked fine in the markup.
+  for (const [name, width, height] of [['phone', 390, 844], ['tablet', 820, 1180], ['desktop', 1440, 900]]) {
+    const pg = await browser.newPage({ viewport: { width, height } });
+    const errors = [];
+    pg.on('pageerror', e => errors.push(e.message));
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(6500);
+    const orbit = await pg.evaluate(() => {
+      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2) }; });
+      return { n: ns.length, spread: new Set(ns.map(n => n.x)).size, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
+        clean: ns.every(n => n.t.length < 14), overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
+    check(orbit.inside, `${name}: every orbit node is on screen`);
+    check(orbit.clean, `${name}: orbit labels are the nav names, not name plus caption`);
+    check(orbit.overflow <= 1, `${name}: the orbit causes no horizontal overflow`, String(orbit.overflow));
+    const near = await pg.evaluate(() => {
+      for (const n of document.querySelectorAll('.fd-node:not(.is-far)')) {
+        const r = n.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+        if (document.elementFromPoint(x, y) === n) return { x, y, h: r.height };
+      }
+      return null;
+    });
+    check(!!near, `${name}: a near orbit node is the topmost thing where it sits`);
+    if (near) {
+      await pg.mouse.click(near.x, near.y);
+      await pg.waitForTimeout(250);
+      const mid = await pg.evaluate(() => ({ view: document.querySelector('.view.active').id, warp: getComputedStyle(document.getElementById('fdWarp')).display }));
+      check(mid.view !== 'view-home', `${name}: clicking an orbit node changes the route`, mid.view);
+      check(mid.warp === 'block', `${name}: the warp fires on the route change`, mid.warp);
+      await pg.waitForTimeout(900);
+      check(await pg.evaluate(() => getComputedStyle(document.getElementById('fdWarp')).display) === 'none', `${name}: the warp is gone once it has played`);
+    }
+    await pg.keyboard.press('Control+k');
+    await pg.waitForTimeout(300);
+    const deck = await pg.evaluate(() => ({ open: document.getElementById('fdDeck').classList.contains('is-open'), focus: document.activeElement.id,
+      groups: [...document.querySelectorAll('.fd-group')].map(g => g.textContent), items: document.querySelectorAll('.fd-item').length }));
+    check(deck.open && deck.focus === 'fdInput', `${name}: Ctrl+K opens the command deck with the field focused`, JSON.stringify(deck));
+    check(deck.groups.length === 3 && deck.items > 10, `${name}: the deck lists pages, projects and contact channels`, JSON.stringify(deck));
+    await pg.keyboard.type('now');
+    await pg.keyboard.press('Enter');
+    await pg.waitForTimeout(800);
+    const went = await pg.evaluate(() => ({ open: document.getElementById('fdDeck').classList.contains('is-open'), view: document.querySelector('.view.active').id,
+      sector: document.querySelector('[data-fd-sector]').textContent }));
+    check(!went.open && went.view === 'view-now', `${name}: typing and Enter in the deck opens that page`, JSON.stringify(went));
+    check(/Now/i.test(went.sector), `${name}: the rail names the current sector`, went.sector);
+    await pg.keyboard.press('Control+k'); await pg.waitForTimeout(200); await pg.keyboard.press('Escape'); await pg.waitForTimeout(150);
+    check(!(await pg.evaluate(() => document.getElementById('fdDeck').classList.contains('is-open'))), `${name}: Escape closes the deck`);
+    check(errors.length === 0, `${name}: the flight deck throws nothing`, errors.slice(0, 2).join(' | '));
+    await pg.close();
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {

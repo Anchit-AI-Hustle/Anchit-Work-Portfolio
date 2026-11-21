@@ -707,6 +707,17 @@
 
   function bail() { root.classList.add('cin-bail'); }
 
+  // Play anything unrevealed that is on screen or already above it. A block
+  // the observer never reported is otherwise invisible for good; a block still
+  // below the fold is left alone, because its entrance has not been earned yet.
+  function rescue() {
+    document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;      // not rendered: nothing to rescue
+      if (r.top < innerHeight) play(el);
+    });
+  }
+
   // ── horizontal rails ──────────────────────────────────────────────────
   // Mixed into the vertical flow, but only where the content earns it. An
   // analysis across the tool pages found almost nothing qualifies: they are
@@ -1217,8 +1228,22 @@
       try { observe(); enrich(); initSurfaces(); initSpecular(); initMagnetic(); } catch (e) {}
     };
 
-    // Hard deadline. Whatever happened, nothing stays invisible.
-    setTimeout(bail, 4000);
+    // Deadline, and then a standing watch. Nothing stays invisible, but only
+    // what is STUCK gets forced, and only where the visitor can see it.
+    //
+    // This used to be `setTimeout(bail, 4000)`. bail() puts a class on <html>
+    // that sets opacity:1, transform:none and transition:none on EVERY .cin on
+    // the page, so four seconds after load every entrance further down was
+    // switched off before anyone had scrolled to it. The page looked finished
+    // and felt dead: the choreography ran for the first screen and never
+    // again, on every page that loads this file. bail() is still the answer to
+    // a thrown error or a missing IntersectionObserver; it is not a timer.
+    setTimeout(rescue, 4000);
+    var watch = 0;
+    addEventListener('scroll', function () {
+      if (watch) return;
+      watch = setTimeout(function () { watch = 0; rescue(); }, 420);
+    }, { passive: true });
   }
 
   if (document.readyState === 'loading') {
