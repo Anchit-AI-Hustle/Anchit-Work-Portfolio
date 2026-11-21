@@ -49,7 +49,7 @@
 <main class="wrap">
   <div class="eyebrow">Legal</div>
   <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: 30 October 2026</p>
+  <p class="updated">Last updated: 21 November 2026</p>
   <p class="lede">This is a personal portfolio run by one person. It is not a company, it sells nothing, and it has no advertising. This page describes exactly what the site stores and what leaves your browser, no more and no less.</p>
 
   <div class="card">
@@ -58,6 +58,7 @@
       <li>No account, no sign-up and no tracking profile is needed to read anything here.</li>
       <li>One cookie is set, and only to remember whether you collapsed the sidebar.</li>
       <li>If you use the chatbot, what you type is sent to an AI provider to produce a reply.</li>
+      <li>If you play a game, your score goes on a public leaderboard under a nickname, tied to a random id your browser made up. No name, email or account is involved.</li>
       <li>Nothing is sold, rented or shared for advertising.</li>
     </ul>
   </div>
@@ -78,7 +79,7 @@
   <p>It holds a single digit, <code>0</code> or <code>1</code>. It contains no identifier, it is not read by anyone else, and it is set <code>SameSite=Lax</code> so it is not sent from other sites. Because it only stores a display choice you made yourself, it is a strictly functional cookie and does not require consent.</p>
 
   <h2>Things stored in your browser</h2>
-  <p>The site also uses your browser's local storage for preferences. This data never leaves your device and is not readable by this site's server:</p>
+  <p>The site also uses your browser's local storage for preferences. Apart from the game leaderboard id and nickname (described under "Game leaderboards and live play" below), this data never leaves your device and is not readable by this site's server:</p>
   <table>
     <tr><th>Key</th><th>What it remembers</th></tr>
     <tr><td><code>anchit-theme</code></td><td>Light or dark theme</td></tr>
@@ -92,6 +93,9 @@
     <tr><td><code>signaldesk:state</code>, <code>sd:missed</code>, <code>gs-growth-school</code></td><td>Your progress, quiz answers and notes in the Marketing 101 and Growth School courses</td></tr>
     <tr><td><code>howto-notes:&hellip;</code></td><td>Notes you wrote on a How-To guide step</td></tr>
     <tr><td><code>freelancer-motion</code></td><td>Whether you turned animation off on the freelance page</td></tr>
+    <tr><td><code>arcade.prefs</code>, <code>arcade.muted</code>, <code>arcade.best.&hellip;</code>, <code>arcade.played.&hellip;</code>, <code>arcade.lb.period</code></td><td>Your game settings, sound, personal best per game, how many times you played, and which leaderboard period you last looked at</td></tr>
+    <tr><td><code>arcade.net.id</code></td><td>A random id your browser made up for the games' leaderboards and live rooms. It is sent with your scores (see below), it is never shown to other players, and it says nothing about who you are</td></tr>
+    <tr><td><code>arcade.net.nick</code>, <code>arcade.net.asked</code></td><td>The nickname you chose for the game leaderboards, and whether you were already asked for one</td></tr>
     <tr><td><code>anchit-auth-user</code></td><td><strong>If you sign in with Google on a page that offers it: your name, email address and profile picture</strong>, so you stay signed in</td></tr>
     <tr><td><code>jobhunt-profile:&lt;your email&gt;</code></td><td><strong>The résumé text and portfolio link you save on JobHunt</strong> (a résumé usually includes your contact details), so tailored applications can use it</td></tr>
     <tr><td><code>gram-street-orders</code>, <code>deli-chic-orders</code></td><td><strong>Orders you place on the two demo shop pages, including the name, mobile number, delivery address and any note you typed</strong>, so your order reference survives a reload. Up to the last 20.</td></tr>
@@ -109,6 +113,17 @@
   <h2>The chatbot and voice features</h2>
   <p>The chat on this site is answered by a large language model. When you send a message, <strong>the text of that message and the recent messages in the same conversation</strong> are sent to this site's own serverless function, which forwards them to an AI provider (Anthropic, and where that is unavailable, Google, Groq, Cerebras or OpenRouter) purely to generate the reply. If you use the spoken replies, the reply text is sent to a text-to-speech provider.</p>
   <p>I do not store a transcript of your conversation on any server I control. Do not type anything confidential into it, it is a demo on a portfolio, not a secure channel.</p>
+
+  <h2>Game leaderboards and live play</h2>
+  <p>The games under <a href="/games">/games</a> have worldwide leaderboards, and a few of them let you play live with other people. Both run on this site's own server (a Cloudflare Worker). When you play, this is what reaches it:</p>
+  <ul>
+    <li><strong>An anonymous id</strong>: the random value in <code>arcade.net.id</code>. It is not linked to an account, an email or a device fingerprint, and other players never see it. Clearing site data gives you a new one.</li>
+    <li><strong>A nickname</strong>: the name you chose, or a plain one such as "Player 4821" if you did not. It is shown publicly next to your scores. Names with slurs or crude words are refused.</li>
+    <li><strong>Your scores</strong>: the game, the mode, the score and when you set it. Each board keeps your best score for today, this week and all time. Daily entries are deleted after about two weeks and weekly entries after about ten weeks; all-time entries stay until a board is reset or you ask for yours to go.</li>
+    <li><strong>In a live room</strong>, what the game sends to keep everyone in sync (positions, moves, the match score) is passed to the other players in that room and kept only while the room is open. A room is deleted a short time after the last player leaves.</li>
+  </ul>
+  <p>Like every web server, it sees the network address your browser connects from. That address is used only in memory, for a few minutes, to slow down anyone flooding the boards; it is never written to storage or linked to your id. Nothing here is used for advertising or shared with anyone. If the server cannot be reached, the games play as normal with your scores kept only in your browser.</p>
+  <p>To have your scores removed, email the game, the nickname and roughly when you played to <a href="mailto:anchit.tandon@gmail.com">anchit.tandon@gmail.com</a>.</p>
 
   <h2>Analytics</h2>
   <p>If, and only if, you accept analytics in the consent banner, the site loads a privacy-preserving analytics script that records page views. It does not use cookies, does not fingerprint your device, and does not build a cross-site profile. Decline, and the script is never loaded at all.</p>
