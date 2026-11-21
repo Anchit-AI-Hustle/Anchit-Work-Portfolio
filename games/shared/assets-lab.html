@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Asset lab</title>
+<meta name="description" content="An internal test page for the shared 3D asset library of the arcade games: people, cars, buildings and nature from CC0 packs, lit and animated.">
+<link rel="canonical" href="https://anchit-tandon.com/games/shared/assets-lab">
+<meta property="og:image" content="https://anchit-tandon.com/games/og.png">
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1e24; color: #eee; font: 13px system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+  #ui { position: fixed; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+  #ui button { pointer-events: auto; background: rgba(20, 22, 28, 0.72); color: #f3f3f3; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 6px; padding: 6px 8px; font: inherit; min-height: 30px; }
+  #ui button.on { background: rgba(70, 90, 140, 0.9); }
+  #stat { position: fixed; left: 8px; bottom: 8px; background: rgba(0, 0, 0, 0.5); padding: 4px 8px; border-radius: 4px; font: 12px ui-monospace, monospace; max-width: calc(100% - 32px); }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; font: 600 15px system-ui, sans-serif; letter-spacing: 0.02em; }
+  #bar { width: min(320px, 70vw); height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  #bar i { display: block; height: 100%; width: 0; background: #d8b46a; }
+  body.shot #ui, body.shot #stat { display: none; }
+</style>
+</head>
+<body>
+<div id="ui"></div>
+<div id="stat"></div>
+<div id="load"><div>Loading the asset library<div id="bar"><i></i></div></div></div>
+<script type="module">
+import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX, contactShadow } from '/games/shared/fx3d.js';
+import * as Assets from '/games/shared/assets.js';
+
+const qs = new URLSearchParams(location.search);
+if (qs.get('shot') === '1') document.body.classList.add('shot');
+const t0 = performance.now();
+const lab = window.__lab = { ready: false, errors: [], loadMs: 0, preloadMs: 0 };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog('#c9cdd2', 60, 190);
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 500);
+const fx = createFX(renderer, {});
+
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
+sun.position.set(18, 26, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 80 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc6d6ff, 0x5a4b3c, 0.35));
+
+// What the lab shows. Everything here comes from /games/assets/catalog.json.
+const PEOPLE = ['q-people/casual-female', 'q-people/casual-male', 'q-people/suit-female', 'q-people/worker-male', 'q-people/casual3-female', 'q-people/doctor-male-old', 'q-people/chef-female', 'q-people/casual2-male'];
+const CARS = ['kenney-cars/sedan', 'kenney-cars/taxi', 'kenney-cars/police', 'kenney-cars/suv-luxury', 'q-cars/race-car', 'kenney-cars/delivery'];
+const NAMES = [...PEOPLE, 'q-people/anims', 'q-base-characters/male', 'q-base-characters/female', 'q-base-characters/hair-simple-parted', 'q-base-characters/hair-long',
+  'q-anim-library/ual1', 'q-anim-library-2/ual2', ...CARS, 'q-downtown/building-large-2', 'q-downtown/building-medium-2-001', 'q-downtown/building-small-1', 'kenney-city/building-skyscraper-a',
+  'q-nature/common-tree-2', 'q-nature/pine-2', 'q-nature/bush-common-flowers', 'q-nature/rock-medium-1', 'ph-models/namaqualand-boulder-05', 'ph-models/fire-hydrant', 'ph-models/street-lamp-01',
+  'ph-models/painted-wooden-bench', 'ph-models/metal-trash-can', 'q-farm-animals/horse', 'q-animals/dog', 'q-scifi/gun-rifle', 'q-scifi/prop-crate-large', 'q-crowd/male-sitting-cheering',
+  'q-crowd/woman-standing-waving', 'kenney-nature/tree-oak'];
+
+const bar = document.querySelector('#bar i');
+const people = [];
+const cs = contactShadow(scene, { max: 64, size: 0.9, opacity: 0.55, fade: 1.2 });
+
+async function build() {
+  const tp = performance.now();
+  const res = await Assets.preload(NAMES, (p) => { bar.style.width = (p * 100).toFixed(1) + '%'; });
+  lab.preloadMs = Math.round(performance.now() - tp);
+  if (res.failed.length) lab.errors.push('failed: ' + res.failed.join(', '));
+
+  await Assets.environment(renderer, scene, qs.get('env') || 'day', { background: true, blur: 0.04, intensity: 1 });
+
+  // ground: paving in the middle, grass around
+  const grass = await Assets.material('grass', { repeat: [40, 40], renderer });
+  const g = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), grass); g.rotation.x = -Math.PI / 2; g.receiveShadow = true; scene.add(g);
+  const pave = await Assets.material('paving', { repeat: [9, 5], renderer });
+  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(40, 16), pave); plaza.rotation.x = -Math.PI / 2; plaza.position.set(0, 0.01, 4); plaza.receiveShadow = true; scene.add(plaza);
+  const road = await Assets.material('asphalt', { repeat: [14, 2], renderer });
+  const rd = new THREE.Mesh(new THREE.PlaneGeometry(60, 9), road); rd.rotation.x = -Math.PI / 2; rd.position.set(0, 0.012, -8.5); rd.receiveShadow = true; scene.add(rd);
+
+  const put = (obj, x, z, ry, s) => { if (!obj) return null; obj.position.set(x, 0, z); obj.rotation.y = ry || 0; if (s) obj.scale.multiplyScalar(s); scene.add(obj); return obj; };
+
+  // buildings behind
+  put(Assets.get('q-downtown/building-large-2'), -16, -26, 0);
+  put(Assets.get('q-downtown/building-medium-2-001'), 9, -24, 0);
+  put(Assets.get('q-downtown/building-small-1'), 26, -22, 0);
+  put(Assets.get('kenney-city/building-skyscraper-a'), -38, -34, 0);
+
+  // nature
+  [[-20, 2, 1], [19, 0, 0.9], [-26, 10, 1.1], [25, 9, 1]].forEach(([x, z, s], i) => put(Assets.get(i % 2 ? 'q-nature/pine-2' : 'q-nature/common-tree-2'), x, z, i, s));
+  [[-15, 10], [15, 11], [-12, -3], [12, -3.5]].forEach(([x, z], i) => put(Assets.get('q-nature/bush-common-flowers'), x, z, i * 1.3));
+  put(Assets.get('ph-models/namaqualand-boulder-05'), -16, 6, 0.6, 1.4);
+  put(Assets.get('q-nature/rock-medium-1'), 16, 6, 1.2, 1);
+  const oaks = await Assets.instanced('kenney-nature/tree-oak', 24);
+  if (oaks) { for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; oaks.set(i, Math.cos(a) * 55, 0, Math.sin(a) * 55 - 10, a * 3, 0.9 + (i % 5) * 0.12); } oaks.commit(); scene.add(oaks.object); }
+
+  // street props
+  put(Assets.get('ph-models/street-lamp-01'), -9, -3.4, 0); put(Assets.get('ph-models/street-lamp-01'), 9, -3.4, 0);
+  put(Assets.get('ph-models/fire-hydrant'), 5.5, -3.2, 0.4);
+  put(Assets.get('ph-models/painted-wooden-bench'), -5, -2.6, 0);
+  put(Assets.get('ph-models/metal-trash-can'), 2.5, -3.2, 0);
+
+  // cars on the road
+  CARS.forEach((n, i) => { const c = put(Assets.get(n), -16 + i * 6.4, i % 2 ? -6.6 : -10.4, i % 2 ? Math.PI / 2 : -Math.PI / 2); if (c) cs.track(c, { size: 2.6, opacity: 0.6, stretch: 1.8 }); });
+
+  // dressed people, each with its own look and timing
+  for (let i = 0; i < PEOPLE.length; i++) {
+    const p = await Assets.person(PEOPLE[i], { anims: 'q-people/anims', seed: 11 + i * 7, play: i % 3 === 0 ? 'Walk' : 'Idle' });
+    const side = i % 2 ? 1 : -1, k = Math.floor(i / 2);
+    p.object.position.set(side * (3.2 + k * 1.6), 0, 4.5 - k * 1.3 + (i % 3) * 0.4);
+    p.object.rotation.y = side * -0.35 + (i % 3 - 1) * 0.3;
+    if (p.mixer) p.mixer.setTime(i * 0.37);
+    scene.add(p.object); people.push(p); cs.track(p.object, { size: 0.8 });
+  }
+  // base rig heroes with the big animation library
+  const hero = await Assets.person('q-base-characters/male', { hair: 'q-base-characters/hair-simple-parted', anims: ['q-anim-library/ual1', 'q-anim-library-2/ual2'], skin: '#8c5a3b', outfit: { top: '#1f4fa8', bottom: '#f2f2ee', shoes: '#1d1d22', sleeves: 'short', legs: 'short' }, play: 'Jog_Fwd_Loop' });
+  hero.object.position.set(-1.0, 0, 6.2); hero.object.rotation.y = 0.35; scene.add(hero.object); people.push(hero); cs.track(hero.object, { size: 0.8 });
+  const hero2 = await Assets.person('q-base-characters/female', { hair: 'q-base-characters/hair-long', anims: ['q-anim-library/ual1', 'q-anim-library-2/ual2'], skin: '#c98f66', outfit: { top: '#a8324a', bottom: '#2f3a52', shoes: '#e8e2d6', sleeves: 'long', legs: 'long' }, play: 'Dance_Loop' });
+  hero2.object.position.set(1.0, 0, 6.0); hero2.object.rotation.y = -0.3; scene.add(hero2.object); people.push(hero2); cs.track(hero2.object, { size: 0.8 });
+
+  // animals, a weapon on a crate, a posed crowd
+  const horse = await Assets.person('q-farm-animals/horse', { play: 'Idle' }); horse.object.position.set(-11, 0, 1.5); horse.object.rotation.y = 0.9; scene.add(horse.object); people.push(horse); cs.track(horse.object, { size: 1.8, stretch: 1.6 });
+  const dog = await Assets.person('q-animals/dog', { play: 'Walking' }); dog.object.position.set(5.5, 0, 7.5); dog.object.rotation.y = -1.3; scene.add(dog.object); people.push(dog); cs.track(dog.object, { size: 0.7 });
+  put(Assets.get('q-scifi/prop-crate-large'), 12, 2.5, 0.3);
+  const gun = Assets.get('q-scifi/gun-rifle'); if (gun) { gun.position.set(12, 1.05, 2.5); gun.rotation.set(0, 1.2, Math.PI / 2); scene.add(gun); }
+  const crowd = await Assets.instanced('q-crowd/male-sitting-cheering', 12);
+  const crowd2 = await Assets.instanced('q-crowd/woman-standing-waving', 12);
+  if (crowd && crowd2) {
+    for (let i = 0; i < 12; i++) { crowd.set(i, -6.5 + i * 1.15, 0, -14.5, 0, 1); crowd2.set(i, -6 + i * 1.15, 0, -16, 0, 1); }
+    crowd.commit(); crowd2.commit(); scene.add(crowd.object, crowd2.object);
+  }
+
+  renderer.compile(scene, camera);
+  lab.loadMs = Math.round(performance.now() - t0);
+  document.getElementById('load').remove();
+  lab.ready = true;
+}
+
+const ui = document.getElementById('ui');
+for (const env of ['day', 'golden', 'dusk', 'overcast-city', 'night']) {
+  const b = document.createElement('button'); b.textContent = env; b.onclick = () => { location.search = '?env=' + env; }; ui.appendChild(b);
+}
+
+function frame(t) {
+  timer.update(t); const dt = Math.min(0.05, timer.getDelta());
+  const portrait = innerWidth < innerHeight;
+  const a = qs.get('shot') === '1' ? 0.18 : Math.sin(t * 0.00012) * 0.35 + 0.18;
+  const r = portrait ? 27 : 15;
+  camera.position.set(Math.sin(a) * r, portrait ? 3.4 : 3.6, 4 + Math.cos(a) * r);
+  camera.lookAt(0, portrait ? 5.2 : 2.4, -2);
+  for (const p of people) p.update(dt);
+  cs.update();
+  fx.render(scene, camera);
+  if ((frameN++ & 31) === 0) {
+    const i = renderer.info;
+    document.getElementById('stat').textContent = `${lab.ready ? 'ready ' + lab.loadMs + ' ms (models ' + lab.preloadMs + ' ms)' : 'loading'} | draws ${i.render.calls} | tris ${i.render.triangles} | programs ${i.programs.length}`;
+  }
+  requestAnimationFrame(frame);
+}
+let frameN = 0;
+const timer = new THREE.Timer();
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+requestAnimationFrame(frame);
+build().catch((e) => { lab.errors.push(String(e && e.stack || e)); console.error(e); }).finally(() => { lab.done = true; });
+</script>
+</body>
+</html>
