@@ -236,6 +236,14 @@ async function main() {
   const me = rid(), you = rid();
   const t1 = await post(L + 'run', { id: me, mode: 'marathon' });
   check('a run token is issued', t1.j && t1.j.ok && typeof t1.j.token === 'string');
+  // Made-up mode names never get a board, so nobody can crowd out the game's real modes.
+  const bogus = [];
+  for (let i = 0; i < 18; i++) bogus.push(await post(L + 'run', { id: rid(), mode: 'junk' + i }));
+  check('a mode the game does not offer gets no run token', bogus.every((r) => r.j && r.j.error === 'unknown_mode'), bogus.map((r) => r.j && r.j.error).slice(0, 3).join(','));
+  const bogusTop = await post(L + 'top', { mode: 'junk0', period: 'all', n: 5 });
+  check('nor a board to read', bogusTop.j && bogusTop.j.error === 'unknown_mode', bogusTop.j && bogusTop.j.error);
+  const sprint = await post(L + 'run', { id: rid(), mode: 'sprint' });
+  check('the game\'s other real modes still get tokens after that', sprint.j && sprint.j.ok, sprint.j && sprint.j.error);
   const big = await post(L + 'submit', { id: me, mode: 'marathon', token: t1.j.token, score: 90000, nick: 'Asha' });
   check('a big score from a run of a second is rejected', big.j && big.j.error === 'run_too_short', big.j && big.j.error);
   const reuse = await post(L + 'submit', { id: me, mode: 'marathon', token: t1.j.token, score: 10, nick: 'Asha' });

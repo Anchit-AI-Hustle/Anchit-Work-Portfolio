@@ -852,6 +852,15 @@
     // Add the board to the panel that is open now; `res` is set on a results panel.
     function boardAttach(res) {
       if (!boardOn) return;
+      // The finished run's token and mode are taken now, and its score posted now. Waiting for the panel's idle
+      // moment let a quick Play again swap in the next run's token (posting the old score with it), and a panel
+      // already closed never posted at all.
+      const runMode = res && board.runMode ? board.runMode : null;
+      let posting = null;
+      if (res && res.score != null && !res.noSubmit && board.runP) {
+        const runP = board.runP, m = runMode || boardMode(); board.runP = null;
+        posting = Promise.all([loadNet(), runP]).then(([n, tok]) => (n && tok ? n.leaderboard.submit(slug, m, res.score, tok) : null)).catch(() => null);
+      }
       const seq = ++board.seq;
       const spot = card.querySelector('.arc-actions');
       if (!spot) return;
@@ -863,12 +872,7 @@
       later(() => {
         loadNet().then((net) => {
           if (!net || seq !== board.seq || !el.isConnected) return;
-          const mode = res && board.runMode ? board.runMode : boardMode();
-          let posting = null;
-          if (res && res.score != null && !res.noSubmit && board.runP) {
-            const runP = board.runP; board.runP = null;
-            posting = runP.then((tok) => (tok ? net.leaderboard.submit(slug, mode, res.score, tok) : null)).catch(() => null);
-          }
+          const mode = runMode || boardMode();
           boardFill(net, el, mode, res, posting, seq);
           // A different mode picked on the menu shows that mode's board.
           if (!res) {

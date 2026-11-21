@@ -80,6 +80,7 @@ export class GameRoom extends DurableObject {
 
   async report() {
     if (!this.meta) return;
+    this.reportedAt = Date.now();
     const n = this.sql.exec('SELECT COUNT(*) AS n FROM players').one().n;
     try { await this.env.LOBBY.getByName(this.meta.game).report({ id: this.meta.id, players: n }); } catch (e) { /* lobby busy: next change reports again */ }
   }
@@ -163,6 +164,10 @@ export class GameRoom extends DurableObject {
     const ok = this.rateOk(uid);
     if (ok === 'close') { ws.close(1008, 'too_fast'); return; }
     if (!ok) return;
+    // The lobby forgets a room that has not reported for ten minutes, and a room only reported when its
+    // players changed, so a long match with the same players vanished from quick match and the counts.
+    // Players' own messages already wake the room, so refreshing here adds no wake-ups, at most every 3 min.
+    if (!this.reportedAt || Date.now() - this.reportedAt > 180_000) { this.reportedAt = Date.now(); this.report(); }
     let m; try { m = JSON.parse(message); } catch (e) { return; }
     if (!m || typeof m !== 'object') return;
     const isHost = uid === this.meta.host;

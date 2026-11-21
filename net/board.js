@@ -4,7 +4,7 @@
 // token the same player asked for when the run started, once, and only if it
 // is believable for that game (see config.js).
 import { DurableObject } from 'cloudflare:workers';
-import { gameConfig, LIMITS } from './config.js';
+import { gameConfig, modeAllowed, LIMITS } from './config.js';
 import { cleanNick, defaultNick, randomToken, Meter } from './util.js';
 
 const DAY = 86_400_000;
@@ -51,14 +51,6 @@ export class Board extends DurableObject {
     return row.n <= limit;
   }
 
-  modeKnown(mode) {
-    if (this.sql.exec('SELECT 1 AS x FROM modes WHERE mode = ?', mode).toArray().length) return true;
-    const n = this.sql.exec('SELECT COUNT(*) AS n FROM modes').one().n;
-    if (n >= LIMITS.maxModes) return false;
-    this.sql.exec('INSERT OR IGNORE INTO modes (mode) VALUES (?)', mode);
-    return true;
-  }
-
   prune(now) {
     this.sql.exec('DELETE FROM runs WHERE started < ?', now - LIMITS.runTokenTtlMs);
     this.sql.exec("DELETE FROM scores WHERE bucket LIKE 'd%' AND bstart < ?", now - 15 * DAY);
@@ -70,6 +62,8 @@ export class Board extends DurableObject {
   async run({ game, id, mode, ip }) {
     const cfg = gameConfig(game, this.env);
     if (!cfg) return { ok: false, error: 'unknown_game' };
+    // Only a mode the game's menu offers (net/config.js): a made-up name never gets a board.
+    if (!modeAllowed(cfg, mode)) return { ok: false, error: 'unknown_mode' };
     if (!this.ipMeter.hit('r' + ip, LIMITS.runsPerIpMin, 60_000)) return { ok: false, error: 'rate_limited' };
     if (!this.idLimit(id, 'run', LIMITS.runsPerIdHour)) return { ok: false, error: 'rate_limited' };
     const now = Date.now();
@@ -96,6 +90,7 @@ export class Board extends DurableObject {
   async submit({ game, id, mode, token, score, nick, ip }) {
     const cfg = gameConfig(game, this.env);
     if (!cfg) return { ok: false, error: 'unknown_game' };
+    if (!modeAllowed(cfg, mode)) return { ok: false, error: 'unknown_mode' };
     if (!this.ipMeter.hit('s' + ip, LIMITS.submitsPerIpMin, 60_000)) return { ok: false, error: 'rate_limited' };
     const rows = this.sql.exec('SELECT pid, mode, started FROM runs WHERE token = ?', token).toArray();
     if (!rows.length) return { ok: false, error: 'bad_token' };
@@ -108,7 +103,6 @@ export class Board extends DurableObject {
     const why = this.check(cfg, score, now - run.started);
     if (why) return { ok: false, error: why };
     if (!this.idLimit(id, 'sub', LIMITS.submitsPerIdHour)) return { ok: false, error: 'rate_limited' };
-    if (!this.modeKnown(mode)) return { ok: false, error: 'too_many_modes' };
     const name = cleanNick(nick) || defaultNick(id);
     const b = buckets(now);
     const better = cfg.lower ? 'excluded.score < scores.score' : 'excluded.score > scores.score';
@@ -137,6 +131,7 @@ export class Board extends DurableObject {
   async top({ game, mode, period, n, id }) {
     const cfg = gameConfig(game, this.env);
     if (!cfg) return { ok: false, error: 'unknown_game' };
+    if (!modeAllowed(cfg, mode)) return { ok: false, error: 'unknown_mode' };
     const bk = buckets(Date.now())[period];
     if (!bk) return { ok: false, error: 'bad_period' };
     const lim = Math.max(1, Math.min(LIMITS.topMax, n | 0 || 10));
