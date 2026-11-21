@@ -468,7 +468,19 @@
       btnPause.innerHTML = arc.state === 'pause' ? ICON.play : ICON.pause;
       btnPause.setAttribute('aria-label', arc.state === 'pause' ? 'Resume' : 'Pause');
       btnPause.disabled = !(arc.state === 'play' || arc.state === 'pause');
+      // Full-screen play: while a game is being played the top bar floats over the game and fades away when
+      // the pointer is still, and the cookie question waits for the next menu, so the game has the whole screen.
+      document.documentElement.classList.toggle('arc-playing', arc.state === 'play');
+      if (arc.state === 'play') wakeBar(); else { clearTimeout(barTimer); app.classList.remove('bar-idle'); }
     };
+    let barTimer = 0;
+    const wakeBar = () => {
+      app.classList.remove('bar-idle'); clearTimeout(barTimer);
+      barTimer = setTimeout(() => { if (arc.state === 'play') app.classList.add('bar-idle'); }, 2600);
+    };
+    app.addEventListener('mousemove', (e) => { if (arc.state === 'play' && (e.movementX || e.movementY)) wakeBar(); }, { passive: true });
+    // on a touch screen a touch near the top brings the bar back (touches elsewhere are play)
+    app.addEventListener('touchstart', (e) => { if (arc.state === 'play' && e.touches[0] && e.touches[0].clientY < 72) wakeBar(); }, { passive: true });
 
     /* panels */
     const keysHtml = () => {
