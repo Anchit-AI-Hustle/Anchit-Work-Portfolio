@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Sky Thread, in real 3D: kite fighting over an invented old-city neighbourhood
  * at sunset, on a festival evening. Original world, names and code.
@@ -54,7 +56,8 @@ const KW = 0.95, KH = 1.1; // kite half width and half height, metres
 const EYE = new V3(0, 10.6, -1.8);
 
 /* ====================================================================== state of the 3D side */
-let POST = null;
+let POST = null, VFX = null;
+const VQ = new V3();
 const R3 = {
   ok: false, lost: false, soft: false, q: 2, qMax: 3, lock: false, accT: 0, accN: 0, fps: 0, settle: 1, goodT: 0,
   renderer: null, scene: null, cam: null, camRef: null, tanH: 0.5, pitch: 0.2, fov: 55, aspect: 1,
@@ -233,6 +236,7 @@ function cutKite(k, byMe, hit) {
   if (!k.alive) return;
   k.alive = false; k.cutT = 0;
   if (hit) k.cutParam = k === G.me ? hit.ta : hit.tb;
+  if (VFX) cutVFX(k, byMe, hit);
   shredBurst(k.world, k.col, 16);
   arc.sfx.tone(byMe ? 740 : 180, 0.18, { type: 'sawtooth', slide: byMe ? 420 : 90, vol: 0.14 });
   flashAt(k.world, byMe);
@@ -246,6 +250,8 @@ function cutKite(k, byMe, hit) {
     if (POST) { POST.flash(0.22, '#fff0c8'); POST.kick(-5); }
     arc.sfx.noise(0.6, { filter: 'bandpass', freq: 900, vol: 0.06 });
     cheer(k);
+    aiMoods(k, true);
+    HANDS.cheer = 0.75;
   } else {
     arc.shake += 11; arc.haptic(k === G.me ? 'fail' : 'heavy', k === G.me ? 1 : 0.5);
     if (POST && k === G.me) POST.kick(6);
@@ -320,24 +326,65 @@ function steerMe(dt) {
   G.me.y = clamp(G.me.y + G.me.vy * dt, 0.08, 0.72);
 }
 
+// Rivals fly like people: each has a form for the day, a reaction time of
+// 150 to 300 ms (they act on where your kite WAS), a moment of hesitation
+// before they commit to a yank, the odd slip (a late pull, a sag, an
+// overshoot), only so much arm for a long yank, and a mood that a big moment
+// changes. The rules of a cut are unchanged, so a fight stays fair and winnable.
+function aiInit(ai) {
+  if (ai.rt) return;
+  ai.form = 0.86 + rnd() * 0.28;            // a good day or a bad one
+  ai.rt = 0.15 + rnd() * 0.15;              // reaction time
+  ai.seenT = 0; ai.px = G.me ? G.me.x : 0.5; ai.py = G.me ? G.me.y : 0.5;
+  ai.commit = 0; ai.arm = 1; ai.slip = 0; ai.mood = 0; ai.wob = rnd() * TAU; ai.hes = 0.1 + rnd() * 0.14;
+}
 function steerAI(k, dt) {
   const ai = k.ai;
+  aiInit(ai);
+  // perception: they only update what they know of your kite every reaction time
+  ai.seenT += dt;
+  if (ai.seenT >= ai.rt) { ai.seenT = 0; ai.px = G.me.x; ai.py = G.me.y; }
   ai.wait -= dt;
   if (ai.wait <= 0) {
     ai.tx = 0.12 + rnd() * 0.76; ai.ty = 0.12 + rnd() * 0.55;
+    // a bold flyer drifts toward where you were; a wary one keeps its distance
+    if (ai.mood > 0.3) { ai.tx = lerp(ai.tx, ai.px, 0.35); ai.ty = lerp(ai.ty, ai.py, 0.3); }
+    else if (ai.mood < -0.3) { ai.tx = ai.px < 0.5 ? 0.62 + rnd() * 0.28 : 0.1 + rnd() * 0.28; }
     ai.wait = 1.2 + rnd() * 2.2;
   }
-  const aiMul = (G.D || DIFF.normal).ai;
-  k.vx += (ai.tx - k.x) * dt * 0.9 * aiMul;
-  k.vy += (ai.ty - k.y) * dt * 0.9 * aiMul;
+  ai.mood *= Math.exp(-dt * 0.12);
+  const aiMul = (G.D || DIFF.normal).ai * ai.form;
+  ai.wob += dt * (0.8 + ai.form);
+  // a hand is never steady: a slow wander on top of the aim, and now and then a slip that lets the kite sag
+  if (ai.slip <= 0 && rnd() < dt * 0.05 / ai.form) ai.slip = 0.5 + rnd() * 0.7;
+  ai.slip = max(0, ai.slip - dt);
+  const sag = ai.slip > 0 ? 0.35 : 0;
+  k.vx += (ai.tx - k.x + sin(ai.wob) * 0.03) * dt * 0.9 * aiMul;
+  k.vy += (ai.ty - k.y + cos(ai.wob * 1.3) * 0.02) * dt * 0.9 * aiMul + sag * dt;
   k.vx += G.wind.x * dt * 0.25; k.vy += G.wind.y * dt * 0.2;
   k.vx *= Math.exp(-dt * 1.4); k.vy *= Math.exp(-dt * 1.4);
   k.x = clamp(k.x + k.vx * dt, 0.06, 0.94);
   k.y = clamp(k.y + k.vy * dt, 0.08, 0.7);
-  const near = hypot(k.x - G.me.x, k.y - G.me.y) < 0.16;
+  // the yank: judged on where your kite was, committed to after a beat, with only so much arm in it
+  const near = hypot(k.x - ai.px, k.y - ai.py) < 0.16;
   // Rivals only yank hard after the player has had a real start.
-  const want = near && G.t > 4.5 ? 0.72 : 0.22;
+  const wantYank = near && G.t > 4.5 && ai.slip <= 0;
+  if (wantYank) ai.commit += dt; else ai.commit = max(0, ai.commit - dt * 2);
+  const hesit = ai.hes / ai.form;
+  const yank = ai.commit > hesit && ai.arm > 0.15;
+  ai.arm = clamp(ai.arm + (yank ? -dt * 0.32 : dt * 0.25), 0, 1);
+  const want = yank ? 0.72 : 0.22;
   k.pull = lerp(k.pull, want, dt * 1.6);
+}
+// A big moment changes how the others fly for a while.
+function aiMoods(cut, byMe) {
+  for (const r of G.rivals) {
+    if (!r.alive || r === cut || !r.ai) continue;
+    aiInit(r.ai);
+    if (byMe) r.ai.mood += rnd() < 0.5 ? 0.6 : -0.6;   // some get fired up, some get careful
+    else r.ai.mood += 0.3;
+    r.ai.mood = clamp(r.ai.mood, -1, 1);
+  }
 }
 
 function stepKite(k, dt) {
@@ -386,6 +433,8 @@ function spawnRival() {
 function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  // the sky lights up for a winner: a finale of shells over the city
+  if (VFX && G.alive && (G.cuts >= 1 || why === 'Sky cleared')) VFX.fireworks(VQ.set(0, 42, -95), { count: 7, size: 1.6, burst: 'mixed' });
   arc.haptic(G.alive ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: G.cuts >= 6 ? 'Sky <em>cleared</em>' : 'Thread <em>cut</em>',
@@ -890,7 +939,7 @@ function buildClutter(scene) {
   const standM = instanced(new THREE.BoxGeometry(1.5, 0.45, 1.5), new THREE.MeshStandardMaterial({ color: '#8f877c', roughness: 0.9 }), tanks.length, scene, true);
   tanks.forEach((b, i) => {
     const x = b.x0 + 1.2 + r() * max(0.1, b.x1 - b.x0 - 4), zz = b.z0 + 1.3 + r() * 1.2;
-    setM(standM, i, x, b.h + 0.22, zz, 0, 1);
+    setM(standM, i, x, b.h + 0.22, zz, 0, 1); GROUNDED.push(x, b.h, zz, 2.2);
     setM(tankM, i, x, b.h + 0.45 + 0.65, zz, 0, 1);
   });
   // dishes
@@ -997,7 +1046,7 @@ function buildClutter(scene) {
   // a few plant pots at the corners of your roof
   const potM = instanced(new THREE.CylinderGeometry(0.32, 0.22, 0.5, 10), new THREE.MeshStandardMaterial({ color: '#b5582e', roughness: 0.85 }), 3, scene, true);
   const bushM = instanced(new THREE.IcosahedronGeometry(0.42, 1), new THREE.MeshStandardMaterial({ color: '#4f7a34', roughness: 0.8, flatShading: true }), 3, scene, true);
-  [[-5.9, -4.1], [5.8, -4.2], [-3.4, -4.3]].forEach((p, i) => { setM(potM, i, p[0], 9.25, p[1], 0, 1); setM(bushM, i, p[0], 9.75, p[1], r() * PI, 1, 1.15, 1); });
+  [[-5.9, -4.1], [5.8, -4.2], [-3.4, -4.3]].forEach((p, i) => { setM(potM, i, p[0], 9.25, p[1], 0, 1); setM(bushM, i, p[0], 9.75, p[1], r() * PI, 1, 1.15, 1); GROUNDED.push(p[0], 9.0, p[1], 0.9); });
 }
 
 function addStrand(a, c, sag, r, n) {
@@ -1014,7 +1063,29 @@ function addStrand(a, c, sag, r, n) {
 
 /* ====================================================================== people on the roofs */
 const PEOPLE = [];
+// Contact shadows: a soft multiply blob under every person, tank and pot, so
+// nothing floats on the tier with no shadow map. One draw call.
+const GROUNDED = [];
+function buildBlobs(scene) {
+  const c = cv(64, 64), g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,.7)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-PI / 2);
+  const mat = new THREE.MeshBasicMaterial({ map: tex(c, { linear: true, aniso: 1 }), transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, premultipliedAlpha: true, toneMapped: false, fog: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const n = PEOPLE.length + GROUNDED.length / 4;
+  const m = new THREE.InstancedMesh(geo, mat, max(1, n)); m.frustumCulled = false; m.renderOrder = 1;
+  for (let i = 0; i < GROUNDED.length / 4; i++) {
+    const x = GROUNDED[i * 4], y = GROUNDED[i * 4 + 1], z = GROUNDED[i * 4 + 2], s = GROUNDED[i * 4 + 3];
+    setM(m, PEOPLE.length + i, x, y + 0.03, z, 0, s, 1, s);
+    m.setColorAt(PEOPLE.length + i, T.col.setScalar(0.5));
+  }
+  PEOPLE.forEach((p, i) => { m.setColorAt(i, T.col.setScalar(0.5)); setM(m, i, p.pos.x, p.pos.y + 0.03, p.pos.z, 0, 0.95 * p.scale, 1, 0.75 * p.scale); });
+  scene.add(m); PP.blob = m;
+}
 const PP = {};
+// The shared people library (games/shared/human.js): real proportions, faces, gait, reactions.
+const HUM = { createHuman, createCrowd };
 const SKIN = ['#8d5a3b', '#a8714f', '#6e4430', '#b9825c', '#7a4b33'];
 const KURTA = ['#e8452c', '#f2b134', '#1e88a8', '#7a3fb0', '#2e9e6a', '#d6336c', '#f4f0e4', '#e8602c', '#2b4a8c', '#c9a96e'];
 const HAIR = ['#1a1412', '#2a1d16', '#e8452c', '#f2b134', '#f4f0e4', '#1a1412', '#1e88a8'];
@@ -1045,6 +1116,7 @@ function buildPeople(scene) {
     PEOPLE.push(mkPerson(b.x0 + 1 + r() * max(0.2, b.x1 - b.x0 - 2), b.h, b.z0 + 1 + r() * max(0.2, b.z1 - b.z0 - 2), 'spec', r, kid ? 0.68 : 0.9 + r() * 0.15));
     n++;
   }
+  if (HUM && buildHumans(scene)) return;
   const N = PEOPLE.length;
   const skin = new THREE.MeshStandardMaterial({ roughness: 0.6 });
   const cloth = new THREE.MeshStandardMaterial({ roughness: 0.85 });
@@ -1066,11 +1138,84 @@ function buildPeople(scene) {
     c.set(p.hair); PP.hair.setColorAt(i, c);
   });
 }
+// Flyers are full rigs (they hold and work a line); the onlookers are two
+// instanced crowds, grown-ups and children, one draw each, every member with
+// their own timing.
+function buildHumans(scene) {
+  try {
+    const q = R3.q;
+    const adults = [], kids = [];
+    let seed = 50;
+    for (const p of PEOPLE) {
+      if (p.role === 'flyer') {
+        const h = HUM.createHuman({ seed: seed++, quality: q, lod: q >= 2 ? 'mid' : 'far', castShadow: q >= 2,
+          outfit: { top: p.kurta, bottom: p.pants, sleeves: rnd() < 0.5 ? 'long' : 'short', shoes: '#2a2420' } });
+        h.group.position.copy(p.pos); h.group.rotation.y = p.yaw;
+        scene.add(h.group); p.h = h;
+      } else (p.scale < 0.8 ? kids : adults).push({ x: p.pos.x, y: p.pos.y, z: p.pos.z, yaw: p.yaw });
+    }
+    const opt = { seated: false, quality: min(2, q), colors: ['#e8452c', '#f2b134', '#1e88a8', '#d6336c'], teamShare: 0.35 };
+    if (adults.length) { PP.crowd = HUM.createCrowd(Object.assign({ members: adults, seed: 7 }, opt)); scene.add(PP.crowd.mesh); }
+    if (kids.length) { PP.kids = HUM.createCrowd(Object.assign({ members: kids, seed: 9, unit: 0.68 }, opt)); scene.add(PP.kids.mesh); }
+    PP.human = true;
+    return true;
+  } catch (e) {
+    try { console.warn('people library unavailable: ' + (e && e.message)); } catch (er) { /* ignore */ }
+    for (const p of PEOPLE) if (p.h) { p.h.dispose(); p.h = null; }
+    PP.human = false;
+    return false;
+  }
+}
+const HV = new V3(), HW = new V3();
+// A flyer: the gait engine breathes and shifts their weight; on top of it the
+// line arm points along the thread to the kite and hauls in short tugs, the
+// other hand works the reel at the chest, and the head follows the kite.
+function stepHumanFlyer(p, dt, t) {
+  const h = p.h, k = p.kite, B = h.bones;
+  h.group.rotation.y = p.yaw;
+  h.update(dt, { speed: 0, turn: 0, look: k && k.alive ? k.world : null });
+  if (k && k.alive && !h.playing()) {
+    const pl = k.pull, tug = Math.pow(max(0, sin(t * 4.2 + p.ph)), 4) * pl;
+    B.shoulderR.getWorldPosition(HV);
+    HW.subVectors(k.world, HV).normalize();
+    // into the body's frame (it only turns about y)
+    const cy = cos(-p.yaw), sy = sin(-p.yaw);
+    const dx = HW.x * cy + HW.z * sy, dz = -HW.x * sy + HW.z * cy, dy = HW.y;
+    B.shoulderR.rotation.set(-Math.asin(clamp(dz, -1, 1)) + tug * 0.5, 0, Math.atan2(dx, -dy));
+    B.elbowR.rotation.set(-0.15 - tug * 0.6 - (1 - pl) * 0.1, 0, 0);
+    B.shoulderL.rotation.set(-0.95 + sin(t * 6 + p.ph) * 0.3 * pl, 0.3, 0.25 + cos(t * 6 + p.ph) * 0.15 * pl);
+    B.elbowL.rotation.set(-1.5, 0, 0);
+    B.spine.rotation.x -= 0.04 + pl * 0.08 + tug * 0.08;
+  }
+  h.group.updateMatrixWorld(true);
+  B.fingersR.getWorldPosition(p.hand);
+}
+function stepHumans(dt) {
+  const t = R3.clock;
+  for (const p of PEOPLE) {
+    if (!p.h) continue;
+    if (p.delay > 0) p.delay -= dt;
+    else if (p.cheer > 0) { if (!p.cheered) { p.h.play(['cheer', 'fistPump', 'celebrate', 'cheer'][p.style], { speed: 0.9 + rnd() * 0.25 }); p.h.setMood(1); p.cheered = true; } p.cheer -= dt; }
+    else if (p.cheered) { p.cheered = false; p.h.setMood(0); }
+    if (p.sad > 0) { if (!p.sadOn) { p.h.play(rnd() < 0.5 ? 'handsOnHead' : 'slump'); p.h.setMood(-1); p.sadOn = true; } p.sad -= dt; if (p.sad <= 0) { p.sadOn = false; p.h.setMood(0); } }
+    if (p.kite && p.kite.alive) {
+      T.v.subVectors(p.kite.world, p.pos);
+      const dy = Math.atan2(T.v.x, T.v.z) - p.yaw; p.yaw += (dy - TAU * Math.round(dy / TAU)) * (1 - Math.exp(-dt * 3));
+    }
+    stepHumanFlyer(p, dt, t);
+  }
+  const look = G.me ? G.me.world : null;
+  if (PP.crowd) PP.crowd.update(dt, { look });
+  if (PP.kids) PP.kids.update(dt, { look });
+}
 function mkPerson(x, h, z, role, r, sc) {
   return {
     pos: new V3(x, h, z), role, scale: sc, yaw: PI + (r() - 0.5) * 2.4, ph: r() * TAU,
     skin: SKIN[floor(r() * SKIN.length)], kurta: KURTA[floor(r() * KURTA.length)], pants: ['#f4f0e4', '#2a2622', '#3a3f55', '#e8e0cc'][floor(r() * 4)],
     hair: HAIR[floor(r() * HAIR.length)], cheer: 0, delay: 0, sad: 0, kite: null, hand: new V3(x, h + 1.9, z), wave: r() < 0.25,
+    // their own rhythm: how fast they cheer, how they cheer, what they do while waiting
+    f: 7 + r() * 6, style: floor(r() * 4), act: -1, actT: 1 + r() * 7, yaw0: 0, watch: r() < 0.7, brT: 0.25 + r() * 0.2,
+    sm: { jump: 0, armL: 0.08, armR: 0.08, raiseL: 0, raiseR: 0, lean: 0, nod: 0, yo: 0 },
   };
 }
 function takeFlyer(k) {
@@ -1087,13 +1232,15 @@ function takeFlyer(k) {
   return best;
 }
 function cheer(cutRival) {
+  if (PP.crowd) PP.crowd.react('cheer', 1); if (PP.kids) PP.kids.react('cheer', 1.2);
   for (const p of PEOPLE) {
     if (p.role === 'flyer') { if (p.kite === cutRival) p.sad = 2.2; continue; }
-    if (rnd() < 0.7) { p.cheer = 1.6 + rnd() * 0.6; p.delay = rnd() * 0.35; }
+    if (rnd() < 0.7) { p.cheer = 1.4 + rnd() * 1.1; p.delay = 0.15 + rnd() * 0.5; }
   }
 }
 function cheerRivals() {
-  for (const p of PEOPLE) if (p.role === 'flyer' && p.kite) { p.cheer = 2; p.delay = rnd() * 0.3; }
+  if (PP.crowd) PP.crowd.react('gasp', 0.8); if (PP.kids) PP.kids.react('gasp', 0.8);
+  for (const p of PEOPLE) if (p.role === 'flyer' && p.kite) { p.cheer = 1.6 + rnd() * 0.8; p.delay = 0.15 + rnd() * 0.3; }
 }
 
 const PM = new THREE.Matrix4(), PQ = new THREE.Quaternion(), PE = new THREE.Euler();
@@ -1104,45 +1251,67 @@ function partM(mesh, idx, ox, oy, oz, rx, rz, sx, sy, sz) {
   mesh.setMatrixAt(idx, T.m3);
 }
 function stepPeople(dt) {
+  if (PP.human) { stepHumans(dt); return; }
   if (!PP.legs) return;
-  const t = R3.clock;
+  const t = R3.clock, ke = 1 - Math.exp(-dt * 7);
+  const me = G.me;
   PEOPLE.forEach((p, i) => {
-    let jump = 0, armL = 0.08, armR = 0.08, raiseL = 0, raiseR = 0, lean = 0, nod = 0;
+    let jump = 0, armL = 0.08, armR = 0.08, raiseL = 0, raiseR = 0, lean = 0, nod = 0, yo = 0;
     if (p.delay > 0) p.delay -= dt;
     else if (p.cheer > 0) p.cheer -= dt;
     if (p.sad > 0) p.sad -= dt;
+    // breathing and a slow shift of weight from foot to foot, never in step with anyone
+    const br = sin(t * (6.3 / (3 + p.brT * 6)) + p.ph);
     if (p.role === 'flyer' && p.kite) {
       const k = p.kite;
       if (k.alive) {
         T.v.subVectors(k.world, p.pos);
         const dy = Math.atan2(T.v.x, T.v.z) - p.yaw; p.yaw += (dy - Math.PI * 2 * Math.round(dy / (Math.PI * 2))) * (1 - Math.exp(-dt * 3));
-        raiseR = -2.1 - k.pull * 0.35 + sin(t * 9 + p.ph) * 0.06 * k.pull;
-        raiseL = -0.7; armL = 0.25;
-        lean = -0.08 - k.pull * 0.08;
+        // a pull is a run of short tugs with the whole body: the arm hauls down, the shoulders lean back, the other hand reels
+        const pl = k.pull, tug = Math.pow(max(0, sin(t * 4.2 + p.ph)), 4) * pl;
+        raiseR = -2.15 + tug * 0.55 - (1 - pl) * 0.15;
+        raiseL = -0.95 + sin(t * 6 + p.ph) * 0.35 * pl; armL = 0.28 + cos(t * 6 + p.ph) * 0.18 * pl;
+        lean = -0.05 - pl * 0.1 - tug * 0.1;
       } else { raiseR = -0.3; nod = 0.35; }
-    } else if (p.wave) { raiseR = -0.4; armR = 2.5 + sin(t * 7 + p.ph) * 0.35; }
-    if (p.sad > 0) { raiseR = 0; armR = 0.05; nod = 0.4; }
-    if (p.cheer > 0 && p.delay <= 0) {
-      jump = abs(sin(t * 10 + p.ph)) * 0.32;
-      armL = 2.7 + sin(t * 14 + p.ph) * 0.25; armR = 2.7 + cos(t * 14 + p.ph) * 0.25; raiseL = raiseR = 0;
     } else if (p.role !== 'flyer') {
-      lean = sin(t * 0.7 + p.ph) * 0.03;
+      // someone waiting turns to a neighbour, waves at a friend or shades their eyes to watch the sky
+      p.actT -= dt;
+      if (p.actT <= 0) { p.act = p.act >= 0 ? -1 : floor(rnd() * 3); p.actT = p.act >= 0 ? 1.4 + rnd() * 1.8 : 3 + rnd() * 7; p.yaw0 = (rnd() - 0.5) * 1.6; }
+      if (p.act === 0) yo = p.yaw0;
+      else if (p.act === 1 || p.wave && p.act < 0 && p.cheer <= 0 && sin(t * 0.3 + p.ph) > 0.6) { raiseR = -0.4; armR = 2.5 + sin(t * 7 + p.ph) * 0.35; }
+      else if (p.act === 2) { raiseR = -2.5; armR = 0.5; nod = -0.15; }
+      lean = br * 0.02;
+      // most of them follow your kite
+      if (p.watch && me && p.act !== 0) { T.v.subVectors(me.world, p.pos); const dy = Math.atan2(T.v.x, T.v.z) - p.yaw; p.yaw += (dy - TAU * Math.round(dy / TAU)) * (1 - Math.exp(-dt * 1.2)); }
     }
-    T.quat.setFromAxisAngle(UP, p.yaw);
-    T.v.set(p.pos.x, p.pos.y + jump, p.pos.z); T.s.set(p.scale, p.scale, p.scale);
+    if (p.sad > 0) { raiseR = 0; armR = 0.05; nod = 0.4; lean = 0.08; }
+    if (p.cheer > 0 && p.delay <= 0) {
+      const ct = t * p.f + p.ph, e = min(1, p.cheer / 0.5);
+      if (p.style === 0) { jump = abs(sin(ct * 0.75)) * 0.3 * e; armL = 2.7 + sin(ct) * 0.25; armR = 2.7 + cos(ct) * 0.25; raiseL = raiseR = 0; }
+      else if (p.style === 1) { raiseL = raiseR = -1.35; armL = armR = -0.3 + sin(ct * 1.3) * 0.18; nod = -0.1; }
+      else if (p.style === 2) { raiseR = 0; armR = 2.5 + max(0, sin(ct * 0.8)) * 0.45; jump = max(0, sin(ct * 0.8)) * 0.1 * e; lean = -0.05; }
+      else { raiseL = raiseR = 0; armL = 2.2 + sin(ct * 0.45) * 0.5; armR = 2.2 - sin(ct * 0.45) * 0.5; lean = sin(ct * 0.45) * 0.08; }
+    }
+    const S = p.sm;
+    S.jump = jump > S.jump ? jump : lerp(S.jump, jump, ke * 2); S.armL = lerp(S.armL, armL, ke); S.armR = lerp(S.armR, armR, ke);
+    S.raiseL = lerp(S.raiseL, raiseL, ke); S.raiseR = lerp(S.raiseR, raiseR, ke); S.lean = lerp(S.lean, lean, ke); S.nod = lerp(S.nod, nod, ke); S.yo = lerp(S.yo, yo, ke * 0.5);
+    T.quat.setFromAxisAngle(UP, p.yaw + S.yo);
+    T.v.set(p.pos.x, p.pos.y + S.jump, p.pos.z); T.s.set(p.scale, p.scale, p.scale);
     PM.compose(T.v, T.quat, T.s);
-    const sw = sin(t * 1.3 + p.ph) * 0.03;
-    partM(PP.legs, i * 2, -0.09, 0.9, 0, jump * 0.6, 0.02, 1, 1, 1);
-    partM(PP.legs, i * 2 + 1, 0.09, 0.9, 0, -jump * 0.6, -0.02, 1, 1, 1);
-    partM(PP.torso, i, 0, 1.27, 0, lean, sw, 1, 1, 1);
-    partM(PP.head, i, 0, 1.74, lean * 0.6 + nod * 0.06, nod, sw, 1, 1, 1);
-    partM(PP.hair, i, 0, 1.76, lean * 0.6 + nod * 0.06, nod - 0.15, sw, 1, 1, 1);
-    partM(PP.arms, i * 2, -0.23, 1.53, 0, raiseL, -armL, 1, 1, 1);
-    partM(PP.arms, i * 2 + 1, 0.23, 1.53, 0, raiseR, armR, 1, 1, 1);
+    const sw = br * 0.025;
+    partM(PP.legs, i * 2, -0.09, 0.9, 0, S.jump * 0.6, 0.02 + sw * 0.4, 1, 1, 1);
+    partM(PP.legs, i * 2 + 1, 0.09, 0.9, 0, -S.jump * 0.6, -0.02 + sw * 0.4, 1, 1, 1);
+    partM(PP.torso, i, 0, 1.27, 0, S.lean, sw, 1, 1, 1);
+    partM(PP.head, i, 0, 1.74, S.lean * 0.6 + S.nod * 0.06, S.nod, sw, 1, 1, 1);
+    partM(PP.hair, i, 0, 1.76, S.lean * 0.6 + S.nod * 0.06, S.nod - 0.15, sw, 1, 1, 1);
+    partM(PP.arms, i * 2, -0.23, 1.53, 0, S.raiseL, -S.armL, 1, 1, 1);
+    partM(PP.arms, i * 2 + 1, 0.23, 1.53, 0, S.raiseR, S.armR, 1, 1, 1);
     // the hand a thread leaves from: end of the right arm
-    T.e.set(raiseR, 0, armR, 'XYZ'); T.q.set(0, -0.58, 0).applyEuler(T.e); T.q.x += 0.23; T.q.y += 1.53;
+    T.e.set(S.raiseR, 0, S.armR, 'XYZ'); T.q.set(0, -0.58, 0).applyEuler(T.e); T.q.x += 0.23; T.q.y += 1.53;
     p.hand.copy(T.q).applyMatrix4(PM);
+    if (PP.blob) { setM(PP.blob, i, p.pos.x, p.pos.y + 0.03, p.pos.z, 0, 0.95 * p.scale, 1, 0.75 * p.scale); PP.blob.setColorAt(i, T.col.setScalar(0.5 + S.jump * 1.2)); }
   });
+  if (PP.blob) { PP.blob.instanceMatrix.needsUpdate = true; PP.blob.instanceColor.needsUpdate = true; }
   for (const m of [PP.legs, PP.arms, PP.torso, PP.head, PP.hair]) m.instanceMatrix.needsUpdate = true;
 }
 
@@ -1217,6 +1386,7 @@ function releaseKite(k) {
   if (!k) return;
   if (k.vis) { const v = k.vis; v.kite = null; v.grp.visible = false; v.tail.mesh.visible = v.tA.mesh.visible = v.tB.mesh.visible = false; k.vis = null; }
   if (k.flyer) { k.flyer.kite = null; k.flyer = null; }
+  if (k.trail) { k.trail.stop(); k.trail = null; }
 }
 
 // Paper flutter: the bow bends the top half back, the loose lower half flaps.
@@ -1265,7 +1435,9 @@ function placeKite(k, dt) {
   v.halo.material.opacity = pullGlow * (k === G.me ? 0.55 : 0.4);
   v.halo.scale.setScalar(4.2 + pullGlow * 1.6);
   v.halo.material.color.set(k === G.me ? WARM : '#ff7a5a');
-  v.mat.emissiveIntensity = 0.32 + R3.backlit * 0.35;
+  // paper with the low sun behind it glows through, like real tissue kites at dusk
+  const back = clamp(-_fwd.dot(SUN) * 1.3 + 0.15, 0, 1);
+  v.mat.emissiveIntensity = 0.2 + R3.backlit * (0.12 + back * back * 0.55);
   // tail: a chain of points hanging from the bottom tip, pushed by the wind
   const N = v.tail.n;
   if (!k.tailOK || k.tailP.length !== N) {
@@ -1347,6 +1519,11 @@ function stepHands(dt) {
   const breathe = arc && arc.reducedMotion ? 0 : sin(R3.clock * 1.6) * 0.004;
   HANDS.reel.position.copy(R3.reelL);
   HANDS.reel.position.y += -HANDS.jerk * 0.03 + breathe;
+  // a cut: the hands punch up with the reel and give it a shake; your own kite gone, they sink
+  HANDS.cheer = max(0, (HANDS.cheer || 0) - dt);
+  const ch = arc && arc.reducedMotion ? 0 : HANDS.cheer;
+  if (ch > 0) { const k = sin(min(1, (0.75 - ch) / 0.2) * PI * 0.5) * min(1, ch / 0.3); HANDS.reel.position.y += k * 0.07 + sin(R3.clock * 30) * 0.006 * k; HANDS.reel.position.z += k * 0.03; }
+  if (me && !me.alive) HANDS.reel.position.y -= min(0.08, me.cutT * 0.06);
   HANDS.reel.position.z += HANDS.jerk * 0.05;
   // lean the reel a little toward the kite
   const lean = me ? clamp((me.x - 0.5) * 0.5, -0.25, 0.25) : 0;
@@ -1408,6 +1585,7 @@ function buildWorld() {
   buildCity(scene, facade, tex(paintRoof(), { repeat: true }));
   buildClutter(scene);
   buildPeople(scene);
+  buildBlobs(scene);
   // kites
   SPAR_GEO = sparGeo();
   SPAR_MAT = new THREE.MeshStandardMaterial({ color: '#d9b77a', roughness: 0.6 });
@@ -1494,6 +1672,38 @@ function flashAt(p, big) {
   if (!FLASH) return;
   FLASH.position.copy(p); FLASH.userData.t = 0; FLASH.userData.big = big ? 1 : 0.6;
   RING.position.copy(p); RING.userData.t = 0;
+}
+
+/* ====================================================================== spectacle */
+// A cut: the strings snap with a spark where they crossed, the paper bursts
+// in its own colour, the falling kite leaves a trail, and the rooftops throw
+// confetti for your cuts. Dusk brings festival shells over the far city; your
+// own kite streaks a faint trail when it dives.
+function cutVFX(k, byMe, hit) {
+  if (hit) { threadAt(G.me, hit.ta, G.me.anchor, G.me.bridle, VQ); VFX.impact(VQ, null, { kind: 'spark', size: 0.8 }); }
+  VFX.burst(k.world, { color: k.col, size: 1.3 });
+  VFX.impact(k.world, null, { kind: 'powder', color: k.col, size: 1.1 });
+  if (!k.trail) k.trail = VFX.trail(k.world, { color: k.col, width: 0.35, life: 0.9 });
+  if (byMe) {
+    let n = 0;
+    for (const p of PEOPLE) { if (p.role === 'spec' && p.pos.z > -70 && rnd() < 0.5 && n < 3) { VFX.confetti(VQ.set(p.pos.x, p.pos.y + 2, p.pos.z), { count: 60, size: 0.9 }); n++; } }
+  }
+}
+function stepVFX(dt) {
+  VFX.update(dt);
+  const me = G.me;
+  // dive trail: on while your kite drops fast, off as it levels out
+  if (me && me.alive && !G.attract) {
+    const diving = me.vy > 0.32;
+    if (diving && !me.trail) me.trail = VFX.trail(me.world, { color: '#ffd9a0', width: 0.22, life: 0.35, alpha: 0.7 });
+    else if (!diving && me.vy < 0.18 && me.trail) { me.trail.stop(); me.trail = null; }
+  }
+  // festival shells over the far roofs once the sun is low
+  R3.fwT = (R3.fwT == null ? 3 : R3.fwT) - dt;
+  if (R3.fwT <= 0) {
+    R3.fwT = (R3.tod > 0.45 ? 1.8 : 4.5) + rnd() * 3;
+    if (R3.tod > 0.3 || G.attract) VFX.fireworks(VQ.set((rnd() - 0.5) * 140, 38 + rnd() * 22, -130 - rnd() * 70), { size: 1.4 + rnd() * 0.8 });
+  }
 }
 
 /* ====================================================================== stepping the world */
@@ -1621,6 +1831,7 @@ function stepVisual0(dt, dtReal) {
     if (R3.cam) RING.quaternion.copy(R3.cam.quaternion);
   }
   R3.punch = max(0, R3.punch - dtReal * 2.4);
+  if (VFX) stepVFX(dtReal);
 }
 
 function applyTod(tod) {
@@ -1674,6 +1885,7 @@ const QPR = [0.55, 0.72, 0.9, 1];
 function applyQuality() {
   const r = R3.renderer; if (!r || !arc) return;
   const q = R3.q;
+  if (VFX) VFX.setQuality(q);
   let pr = arc.dpr * QPR[q];
   // a software renderer draws every pixel on the CPU: keep its pixel count small
   if (R3.soft) pr = min(pr, q === 0 ? 0.6 : 0.8, Math.sqrt((q === 0 ? 240000 : 420000) / max(1, arc.w * arc.h)));
@@ -1694,6 +1906,7 @@ function applyQuality() {
     if (R3.skyMat.defines.OCT !== oct) { R3.skyMat.defines.OCT = oct; R3.skyMat.needsUpdate = true; }
   }
   if (PP.legs) { const s = q >= 2; for (const m of [PP.legs, PP.arms, PP.torso, PP.head]) m.castShadow = s; }
+  if (PP.human) for (const p of PEOPLE) if (p.h) { p.h.setLod(q >= 2 ? 'mid' : 'far'); p.h.mesh.castShadow = q >= 2; }
 }
 function softwareGL() {
   try {
@@ -1738,7 +1951,8 @@ function boot(a) {
         pm.dispose();
       } catch (e) { /* no environment: still lit */ }
       // Shared post pass: bloom on the sun, lanterns and threads, grade, grain; a slow pan up into the sky at the start.
-      POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { dist: 30, yaw: 0.4, up: 0.08, back: 0.15, dur: 2.2 }, results: { dist: 30, yaw: 0.16, rise: 0.04 }, look: { bloom: 0.55, threshold: 0.7 } });
+      POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { dist: 30, yaw: 0.4, up: 0.08, back: 0.15, dur: 2.2 }, results: { dist: 30, yaw: 0.16, rise: 0.04 }, look: { bloom: 0.5, threshold: 0.72, sat: 0.96, contrast: 1.06, lift: [0.02, 0.012, 0.026], gain: [1.03, 0.99, 0.95], grain: 0.04, vignette: 0.34 } });
+      try { VFX = createVFX(R3.renderer, R3.scene, R3.cam, { quality: R3.q, unit: 1, groundY: 0 }); } catch (e) { VFX = null; }
       applyQuality();
       R3.ok = true;
     }
@@ -1854,6 +2068,16 @@ function drawGlow() {
     P.push(p.x, p.y - 0.05, p.z, 0.7 * night, on * 0.5, c.r * 0.5, c.g * 0.5, c.b * 0.5);
   }));
   LANT.list.forEach((l) => P.push(l.x + sin(R3.clock * 0.7 + l.ph), l.y, l.z, 3.4, 0.45 + R3.tod * 0.4, 1.0, 0.45, 0.12));
+  // dust hanging in the low sun just off your roof, lit warm from behind, drifting on the breeze
+  if (R3.q >= 1) {
+    const lit = clamp(SUN.y * 8 + 0.4, 0, 1), wx = G.wind.x;
+    for (let i = 0; i < 26; i++) {
+      const h1 = (i * 0.618034) % 1, h2 = (i * 0.754877) % 1, h3 = (i * 0.569840) % 1;
+      const x = ((h1 * 16 + R3.clock * (0.15 + wx * 0.4) + sin(R3.clock * 0.3 + i) * 0.4) % 16 + 16) % 16 - 8;
+      const y = 9.6 + h2 * 4 + sin(R3.clock * 0.5 + i * 1.7) * 0.25, z = -3 - h3 * 9;
+      P.push(x, y, z, 0.035, (0.25 + 0.25 * sin(R3.clock * 1.3 + i)) * lit, 1.0, 0.78, 0.5);
+    }
+  }
   P.mat.uniforms.uScale.value = (R3.renderer ? R3.renderer.getDrawingBufferSize(V2).y : arc.h) / (2 * Math.tan(R3.cam.fov * PI / 360));
   P.end();
 }
@@ -2056,6 +2280,18 @@ A.create({
   onMenu(a) { arc = a; resetWorld(true); },
   init(a) {
     arc = a; a.debug = dbg; G.D = DIFF.normal;
+    a.dev = {
+      quality: (q) => { R3.lock = true; R3.q = clamp(q | 0, 0, 3); applyQuality(); },
+      get VFX() { return VFX; },
+      // trigger a signature moment on purpose (screenshots, tests)
+      moment: (k) => {
+        const r = G.rivals.find((x) => x.alive);
+        if (k === 'cut' && r) cutKite(r, true, null);
+        else if (k === 'dive' && G.me) { G.me.vy = 0.6; }
+        else if (k === 'fireworks' && VFX) VFX.fireworks(VQ.set(0, 45, -150), { count: 4, size: 1.8 });
+        else if (k === 'win' && VFX) VFX.fireworks(VQ.set(0, 42, -95), { count: 7, size: 1.6 });
+      },
+    };
     boot(a);
     resetWorld(true);
     const cvs = a.canvas;
@@ -2064,6 +2300,7 @@ A.create({
     cvs.addEventListener('pointerup', lift); cvs.addEventListener('pointercancel', lift); cvs.addEventListener('lostpointercapture', lift);
     window.addEventListener('blur', () => fingers.clear());
     a.menu();
+    if (VFX) setTimeout(() => { try { VFX.warm(); } catch (e) { /* compiles on first use */ } }, 250);
   },
   onPause() { fingers.clear(); },
   start(a, ch) {

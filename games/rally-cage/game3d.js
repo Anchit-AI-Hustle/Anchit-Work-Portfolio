@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Rally Cage, in real 3D: squash in a floodlit cage on a city terrace.
  * Original world on the Arcade shell; every model and texture is made in code.
@@ -267,6 +269,25 @@ function floorTex() {
   }, { clamp: true });
 }
 
+// Acrylic court paint: buffed to a sheen down the middle where feet and the ball go, matt at the edges.
+function floorRough() {
+  return canvasTex(192, 360, (g, w, h) => {
+    g.fillStyle = 'rgb(120,120,120)'; g.fillRect(0, 0, w, h);
+    const gr = g.createLinearGradient(0, 0, w, 0);
+    gr.addColorStop(0, 'rgba(190,190,190,.8)'); gr.addColorStop(0.25, 'rgba(60,60,60,.5)'); gr.addColorStop(0.75, 'rgba(60,60,60,.5)'); gr.addColorStop(1, 'rgba(190,190,190,.8)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 2600; i++) { const v = 90 + (rnd() * 110) | 0; g.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',.4)'; g.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 2, 1 + rnd() * 3); }
+  }, { clamp: true, srgb: false });
+}
+// Rubber marks the ball leaves on a squash wall, drawn soft so a stack of them reads as wear.
+function smudgeTex() {
+  return canvasTex(64, 64, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, 'rgba(26,18,14,.75)'); gr.addColorStop(0.35, 'rgba(26,18,14,.35)'); gr.addColorStop(1, 'rgba(26,18,14,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }, { clamp: true });
+}
+
 function frontWallTex() {
   const W = 1024, H = 768;
   return canvasTex(W, H, (g) => {
@@ -415,8 +436,50 @@ function colorsInit() {
   COL.spark = new THREE.Color('#ffe0a0'); COL.red = new THREE.Color('#ff4a3a');
   COL.conf = ['#FFB736', '#FF6940', '#FBF5EC', '#c9a96e', '#7fd1ff', '#ff7ab6'].map((c) => new THREE.Color(c));
 }
+// Spectacle from the shared library: a ribbon behind the ball, a spark crack and a shock ring off the
+// paddle (bigger as the rally grows), dust off the wall, a lamp that bursts in glass and sparks with
+// tumbling debris when the ball smashes it, fireworks over the cage when every lamp is out, and a
+// scuff of dust when a ball gets past. No fire anywhere near the people.
+let VFX = null, VTR = null;
+const _vp = new THREE.Vector3(), _vn = new THREE.Vector3(0, 1, 0), _vw = new THREE.Vector3(0, 0, -1), _vf = new THREE.Vector3(0, 0, 1);
+// the effects library is created a few frames after the menu is up, so the menu paints first
+function buildVFX() {
+  try { VFX = createVFX(R3.renderer, R3.scene, R3.camera, { quality: R3.q, unit: 1, groundY: 0, soft: R3.soft, reduced: !!arc.reducedMotion }); VFX.warm(); } catch (e) { VFX = null; }
+}
+const VX = {
+  paddle(b) {
+    if (!VFX) return;
+    _vp.set(WX(b.x), PAD_H + 0.05, WZ(b.y) + 0.12);
+    VFX.impact(_vp, _vf, { kind: 'spark', color: '#ffb070', size: 0.35 + min(0.5, G.rally * 0.04) });
+    VFX.ring(_vp, '#ffd090', { size: 0.6 + min(0.8, G.rally * 0.06), normal: _vf, kind: 'shock' });
+    if (G.rally > 0 && G.rally % 10 === 0) { _vp.y += 0.6; VFX.burst(_vp, { color: '#ffb736', size: 0.9 }); }
+  },
+  wall(b) { if (!VFX) return; _vp.set(WX(b.x), BH.h, WALL_Z - 0.05); VFX.impact(_vp, _vw, { kind: 'dust', color: '#d9c9ae', size: 0.35 }); },
+  lamp(l) {
+    if (!VFX) return;
+    _vp.set(WX(l.x), LAMP_H, WZ(l.y));
+    VFX.impact(_vp, _vn, { kind: 'glass', size: 0.6 });
+    VFX.explosion(_vp, { size: 0.28, color: '#ffc070' });
+  },
+  relight() {
+    if (!VFX) return;
+    for (let i = 0; i < 3; i++) { _vp.set(-2.6 + i * 2.6, 5.6 + i * 0.5, WZ(0.12)); VFX.fireworks(_vp, { burst: i === 1 ? 'chrysanthemum' : 'peony', size: 0.8, color: i === 1 ? '#ffb736' : '#ff6940', launch: true, delay: i * 0.3 }); }
+    _vp.set(0, 2.5, 4); VFX.confetti(_vp, { count: 160, size: 1, colors: ['#ffb736', '#ff6940', '#fbf5ec', '#c22a5a'] });
+    if (!arc.reducedMotion) VFX.timeWarp(0.5, 1);
+  },
+  drop(x) { if (!VFX) return; _vp.set(WX(x), 0.05, -0.6); VFX.dust(_vp, { size: 0.8, color: '#9c8a70' }); },
+  tick(dt) {
+    if (!VFX) return;
+    const live = !!(G.ball && G.phase === 'play');
+    if (live && !VTR) VTR = VFX.trail(W.ball, { color: '#fff2d8', width: 0.18, life: 0.3, core: 0.75 });
+    else if (!live && VTR) { VTR.stop(); VTR = null; }
+    VFX.setReduced(!!arc.reducedMotion);
+    VFX.update(dt);
+  },
+};
 const FXK = {
   paddle(b, off) {
+    VX.paddle(b);
     G.hitT = 0; G.hitOff = off || 0;
     if (!FX.add) return;
     const x = WX(b.x), z = WZ(b.y) + 0.1, y = PAD_H + 0.05;
@@ -426,6 +489,7 @@ const FXK = {
   },
   wall(b) {
     G.wallT = 0; G.wallX = b.x; G.wallH = BH.h;
+    wallSmudge(WX(b.x), BH.h); VX.wall(b);
     if (!FX.norm) return;
     const x = WX(b.x), y = BH.h;
     for (let i = 0; i < 10; i++) FX.norm.add(x + rr(-0.1, 0.1), y + rr(-0.1, 0.1), WALL_Z - 0.06, rr(-0.8, 0.8), rr(-0.4, 0.9), rr(-1.4, -0.3), rr(0.35, 0.7), rr(0.05, 0.1), COL.dust, 0.5, 2, 0.94);
@@ -437,6 +501,9 @@ const FXK = {
     G.cageHit = 1; G.cageSide = s;
   },
   lamp(l) {
+    VX.lamp(l);
+    if (!G.attract && rnd() < 0.5) plReact('fistPump', 0.7);
+    if (W.crowd) W.crowd.react('cheer');
     if (!FX.add) return;
     const x = WX(l.x), z = WZ(l.y), y = LAMP_H;
     const rm = arc && arc.reducedMotion;
@@ -444,6 +511,8 @@ const FXK = {
     for (let i = 0; i < (rm ? 8 : 22); i++) FX.norm.add(x, y, z, rr(-1.6, 1.6), rr(0, 2.2), rr(-1.6, 1.6), rr(0.5, 1.0), rr(0.025, 0.045), COL.glass, 0.9, 8, 0.98);
   },
   relight() {
+    VX.relight();
+    plReact('celebrate', 0.9, 0.25, 1.3); if (W.crowd) W.crowd.react('cheer');
     if (!FX.add) return;
     const rm = arc && arc.reducedMotion;
     G.lamps.forEach((l) => {
@@ -452,6 +521,8 @@ const FXK = {
     });
   },
   drop(x) {
+    VX.drop(x);
+    plReact(rnd() < 0.6 ? 'handsOnHead' : 'slump', 0.75, null, 1.5); if (W.crowd) W.crowd.react('groan');
     if (!FX.add) return;
     const wx = WX(x);
     for (let i = 0; i < 20; i++) FX.add.add(wx, 0.3, -1.2, rr(-1.5, 1.5), rr(0.3, 2), rr(-2, 0.5), rr(0.3, 0.6), rr(0.04, 0.07), COL.red, 0.9, 5, 0.95);
@@ -583,7 +654,7 @@ function buildCourt() {
   // the terrace
   const roof = new THREE.Mesh(new THREE.PlaneGeometry(30, 36), std({ map: concreteTex(), color: 0x8a8078, roughness: 0.95 }));
   roof.rotation.x = -PI / 2; roof.position.set(0, -0.01, 4); roof.receiveShadow = true; R3.scene.add(roof);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(FX1 - FX0, FZ1 - FZ0), std({ map: floorTex(), roughness: 0.55, metalness: 0.0 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(FX1 - FX0, FZ1 - FZ0), std({ map: floorTex(), roughness: 0.85, roughnessMap: floorRough(), metalness: 0.0, envMapIntensity: 0.9 }));
   floor.rotation.x = -PI / 2; floor.position.set(0, 0, (FZ0 + FZ1) / 2); floor.receiveShadow = true; R3.scene.add(floor);
   // the front wall
   const fw = new THREE.Mesh(new THREE.BoxGeometry(SIDE_X * 2 + 0.6, 5, 0.4), std({ map: frontWallTex(), roughness: 0.9 }));
@@ -676,6 +747,67 @@ function buildLamps() {
   W.lampLights = [0.28, 0.42].map((y) => { const l = new THREE.PointLight(0xffb060, 6, 9, 1.8); l.position.set(0, LAMP_H + 0.4, WZ(y)); R3.scene.add(l); return l; });
 }
 
+// Ball marks that build up on the front wall and slowly fade, haze in the flood beams, an environment
+// for the polished floor to reflect, and a soft contact shadow for the player.
+function buildAtmosphere() {
+  const n = 28, g1 = new THREE.PlaneGeometry(1, 1);
+  W.smudge = new THREE.InstancedMesh(g1, new THREE.MeshBasicMaterial({ map: smudgeTex(), transparent: true, depthWrite: false, opacity: 0.55, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), n);
+  W.smudge.frustumCulled = false; W.smudgeN = n; W.smudgeHead = 0; W.smudgeAge = new Float32Array(n).fill(99); W.smudgeS = new Float32Array(n);
+  W.smM = new THREE.Matrix4(); W.smQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), PI); W.smP = new THREE.Vector3(); W.smV = new THREE.Vector3();
+  for (let i = 0; i < n; i++) { W.smM.makeScale(0.0001, 0.0001, 0.0001); W.smudge.setMatrixAt(i, W.smM); }
+  R3.scene.add(W.smudge);
+  const hn = 200, pos = new Float32Array(hn * 3), sd = new Float32Array(hn);
+  for (let i = 0; i < hn; i++) { pos[i * 3] = rr(-SIDE_X - 1, SIDE_X + 1); pos[i * 3 + 1] = rr(0.4, 7); pos[i * 3 + 2] = rr(-3, WALL_Z); sd[i] = rnd(); }
+  const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); hg.setAttribute('aSeed', new THREE.BufferAttribute(sd, 1));
+  W.hazeU = { uTime: { value: 0 }, uK: { value: 600 } };
+  W.haze = new THREE.Points(hg, new THREE.ShaderMaterial({
+    uniforms: W.hazeU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'attribute float aSeed; uniform float uTime; uniform float uK; varying float vA; void main(){ vec3 p = position; float t = uTime * (0.05 + aSeed * 0.06);' +
+      ' p.x += sin(t * 3.1 + aSeed * 40.0) * 0.6; p.y += sin(t * 2.3 + aSeed * 17.0) * 0.35; p.z += cos(t * 2.7 + aSeed * 23.0) * 0.6;' +
+      ' float beam = 0.3 + 0.7 * smoothstep(1.0, 7.0, p.y) * exp(-pow(abs(p.x) - 3.0, 2.0) * 0.12);' +
+      ' vec4 mv = modelViewMatrix * vec4(p, 1.0); vA = beam * (0.5 + 0.5 * sin(uTime * (0.6 + aSeed) + aSeed * 30.0)) * smoothstep(0.8, 3.0, -mv.z);' +
+      ' gl_PointSize = max(1.0, (0.04 + aSeed * 0.05) * uK / max(0.3, -mv.z)); gl_Position = projectionMatrix * mv; }',
+    fragmentShader: 'varying float vA; void main(){ float d = length(gl_PointCoord - 0.5) * 2.0; if (d > 1.0) discard; float a = pow(1.0 - d, 2.0) * vA * 0.3; gl_FragColor = vec4(vec3(1.0, 0.88, 0.7) * a, a); }',
+  }));
+  W.haze.frustumCulled = false; W.haze.renderOrder = 7; R3.scene.add(W.haze);
+  if (!R3.soft) {
+    try {
+      const env = new THREE.Scene();
+      env.add(new THREE.Mesh(new THREE.SphereGeometry(30, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.05, 0.03, 0.06), side: THREE.BackSide })));
+      const hor = new THREE.Mesh(new THREE.CylinderGeometry(29, 29, 5, 24, 1, true), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.45, 0.2, 0.1), side: THREE.BackSide })); env.add(hor);
+      const lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(14, 11, 8) });
+      [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach((q) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.7), lamp); m.position.set(q[0] * 5, 7.5, q[1] * 7); m.lookAt(0, 0, 0); env.add(m); });
+      const warm = new THREE.MeshBasicMaterial({ color: new THREE.Color(5, 3.2, 1.6) });
+      for (let i = 0; i < 4; i++) { const m = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 6), warm); m.position.set(-2.2 + i * 1.5, 1.6, 3); env.add(m); }
+      const pm = new THREE.PMREMGenerator(R3.renderer);
+      R3.env = pm.fromScene(env, 0.04).texture; pm.dispose();
+      R3.scene.environment = R3.env; R3.scene.environmentIntensity = 0.65;
+    } catch (e) { /* plain lighting */ }
+  }
+}
+// A fresh mark where the ball met the wall; the oldest is reused.
+function wallSmudge(x, y) {
+  if (!W.smudge) return;
+  const i = W.smudgeHead; W.smudgeHead = (W.smudgeHead + 1) % W.smudgeN;
+  if (!W.smudgePos) W.smudgePos = new Float32Array(W.smudgeN * 3);
+  W.smudgeAge[i] = 0; W.smudgeS[i] = rr(0.16, 0.26);
+  W.smudgePos[i * 3] = x + rr(-0.03, 0.03); W.smudgePos[i * 3 + 1] = y + rr(-0.03, 0.03); W.smudgePos[i * 3 + 2] = WALL_Z - 0.004 - i * 0.0002;
+}
+// Marks darken in at once, hold, then fade over half a minute.
+function tickSmudges(dt) {
+  if (!W.smudge || !W.smudge.visible || !W.smudgePos) return;
+  let any = false;
+  for (let i = 0; i < W.smudgeN; i++) {
+    const a = W.smudgeAge[i]; if (a > 40) continue;
+    W.smudgeAge[i] = a + dt; any = true;
+    const k = clamp(1 - (a - 10) / 30, 0, 1), sz = W.smudgeS[i] * (0.85 + 0.15 * clamp(a * 6, 0, 1)) * k;
+    W.smV.set(W.smudgePos[i * 3], W.smudgePos[i * 3 + 1], W.smudgePos[i * 3 + 2]);
+    W.smP.set(max(0.0001, sz), max(0.0001, sz * 0.8), 1);
+    W.smM.compose(W.smV, W.smQ, W.smP); W.smudge.setMatrixAt(i, W.smM);
+  }
+  if (any) W.smudge.instanceMatrix.needsUpdate = true;
+}
+
 function buildPaddle() {
   const g = new THREE.Group(); R3.scene.add(g); W.paddle = g;
   const len = 0.26 * WC;
@@ -721,41 +853,91 @@ function buildBall() {
   W.trail.frustumCulled = false; R3.scene.add(W.trail);
 }
 
-// A handful of neighbours watching from the terrace, cheering on long rallies.
-function buildCrowd() {
-  const spots = [];
-  for (let i = 0; i < 7; i++) { spots.push([-(SIDE_X + 1.3 + (i % 2) * 0.7), 1.5 + i * 1.25, 1]); spots.push([SIDE_X + 1.3 + ((i + 1) % 2) * 0.7, 2.1 + i * 1.2, -1]); }
-  const n = spots.length;
-  const shirt = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.17, 0.34, 4, 10), std({ color: 0xffffff, roughness: 0.8 }), n);
-  const legs = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.065, 0.62, 4, 8), std({ color: 0x24262c, roughness: 0.85 }), n * 2);
-  const arms = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.05, 0.42, 4, 8), std({ color: 0x8a5a3c, roughness: 0.6 }), n * 2);
-  const head = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11, 12, 10), std({ color: 0x8a5a3c, roughness: 0.6 }), n);
-  const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.115, 12, 8, 0, TAU, 0, PI * 0.5), std({ color: 0x15100d, roughness: 0.9 }), n);
-  const cols = ['#c22a5a', '#e07a2a', '#1f6b5a', '#f2b13a', '#3a4a8a', '#d9c9ae', '#7a2a18'];
-  spots.forEach((s, i) => { shirt.setColorAt(i, new THREE.Color(cols[i % cols.length])); });
-  [shirt, legs, arms, head].forEach((m) => { m.castShadow = true; R3.scene.add(m); });
-  R3.scene.add(hair);
-  W.crowd = { shirt, legs, arms, head, hair, spots, ph: spots.map(() => rnd() * TAU), m: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), sc: new THREE.Vector3(1, 1, 1) };
+// The player behind the paddle and the neighbours on the terrace, from the shared people library.
+// The player holds the paddle by its handle like an oversized racquet, shuffles with it, sets low as
+// the ball comes back, drives through the hit and reacts to lamps and drops a beat after they happen.
+const PL = { x: 0, vx: 0, yaw: 0, cr: 0, push: 0, w: 1, pend: null, reacting: null };
+const _lk = new THREE.Vector3(), _ha = new THREE.Vector3(), _hb = new THREE.Vector3(), _up3 = new THREE.Vector3(0, 1, 0);
+function humanQ() { return R3.soft ? 0 : R3.q >= 2 ? 3 : 2; }
+function buildPlayer() {
+  const H = createHuman({ seed: 14, quality: humanQ(), sex: 'm', build: 'athletic', height: 1.76, hair: 'curly',
+    outfit: { top: '#ff6940', top2: '#c9a96e', sleeves: 'short', bottom: '#1d1a18', legs: 'shorts', socks: '#f2ede4', shoes: '#f6f2ea', soles: '#ff6940' } });
+  H.group.position.set(0, 0, -1.05); R3.scene.add(H.group); PL.H = H;
+  // the paddle's throat: two struts from the frame that meet at a wrapped grip in the hands
+  const m = std({ color: 0x2a2420, roughness: 0.45, metalness: 0.6 });
+  const sg = new THREE.CylinderGeometry(0.022, 0.022, 1, 8); sg.translate(0, 0.5, 0);
+  PL.struts = [new THREE.Mesh(sg, m), new THREE.Mesh(sg, m)];
+  PL.struts.forEach((x) => { x.castShadow = true; R3.scene.add(x); });
+  PL.grip = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.26, 10), std({ color: 0x1d1a18, roughness: 0.9 }));
+  PL.grip.castShadow = true; R3.scene.add(PL.grip);
 }
-function animCrowd(t) {
+function plReact(name, k, delay, speed) { PL.pend = { name, k: k || 1, at: R3.time + (delay == null ? 0.18 + rnd() * 0.15 : delay), speed: speed || 1.25 }; }
+function posePlayer(dt) {
+  const H = PL.H; if (!H) return;
+  const padX = WX(G.px), b = G.ball;
+  const px = PL.x; PL.x = lerp(PL.x, padX, 1 - Math.exp(-dt * 16));
+  const vx = dt > 0 ? (PL.x - px) / dt : 0; PL.vx = lerp(PL.vx, vx, 1 - Math.exp(-dt * 10));
+  // turn a little into the shuffle, square up when still
+  PL.yaw = lerp(PL.yaw, clamp(PL.vx * 0.12, -0.45, 0.45), 1 - Math.exp(-dt * 8));
+  H.group.position.set(PL.x, 0, -1.05); H.group.rotation.y = PL.yaw;
+  // ready crouch while the ball comes back to the paddle, a push through the hit
+  const coming = b && G.phase === 'play' && b.vy > 0 ? clamp((b.y - 0.45) / 0.4, 0, 1) : 0;
+  PL.cr = lerp(PL.cr, 0.25 + coming * 0.35, 1 - Math.exp(-dt * 6));
+  const hit = clamp(1 - G.hitT / 0.35, 0, 1);
+  PL.push = hit > 0 ? sin(hit * PI) : 0;
+  if (PL.pend && R3.time >= PL.pend.at) { H.play(PL.pend.name, { intensity: PL.pend.k, speed: PL.pend.speed }); PL.reacting = PL.pend.name; PL.pend = null; }
+  if (PL.reacting && (!H.playing(PL.reacting) || (G.phase === 'play' && b && b.vy > 0 && b.y > 0.6))) { if (H.playing(PL.reacting)) H.stop(PL.reacting); PL.reacting = null; }
+  PL.w = lerp(PL.w, PL.reacting ? 0 : 1, 1 - Math.exp(-dt * (PL.reacting ? 10 : 6)));
+  H.setMood(clamp(G.rally / 12, 0, 0.8) - clamp(1 - G.dropT / 2, 0, 1) * 0.6);
+  if (b) _lk.set(WX(b.x), BH.h, WZ(b.y)); else _lk.set(0, 1, 6);
+  H.update(dt, { speed: Math.abs(PL.vx) * 0.55, turn: 0, look: _lk });
+  const B = H.bones, w = PL.w, cr = PL.cr * w, ps = PL.push * w;
+  B.pelvis.position.y -= cr * 0.2;
+  B.hipL.rotation.x += -cr * 0.9; B.hipR.rotation.x += -cr * 0.9;
+  B.kneeL.rotation.x += cr * 1.55; B.kneeR.rotation.x += cr * 1.55;
+  B.ankleL.rotation.x += -cr * 0.62; B.ankleR.rotation.x += -cr * 0.62;
+  B.spine.rotation.x += cr * 0.35 + ps * 0.15;
+  // both hands on the grip in front of the hips
+  const shx = -0.62 - ps * 0.45, elx = -0.55 + ps * 0.4;
+  const A = [[B.shoulderL, B.elbowL, -1], [B.shoulderR, B.elbowR, 1]];
+  for (let i = 0; i < 2; i++) {
+    const s0 = A[i][0], e0 = A[i][1];
+    s0.rotation.x = lerp(s0.rotation.x, shx, w); s0.rotation.y = lerp(s0.rotation.y, 0, w);
+    s0.rotation.z = lerp(s0.rotation.z, A[i][2] * 0.32, w); e0.rotation.x = lerp(e0.rotation.x, elx, w);
+  }
+  H.group.updateMatrixWorld(true);
+  // the grip sits between the hands; the struts run from it to the paddle frame
+  B.fingersL.getWorldPosition(_ha); B.fingersR.getWorldPosition(_hb);
+  _ha.add(_hb).multiplyScalar(0.5);
+  const show = w > 0.5;
+  PL.grip.visible = show; PL.struts[0].visible = show; PL.struts[1].visible = show;
+  if (!show) return;
+  PL.grip.position.copy(_ha); PL.grip.rotation.set(0, PL.yaw, PI / 2);
+  const pz = W.paddle.position.z - 0.13, py = W.paddle.position.y + 0.02;
+  for (let k = 0; k < 2; k++) {
+    const st = PL.struts[k];
+    st.position.set(padX + (k ? 0.32 : -0.32), py, pz);
+    _hb.subVectors(_ha, st.position); const len = _hb.length();
+    st.scale.set(1, len, 1); st.quaternion.setFromUnitVectors(_up3, _hb.multiplyScalar(1 / Math.max(1e-4, len)));
+  }
+}
+
+// The neighbours on the terrace: each keeps their own time, cheers long rallies a beat late, groans at a drop.
+function buildCrowd() {
+  const members = [];
+  for (let i = 0; i < 7; i++) {
+    [[-(SIDE_X + 1.3 + (i % 2) * 0.7), 1.5 + i * 1.25], [SIDE_X + 1.3 + ((i + 1) % 2) * 0.7, 2.1 + i * 1.2]].forEach((q) => members.push({ x: q[0], y: 0, z: q[1], yaw: Math.atan2(0 - q[0], 4.5 - q[1]) }));
+  }
+  W.crowd = createCrowd({ members, unit: 1, seed: 21, quality: humanQ(), seated: false, colors: ['#c22a5a', '#e07a2a', '#1f6b5a', '#f2b13a', '#3a4a8a'] });
+  W.crowd.mesh.castShadow = true; R3.scene.add(W.crowd.mesh);
+}
+function animCrowd(t, dt) {
   const C = W.crowd; if (!C) return;
   const hype = clamp(G.rally / 10, 0, 1) + clamp(1 - G.relit / 1.5, 0, 1);
-  const rm = arc.reducedMotion;
-  const put = (mesh, i, x, y, z, rx, rz, ry) => { C.e.set(rx || 0, ry || 0, rz || 0); C.q.setFromEuler(C.e); C.p.set(x, y, z); C.m.compose(C.p, C.q, C.sc); mesh.setMatrixAt(i, C.m); };
-  C.spots.forEach((s, i) => {
-    const ph = C.ph[i];
-    const jump = rm ? 0 : max(0, sin(t * (4 + hype * 4) + ph)) * 0.1 * hype;
-    const sway = rm ? 0 : sin(t * 1.3 + ph) * 0.03;
-    const face = s[2] > 0 ? -PI / 2 : PI / 2;
-    const x = s[0] + sway, z = s[1], y = jump;
-    put(C.legs, i * 2, x, 0.4 + y, z - 0.08, 0, 0, face); put(C.legs, i * 2 + 1, x, 0.4 + y, z + 0.08, 0, 0, face);
-    put(C.shirt, i, x, 1.06 + y, z, 0, 0, face);
-    put(C.head, i, x, 1.52 + y, z, 0, 0, face); put(C.hair, i, x, 1.535 + y, z, 0, 0, face);
-    const cheer = rm ? 0.3 : clamp(hype, 0, 1) * (0.6 + 0.4 * sin(t * 6 + ph));
-    put(C.arms, i * 2, x, 1.1 + y + cheer * 0.25, z - 0.21, -cheer * 2.6, 0, 0);
-    put(C.arms, i * 2 + 1, x, 1.1 + y + cheer * 0.25, z + 0.21, cheer * 2.6, 0, 0);
-  });
-  [C.legs, C.shirt, C.head, C.hair, C.arms].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+  C.excite(clamp(0.12 + hype * 0.8, 0, 1));
+  const b = G.ball;
+  if (b) _lk.set(WX(b.x), BH.h, WZ(b.y)); else _lk.set(0, 1, 5);
+  C.update(dt, { look: _lk });
 }
 
 function buildLights() {
@@ -801,12 +983,14 @@ function initRenderer() {
     R3.camera = new THREE.PerspectiveCamera(46, arc.w / arc.h, 0.1, 900);
     R3.glow = glowTex();
     colorsInit();
-    buildSky(); buildCity(); buildCourt(); buildFloodlights(); buildLamps(); buildPaddle(); buildBall(); buildCrowd(); buildLights();
+    buildSky(); buildCity(); buildCourt(); buildFloodlights(); buildLamps(); buildPaddle(); buildBall(); buildLights(); buildAtmosphere();
+    // the player, the neighbours and the effects arrive a frame apiece once the menu is up
+    R3.late = [buildPlayer, buildCrowd, buildVFX];
     FX.add = new FxPool(800, true); FX.norm = new FxPool(600, false);
     R3.camPos = new THREE.Vector3(0, 4, -7); R3.camLook = new THREE.Vector3(0, 0.6, 5);
     R3.proj = new THREE.Vector3(); R3.v = new THREE.Vector3();
     // Shared post pass: bloom on the floodlights and lamps, grade, grain; the camera swings onto the court at the start.
-    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.85, up: 0.45, back: 0.4 }, results: { yaw: 0.3 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.62, threshold: 0.68 } });
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.85, up: 0.45, back: 0.4 }, results: { yaw: 0.3 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.58, threshold: 0.7, vignette: 0.26, sat: 0.97, contrast: 1.04, lift: [0.008, 0.012, 0.026], gain: [1.03, 1.0, 0.96], grain: 0.03 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
@@ -827,6 +1011,10 @@ function applyQuality() {
   if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
   if (W.lampLights) W.lampLights.forEach((l) => { l.visible = R3.q >= 1; });
   if (W.padLight) W.padLight.visible = R3.q >= 2;
+  if (W.haze) W.haze.visible = R3.q >= 2;
+  if (W.smudge) W.smudge.visible = R3.q >= 1;
+  if (R3.env) R3.scene.environment = R3.q >= 1 ? R3.env : null;
+  if (VFX) VFX.setQuality(R3.q);
 }
 
 function cameraRig(dt) {
@@ -840,7 +1028,8 @@ function cameraRig(dt) {
     px = padX * 0.25; py = 9.4; pz = -4.6; lx = padX * 0.2; ly = 0; lz = 7.9;
   } else {
     fov = clamp(2 * Math.atan(Math.tan(31 * PI / 180) / asp) * 180 / PI, 34, 50);
-    px = padX * 0.35; py = 6.4; pz = -6.4; lx = padX * 0.25; ly = 0.2; lz = 4.6;
+    // high enough that the player's head never hides the middle of the paddle
+    px = padX * 0.35; py = 7.3; pz = -6.6; lx = padX * 0.25; ly = 0.2; lz = 4.9;
   }
   // a little life: drift toward the ball's side and a breath of zoom on long rallies
   if (b && !rm) { lx += WX(b.x) * 0.08; fov *= 1 - clamp(G.rally / 30, 0, 1) * 0.05; }
@@ -927,9 +1116,13 @@ function frame3D(dt) {
   W.lampGlows.forEach((g, i) => { g.material.opacity = 0.75 + (rm ? 0 : sin(t * 3 + i) * 0.03); });
   const blink = rm ? 1 : 0.4 + 0.6 * (sin(t * 2.5) > 0 ? 1 : 0.15);
   W.redLights.material.color.setRGB(blink, 0.19 * blink, 0.12 * blink);
-  animCrowd(t);
+  posePlayer(dt);
+  animCrowd(t, dt);
+  tickSmudges(dt);
+  if (W.haze.visible) { W.hazeU.uTime.value = t; W.hazeU.uK.value = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360)); }
   const fdt = dt * (G.slow > 0 ? 0.4 : 1);
   FX.add.step(fdt); FX.norm.step(fdt);
+  VX.tick(dt);
   cameraRig(dt);
   const uk = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360));
   FX.add.u.uK.value = FX.norm.u.uK.value = uk; W.trailU.uK.value = uk;
@@ -1040,6 +1233,7 @@ function render(c) {
   R3.last = now;
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
+    if (R3.late && R3.late.length && arc.frame > 2) { try { R3.late.shift()(); if (!R3.late.length) applyQuality(); } catch (e) { R3.late.length = 0; } }
     try { frame3D(arc.state === 'pause' ? 0 : dt); if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
   if (G.dropT < 0.5 && !arc.reducedMotion) {

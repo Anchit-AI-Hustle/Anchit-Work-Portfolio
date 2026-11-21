@@ -147,6 +147,83 @@ entirely by obeying this.
 - Every animation must be disabled under `@media (prefers-reduced-motion: reduce)`
   and under `html[data-motion="off"]`, which the Motion toggle sets.
 
+### The turn
+
+Moving between views, and between pages, is **one motion with one timing**:
+the incoming surface rises 14px and fades in over 420ms on
+`cubic-bezier(.22, 1, .36, 1)`. Nothing else starts on that frame.
+
+- **Views** (`index.html`): the single `viewIn` animation on `.view.active`.
+  The router calls `window.__quiet(440)`, which holds the scroll governor for
+  the length of the turn, so the aura, the canvases and the frosted chrome stand
+  down and light back up once it lands. One 22vw light band (`.view-wipe`)
+  crosses the frame and is `visibility: hidden` between jumps.
+- **Pages**: `scripts/build-www.mjs` writes a `<style id="page-turn">` into the
+  head of every built page, opting it into a cross-document view transition
+  with the same curve. It must be in the parsed head of both documents, so it
+  is build-time, never script-injected. Browsers without support cut, as before.
+- Both are off under `prefers-reduced-motion` and `html[data-motion="off"]`.
+
+Do not stack a second entrance on the view. This page once ran three at once
+(a fade-up, a perspective tilt and this one), a `filter: brightness()` tween
+on the whole view and a four-layer full-screen wipe, and a route change drew
+about 26 render passes a frame. Depth belongs to the blocks inside the view,
+which are small; a 3D transform on a page-tall layer is the most expensive
+thing a route change can ask for.
+
+**No `mix-blend-mode` on repeating surfaces.** A blend mode isolates its
+element into an offscreen surface that is composited every frame, at rest.
+Over a near-black panel `screen` and plain alpha are the same picture.
+
+### Runtime budget
+
+The three concept storefronts were reported as "laggy" and "broken" on a laptop
+that measured fine in a headless browser. With nobody touching the page, each
+home spent 400-660 ms of every second redrawing shaders, restyling a whole film
+and repainting SVG loops. These rules are what fixed it, and
+`npm run test:storefront-motion` holds the storefronts to them.
+
+- **Idle is idle.** With nobody scrolling, pointing or typing, a page that is
+  not playing a film on purpose does under ~40 ms of main-thread work per
+  second (Deli and Gram measure 1). Measure it, with Chrome's
+  `Performance.getMetrics` TaskDuration, not by eye.
+- **Effects move while the visitor does.** A WebGL or canvas background draws on
+  load and on scroll, pointer and touch, then holds its last frame 2.5s after
+  the visitor stops. A film that plays on its own drops to 30fps on phones and
+  12fps when the visitor is still, with its clock cap raised so cuts stay on
+  time.
+- **Every new wake-up listener honours reduced motion.** A scroll listener that
+  restarts a loop is a reduced-motion bug unless it returns early under
+  `prefers-reduced-motion: reduce`.
+- **Scroll handlers are gated and cheap.** They run only while their section is
+  on screen (IntersectionObserver), never read layout every frame (measure on
+  resize and cache), and do work only when the outcome changes.
+- **Per-frame values go on the element that uses them.** A custom property on
+  any container restyles everything inside it, not only on `:root`. Write the
+  transform to the three shots, not `--zoom` to the film.
+- **Pinned scroll stories step between whole scenes.** Scroll picks the scene;
+  each scene is a fully composed pose and the stylesheet glides to it in one
+  transition. A story that interpolates every layer on every frame spends most
+  of its scroll range half-dissolved with its caption faded out between steps,
+  which a visitor screenshots as broken. Check that the last pose actually
+  shows the destination the caption names. The glide between scenes (0.5-0.8s)
+  is a cinematic move, not a UI transition, so the 150-260ms rule above does
+  not apply to it.
+- **No backdrop blur over moving content.** Each blur is redone every frame the
+  page moves under it. None on phones and tablets (`max-width: 1024px`,
+  `pointer: coarse`), none behind an opaque background, never full-screen.
+- **SVG shapes are not composited.** `transform`/`opacity` animations on SVG
+  children repaint the whole drawing, and re-lay it out, every frame. No
+  infinite SVG loops, and hold them still on phones.
+- **Rotate the element, not its gradient.** Changing a `conic-gradient`'s angle
+  repaints it every frame; rotating the element costs nothing.
+- **No forever-pulsing status dots.** A pulsing dot inside a blurred badge is a
+  full re-blur 60 times a second, and a pulsing "live" dot on static data is a
+  false claim anyway.
+- **Canvas backing store and CSS box share an aspect ratio.** A one-screen
+  backing store stretched over a 1,516px hero is a smear. Soft effects render at
+  1x on phones and at most 1.25x on large screens.
+
 ### Arrival choreography
 
 Blocks arrive **one at a time**, and their children arrive one at a time inside

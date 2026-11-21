@@ -1,6 +1,6 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
-import { boot, SPIRITS, BONUS, WALL, TAU, clamp } from '/games/laddoo-dash/core.js';
+import { boot, SPIRITS, BONUS, WALL, TAU, clamp, DX, DY } from '/games/laddoo-dash/core.js';
 
 /*
  * Laddoo Dash in 3D. The rules live in core.js; this file builds the maze of
@@ -46,6 +46,24 @@ function merge(list) {
   out.setAttribute('color', new THREE.BufferAttribute(col, 3));
   out.computeBoundingSphere();
   return out;
+}
+// Flagstones: an uneven grid of stones, each its own tone, with mortar, grit and chipped edges.
+function stoneFlags(g, w, nx, seed, base) {
+  const r = rng(seed), cs = w / nx;
+  g.fillStyle = '#120c0a'; g.fillRect(0, 0, w, w);
+  for (let j = 0; j < nx; j++) for (let i = 0; i < nx; i++) {
+    const off = (j % 2) * cs * 0.5, x = i * cs + off - (j % 2 && i === nx - 1 ? 0 : 0), y = j * cs;
+    const v = 0.78 + r() * 0.4;
+    _c.set(base).multiplyScalar(v); _c.r = Math.min(1, _c.r * (0.96 + r() * 0.1)); _c.b *= 0.94 + r() * 0.08;
+    g.fillStyle = '#' + _c.getHexString();
+    const pad = 3 + r() * 2;
+    for (let k = -1; k <= 0; k++) g.fillRect(x + pad + k * w, y + pad, cs - pad * 2, cs - pad * 2);
+    if (off) g.fillRect(x + pad - w, y + pad, cs - pad * 2, cs - pad * 2);
+    for (let q = 0; q < 6; q++) { g.fillStyle = 'rgba(0,0,0,' + (0.05 + r() * 0.08) + ')'; const cx = x + r() * cs, cy = y + r() * cs, rr = cs * (0.12 + r() * 0.3); g.beginPath(); g.ellipse(cx % w, cy, rr, rr * (0.5 + r() * 0.5), r() * 3, 0, TAU); g.fill(); }
+  }
+  for (let i = 0; i < 5000; i++) { const v = r(); g.fillStyle = v < 0.5 ? 'rgba(255,236,214,' + (0.03 + r() * 0.06) + ')' : 'rgba(0,0,0,' + (0.06 + r() * 0.1) + ')'; g.fillRect(r() * w, r() * w, 1 + r() * 1.5, 1 + r() * 1.5); }
+  g.strokeStyle = 'rgba(0,0,0,0.25)'; g.lineWidth = 1;
+  for (let i = 0; i < 40; i++) { const x = r() * w, y = r() * w; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 30, y + (r() - 0.5) * 30); g.stroke(); }
 }
 function canvasTex(w, h, draw, o) {
   o = o || {};
@@ -131,20 +149,18 @@ function initRenderer(a) {
   sky.frustumCulled = false; sky.renderOrder = -10; scene.add(sky);
   R.sky = sky; R.skyU = skyU;
   // the far ground: a dark glossy plain with a fading neon grid, so the maze floats in a place
-  const groundTex = canvasTex(256, 256, (g, w) => {
-    g.fillStyle = '#07040c'; g.fillRect(0, 0, w, w);
-    g.strokeStyle = 'rgba(160,110,255,0.22)'; g.lineWidth = 2; g.strokeRect(1, 1, w - 2, w - 2);
-    g.strokeStyle = 'rgba(255,80,160,0.08)'; g.lineWidth = 1; g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, w); g.moveTo(0, w / 2); g.lineTo(w, w / 2); g.stroke();
-  });
-  groundTex.repeat.set(40, 40);
+  // the courtyard the maze stands in: worn sandstone flags, mortar lines, grit and a little wear
+  // a software renderer pays for every texel it filters: a smaller picture and no anisotropic filtering there
+  const groundTex = R.soft ? canvasTex(256, 256, (g, w) => stoneFlags(g, w, 4, 5, '#5e4c42'), { aniso: 1 }) : canvasTex(512, 512, (g, w) => stoneFlags(g, w, 4, 5, '#5e4c42'), { aniso: 8 });
+  groundTex.repeat.set(40, 40); R.groundTex = groundTex;
   // ?q=0..3 pins a quality level (posters, tests). Full detail at 2 or 3 also means the lit materials, even on a software renderer.
   const qp = (location.search.match(/[?&]q=(\d)/) || [])[1];
   R.forceQ = qp == null ? -1 : clamp(+qp, 0, 3);
   R.cheap = R.soft && !(R.forceQ >= 2);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160).rotateX(-Math.PI / 2), R.cheap ? new THREE.MeshBasicMaterial({ map: groundTex, color: '#ffffff' }) : new THREE.MeshStandardMaterial({ map: groundTex, color: '#ffffff', roughness: 0.42, metalness: 0.35 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160).rotateX(-Math.PI / 2), R.cheap ? new THREE.MeshBasicMaterial({ map: groundTex, color: '#ffffff' }) : new THREE.MeshStandardMaterial({ map: groundTex, color: '#ffffff', roughness: 0.82, metalness: 0.0 }));
   ground.position.y = -1.1; ground.receiveShadow = false; scene.add(ground);
   R.ground = ground;
-  R.post = createPost(renderer, { arc: a, intro: { dist: 16, yaw: 0.55, dur: 2.0 }, results: { dist: 16 }, target: (v) => { v.set(R.cam.tx, 0, R.cam.tz); return true; }, look: { bloom: 0.75, bloomWide: 0.5, threshold: 0.6, knee: 0.25, vignette: 0.36, grain: 0.03, sat: 1.1, contrast: 1.06, lift: [0.01, 0.006, 0.03], gain: [1.02, 0.99, 1.03] } });
+  R.post = createPost(renderer, { arc: a, intro: { dist: 16, yaw: 0.55, dur: 2.0 }, results: { dist: 16 }, target: (v) => { v.set(R.cam.tx, 0, R.cam.tz); return true; }, look: { bloom: 0.66, bloomWide: 0.45, threshold: 0.62, knee: 0.25, vignette: 0.36, grain: 0.032, sat: 0.97, contrast: 1.05, lift: [0.012, 0.012, 0.026], gain: [1.04, 1.0, 0.96] } });
   return true;
 }
 
@@ -299,7 +315,7 @@ function buildMazeGeo(M) {
     part(new THREE.PlaneGeometry(ph * 2, D), M.glass, [pw, -D / 2, 0], [0, Math.PI / 2, 0]),
     part(new THREE.PlaneGeometry(ph * 2, D), M.glass, [-pw, -D / 2, 0], [0, -Math.PI / 2, 0])
   ]);
-  { const n = plat.attributes.position.count, u = new Float32Array(n * 2); for (let i = 0; i < n; i++) { u[i * 2] = 0.01; u[i * 2 + 1] = 0.99; } plat.setAttribute('uv', new THREE.BufferAttribute(u, 2)); }
+  { const n = plat.attributes.position.count, pa = plat.attributes.position, u = new Float32Array(n * 2); for (let i = 0; i < n; i++) { u[i * 2] = (pa.getX(i) + pa.getZ(i)) * 0.45; u[i * 2 + 1] = pa.getY(i) * 0.45; } plat.setAttribute('uv', new THREE.BufferAttribute(u, 2)); }
   return { geo, ng, sg, plat };
 }
 function buildMaze(M) {
@@ -319,7 +335,10 @@ function buildMaze(M) {
     B.door = new THREE.Mesh(new THREE.BoxGeometry(1, 0.08, 0.08), doorMat);
     // the light spill is many overlapping see-through strips: lovely on a GPU, slow on a software renderer
     B.skirt.visible = !R.cheap;
-    B.plat = new THREE.Mesh(plat, wallMat);
+    // the maze stands on a sandstone plinth in the courtyard, not on more glass
+    const pt = R.groundTex ? R.groundTex.clone() : null; if (pt) { pt.repeat.set(1, 1); pt.needsUpdate = true; }
+    const platMat = R.cheap ? new THREE.MeshBasicMaterial({ map: pt, color: '#b8a89c' }) : new THREE.MeshStandardMaterial({ map: pt, color: '#d8c4b4', roughness: 0.86, metalness: 0.0 });
+    B.plat = new THREE.Mesh(plat, platMat); B.plat.receiveShadow = true;
     B.group = new THREE.Group(); B.group.add(B.walls, B.neon, B.skirt, B.floor, B.door, B.plat);
     // the reflection: the same meshes drawn upside down under the glass floor
     B.mirror = new THREE.Group(); B.mirror.scale.y = -1;
@@ -331,14 +350,15 @@ function buildMaze(M) {
     B.walls.geometry.dispose(); B.neon.geometry.dispose(); B.skirt.geometry.dispose(); B.plat.geometry.dispose(); B.plat.geometry = plat;
     B.walls.geometry = geo; B.neon.geometry = ng; B.skirt.geometry = sg; B.mWalls.geometry = geo; B.mNeon.geometry = ng;
   }
-  B.neonCol = new THREE.Color(2.2, 2.2, 2.2); B.neonMat.color.copy(B.neonCol);
-  B.skirtMat.color.set(M.neon).multiplyScalar(0.55);
+  B.neonCol = new THREE.Color(1.9, 1.9, 1.9); B.neonMat.color.copy(B.neonCol);
+  B.skirtMat.color.set(M.neon).multiplyScalar(0.45);
   B.doorMat.color.set('#ff8ad8').multiplyScalar(1.6);
   if (B.wallMat.emissive) B.wallMat.emissive.set(M.neon2).multiplyScalar(0.32);
   B.floorMat.color.set(M.floor).lerp(_c.set(R.cheap ? M.neon : '#ffffff'), R.cheap ? 0.1 : 0.12);
   TX.floor.repeat.set((M.W + 2) / 4, (M.H + 2) / 4); TX.floor.offset.set(0.5 / 4 * 0, 0);
   B.floor.scale.set(M.W + 2, 1, M.H + 2); B.floor.position.set(0, 0, 0);
   B.door.position.set(M.door.x + R.ox, WALL_H * 0.55, M.door.y + R.oz);
+  placeLamps(M);
   R.skyU.uGlow.value.set(M.neon).multiplyScalar(0.22);
   R.scene.fog.color.set(M.floor).lerp(_c.set('#0a0614'), 0.5);
   // fit the key light's shadow to the maze
@@ -414,36 +434,99 @@ function buildHero() {
   lower.push(part(new THREE.SphereGeometry(r * 0.985, 30, 15, 0, TAU, Math.PI / 2, Math.PI / 2), '#ffb81c'));
   lower.push(part(new THREE.CircleGeometry(r * 0.95, 30), '#6a0c22', [0, 0.002, 0], [-Math.PI / 2, 0, 0]));
   lower.push(part(new THREE.SphereGeometry(0.15, 14, 8), '#ff5a7a', [0, 0.012, 0.13], null, [1, 0.25, 1.1]));
-  // eyes, a little saffron tilak and a tuft of hair on top
-  [-1, 1].forEach((s) => {
-    const ex = Math.sin(0.42) * r * 0.82 * s, ey = Math.sin(0.62) * r, ez = Math.cos(0.62) * r * 0.86;
-    upper.push(part(new THREE.SphereGeometry(0.095, 14, 10), '#ffffff', [ex, ey, ez], [0, s * 0.42, 0], [1, 1.18, 0.62]));
-    upper.push(part(new THREE.SphereGeometry(0.052, 12, 8), '#1a1028', [ex + s * 0.008, ey - 0.006, ez + 0.05], null, [1, 1.15, 0.6]));
-    upper.push(part(new THREE.SphereGeometry(0.017, 8, 6), '#ffffff', [ex + s * 0.02 + 0.012, ey + 0.026, ez + 0.08]));
-    upper.push(part(new THREE.BoxGeometry(0.11, 0.022, 0.03), '#5a2a10', [ex, ey + 0.14, ez - 0.03], [0.4, s * 0.42, -s * 0.18]));
-  });
+  // a little saffron tilak and a tuft of hair on top
   upper.push(part(new THREE.SphereGeometry(0.03, 8, 6), '#e8261c', [0, Math.sin(0.78) * r, Math.cos(0.78) * r * 0.98], null, [1, 1.5, 0.5]));
   upper.push(part(new THREE.ConeGeometry(0.06, 0.2, 8), '#2a1608', [0, r + 0.05, -0.12], [-0.7, 0, 0]));
+  // eyes and brows are parts of their own, so they blink, look where the hero is about to go, and frown
+  const ey = Math.sin(0.62) * r, ez = Math.cos(0.62) * r * 0.86, exA = Math.sin(0.42) * r * 0.82;
+  const whites = [], pupils = [];
+  [-1, 1].forEach((s) => {
+    const ex = exA * s;
+    whites.push(part(new THREE.SphereGeometry(0.095, 14, 10), '#ffffff', [ex, 0, 0], [0, s * 0.42, 0], [1, 1.18, 0.62]));
+    pupils.push(part(new THREE.SphereGeometry(0.052, 12, 8), '#1a1028', [ex + s * 0.008, -0.006, 0.05], null, [1, 1.15, 0.6]));
+    pupils.push(part(new THREE.SphereGeometry(0.017, 8, 6), '#ffffff', [ex + s * 0.02 + 0.012, 0.026, 0.08]));
+  });
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.08, emissive: '#ff9d1a', emissiveIntensity: R.cheap ? 0.5 : 0.1 });
-  const mk = () => {
+  R.heroUpGeo = merge(upper); R.heroLoGeo = merge(lower);
+  R.heroEyeGeo = merge(whites); R.heroPupGeo = merge(pupils);
+  R.heroBrowGeo = part(new THREE.BoxGeometry(0.11, 0.022, 0.03), '#5a2a10');
+  const mk = (brows) => {
     const g = new THREE.Group(), body = new THREE.Group();
     const up = new THREE.Mesh(R.heroUpGeo, mat), lo = new THREE.Mesh(R.heroLoGeo, mat);
     up.castShadow = lo.castShadow = true;
+    const eyes = new THREE.Group(); eyes.position.set(0, ey, ez);
+    const wh = new THREE.Mesh(R.heroEyeGeo, mat), pu = new THREE.Mesh(R.heroPupGeo, mat);
+    eyes.add(wh, pu); up.add(eyes);
+    const bl = [];
+    if (brows) [-1, 1].forEach((s) => { const b2 = new THREE.Mesh(R.heroBrowGeo, mat); b2.position.set(exA * s, 0.14, -0.03); b2.rotation.set(0.4, s * 0.42, -s * 0.18, 'YXZ'); b2.userData.s = s; up.add(b2); bl.push(b2); });
     body.add(up, lo); g.add(body);
-    return { g, body, up, lo };
+    return { g, body, up, lo, eyes, pu, bl };
   };
-  R.heroUpGeo = merge(upper); R.heroLoGeo = merge(lower);
-  const H = mk(); R.scene.add(H.g);
-  const MH = mk(); MH.up.castShadow = MH.lo.castShadow = false; R.built.mirror.add(MH.g);
-  R.hero = { H, MH, mat, squash: 0, hop: 0 };
+  const H = mk(true); R.scene.add(H.g);
+  const MH = mk(false); MH.up.castShadow = MH.lo.castShadow = false; R.built.mirror.add(MH.g);
+  // the animation state: squash on turns and stops, a lean into the run, blinks and glances
+  R.hero = { H, MH, mat, squash: 0, hop: 0, dir: -9, moving: false, turn: 0, stop: 0, lean: 0, roll: 0, lastAng: 0, blinkT: 2 + Math.random() * 3, blink: 0, look: 0, lookY: 0, brow: 0, ex: exA };
 }
+const HS = { sx: 1, sy: 1, sz: 1, pitch: 0, roll: 0, blink: 0, look: 0, lookY: 0, brow: 0 };
 function poseHeroMesh(o, x, y, z, ang, mouth, scale, spin, squash) {
   o.g.position.set(x, y, z);
   o.g.rotation.set(0, ang + spin, 0);
   o.g.scale.setScalar(Math.max(0.0001, scale * 1.1));
-  o.body.scale.set(1 + squash * 0.08, 1 - squash * 0.1, 1 + squash * 0.04);
+  o.body.scale.set((1 + squash * 0.08) * HS.sx, (1 - squash * 0.1) * HS.sy, (1 + squash * 0.04) * HS.sz);
+  o.body.rotation.set(HS.pitch, 0, HS.roll);
   const m = 0.04 + mouth * 0.62;
   o.up.rotation.x = -m; o.lo.rotation.x = m * 0.85;
+  o.eyes.scale.y = Math.max(0.08, 1 - HS.blink * 0.92);
+  o.pu.position.set(HS.look * 0.03, HS.lookY * 0.02, 0);
+  for (let i = 0; i < o.bl.length; i++) { const b = o.bl[i], s = b.userData.s; b.rotation.z = -s * (0.18 + HS.brow * 0.32); b.position.y = 0.14 + HS.brow * (HS.brow > 0 ? 0.025 : 0.02); }
+}
+// the hero's body language for this frame, from what it is doing and what is near it
+function heroAct(G, Hp, ang, dt, cut, rm) {
+  const HR = R.hero, h = G.hero;
+  const playing = G.phase === 'play' && !cut;
+  if (HR.dir === -9) HR.lastAng = ang;
+  // a change of direction: squash first, then stretch out of it (anticipation and follow through)
+  if (h.dir !== HR.dir) { if (HR.dir >= 0 && playing) HR.turn = 1; HR.dir = h.dir; }
+  if (HR.moving && !Hp.moving && playing) HR.stop = 1;
+  HR.moving = Hp.moving;
+  HR.turn *= Math.exp(-dt * 9); HR.stop *= Math.exp(-dt * 10);
+  let dA = ang - HR.lastAng; while (dA > Math.PI) dA -= TAU; while (dA < -Math.PI) dA += TAU; HR.lastAng = ang;
+  const turnRate = dt > 0 ? clamp(dA / dt, -12, 12) : 0;
+  HR.lean += ((Hp.moving ? 0.13 : 0) - HR.lean) * Math.min(1, dt * 8);
+  HR.roll += (-turnRate * 0.028 - HR.roll) * Math.min(1, dt * 10);
+  const tp = Math.sin(Math.min(1, 1 - HR.turn) * Math.PI) * HR.turn, sp = HR.stop;
+  const k = rm ? 0.4 : 1;
+  HS.sx = 1 + (0.1 * HR.turn - 0.04 * tp + 0.06 * sp) * k;
+  HS.sy = 1 + (-0.13 * HR.turn + 0.06 * tp + 0.05 * sp) * k;
+  HS.sz = 1 + (0.06 * HR.turn + 0.05 * (Hp.moving ? 1 : 0) - 0.16 * sp) * k;
+  HS.pitch = (HR.lean - sp * 0.12) * k; HS.roll = HR.roll * k;
+  // blinks: every 2 to 6 s, sometimes twice; shut tight when caught
+  HR.blinkT -= dt;
+  if (HR.blinkT <= 0) { HR.blink = 0.001; HR.blinkT = 2 + Math.random() * 4; if (Math.random() < 0.18) HR.blinkT = 0.32; }
+  if (HR.blink > 0) { HR.blink += dt / 0.15; if (HR.blink >= 1) HR.blink = 0; }
+  const shut = G.phase === 'caught' || G.phase === 'dead' ? 1 : 0;
+  HS.blink = Math.max(shut, HR.blink > 0 ? Math.sin(HR.blink * Math.PI) : 0);
+  // a happy squint and a little bounce after gulping a spirit
+  HR.joy = (HR.joy || 0) * Math.exp(-dt * 2.2);
+  if (HR.joy > 0.02) { HS.blink = Math.max(HS.blink, HR.joy * 0.6); HS.sy *= 1 + Math.sin(HR.joy * 18) * 0.06 * HR.joy * k; }
+  // where the eyes go: toward a queued turn first, then toward the nearest spirit if one is close
+  let lookA = 0, lookY = 0, brow = 0, best = 3.4 * 3.4;
+  if (playing && h.want >= 0 && h.want !== h.dir) { lookA = Math.atan2(DX[h.want], DY[h.want]) - ang; }
+  else if (playing) {
+    for (let i = 0; i < 4; i++) {
+      const S = G.pose.sp[i]; if (!S.vis || S.eyes) continue;
+      const dx = S.x - Hp.x, dz = S.y - Hp.y, d2 = dx * dx + dz * dz;
+      if (d2 < best) { best = d2; lookA = Math.atan2(dx, dz) - ang; brow = S.fright ? -0.6 : 0.8; lookY = 0.3; }
+    }
+    if (!brow && G.fright > 0) brow = -0.5;
+  }
+  while (lookA > Math.PI) lookA -= TAU; while (lookA < -Math.PI) lookA += TAU;
+  const lx = clamp(Math.sin(lookA) * 1.3, -1, 1) * (Math.cos(lookA) < -0.2 ? 1.2 : 1);
+  HR.look += (clamp(lx, -1, 1) - HR.look) * Math.min(1, dt * 18);
+  HR.lookY += (lookY - HR.lookY) * Math.min(1, dt * 10);
+  if (HR.joy > 0.2) brow = 0.3;
+  HR.brow += (brow - HR.brow) * Math.min(1, dt * 7);
+  HS.look = HR.look; HS.lookY = HR.lookY; HS.brow = HR.brow;
 }
 
 /* ------------------------------------------------------------ the spirits */
@@ -469,12 +552,13 @@ function buildSpirits() {
   for (let i = 0; i < 8; i++) pup.setColorAt(i, _c.set('#1d36ff'));
   const mbody = new THREE.InstancedMesh(bg, bm, 4); mbody.instanceMatrix = body.instanceMatrix; mbody.instanceColor = body.instanceColor; mbody.frustumCulled = false;
   R.scene.add(body, scl, pup); R.built.mirror.add(mbody);
-  R.sp = { body, mbody, scl, pup, face: new Float32Array(4), cols: SPIRITS.map((s) => new THREE.Color(s.col)), blue: new THREE.Color('#3554ff'), white: new THREE.Color('#e8ecff'), blueEye: new THREE.Color('#1d36ff') };
+  const st = [0, 1, 2, 3].map((i) => ({ dir: -1, turn: 0, pitch: 0, roll: 0, look: 0, gT: 1 + i * 1.3, gOn: 0, bf: [3.2, 2.7, 3.7, 2.3][i], ba: [0.05, 0.065, 0.04, 0.058][i], agile: [12, 9, 15, 8][i] }));
+  R.sp = { body, mbody, scl, pup, st, face: new Float32Array(4), cols: SPIRITS.map((s) => new THREE.Color(s.col)), blue: new THREE.Color('#3554ff'), white: new THREE.Color('#e8ecff'), blueEye: new THREE.Color('#1d36ff') };
 }
 function poseSpirit(i, x, y, z, ang, S, t) {
   const P = R.sp;
   const showBody = !S.eyes;
-  _q.setFromAxisAngle(UP, ang);
+  _e.set(S.pitch || 0, ang, S.roll || 0, 'YXZ'); _q.setFromEuler(_e);
   if (showBody) { _m4.compose(_p.set(x, y, z), _q, _s.set(1, 1, 1)); P.body.setMatrixAt(i, _m4); }
   else P.body.setMatrixAt(i, ZERO_M);
   const col = S.fright ? (S.flash ? P.white : P.blue) : P.cols[i];
@@ -489,7 +573,8 @@ function poseSpirit(i, x, y, z, ang, S, t) {
     P.scl.setMatrixAt(i * 2 + k, _m4);
     if (fr) P.pup.setMatrixAt(i * 2 + k, ZERO_M);
     else {
-      _v.set(s * 0.15, 0.6, 0.39).applyQuaternion(_q);
+      // the pupils lead the body: they are already on the next way before it turns
+      _v.set(s * 0.15 + (S.look || 0) * 0.07, 0.6 + (S.lookY || 0) * 0.04, 0.39 - Math.abs(S.look || 0) * 0.025).applyQuaternion(_q);
       _m4.compose(_p.set(x + _v.x, y + _v.y - 0.01, z + _v.z), _q, _s.set(1, 1.15, 0.7));
       P.pup.setMatrixAt(i * 2 + k, _m4);
     }
@@ -601,6 +686,64 @@ function stepDiyas(t, M) {
   D.m.instanceMatrix.needsUpdate = true;
 }
 
+/* ------------------------------------------------------------ clay diyas round the plinth */
+// Little oil lamps on the courtyard stones. Each flame breathes on its own, a gust now and then makes it
+// gutter, and its warm pool of light on the flags rises and falls with it; no real light is used, so this
+// costs three draws however many there are.
+const LAMP_N = 36;
+function buildLamps() {
+  const prof = [new THREE.Vector2(0.001, 0), new THREE.Vector2(0.1, 0.0), new THREE.Vector2(0.15, 0.03), new THREE.Vector2(0.17, 0.075), new THREE.Vector2(0.155, 0.08), new THREE.Vector2(0.12, 0.045), new THREE.Vector2(0.001, 0.04)];
+  const bowl = new THREE.LatheGeometry(prof, 14);
+  const bm = R.cheap ? new THREE.MeshLambertMaterial({ color: '#8a4a2a' }) : new THREE.MeshStandardMaterial({ color: '#8a4628', roughness: 0.92, metalness: 0, emissive: '#ff6a1a', emissiveIntensity: 0.08 });
+  const bowls = new THREE.InstancedMesh(bowl, bm, LAMP_N);
+  const fg = new THREE.SphereGeometry(0.07, 10, 8); fg.translate(0, 0.07, 0);
+  const fm = new THREE.MeshBasicMaterial({ color: new THREE.Color(3.2, 1.75, 0.6), toneMapped: false, fog: false });
+  const flames = new THREE.InstancedMesh(fg, fm, LAMP_N);
+  const pm = new THREE.MeshBasicMaterial({ map: TX.glow, color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), pm, LAMP_N);
+  [bowls, flames, pools].forEach((m) => { m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); });
+  pools.renderOrder = 2;
+  const r = rng(77), ph = new Float32Array(LAMP_N * 3), pos = new Float32Array(LAMP_N * 2);
+  for (let i = 0; i < LAMP_N; i++) { ph[i * 3] = r() * 100; ph[i * 3 + 1] = 0.8 + r() * 0.5; ph[i * 3 + 2] = 0; pools.setColorAt(i, _c.set('#000000')); }
+  R.scene.add(bowls, flames, pools);
+  R.lamps = { bowls, flames, pools, ph, pos, n: 0, gust: 0, gustAt: 3 };
+  if (R.M) placeLamps(R.M);
+}
+function placeLamps(M) {
+  const L = R.lamps; if (!L) return;
+  const pw = M.W / 2 + 1, ph = M.H / 2 + 1, gap = 0.55, y = -1.1;
+  // spaced along the foot of the plinth, a little irregular, the way people actually set them out
+  const per = 2 * (pw * 2 + ph * 2), step = per / LAMP_N, r = rng(13 + M.W * 7 + M.H);
+  for (let i = 0; i < LAMP_N; i++) {
+    let d = (i + 0.5) * step + (r() - 0.5) * step * 0.4, x, z;
+    if (d < pw * 2) { x = -pw + d; z = -ph - gap; } else if ((d -= pw * 2) < ph * 2) { x = pw + gap; z = -ph + d; } else if ((d -= ph * 2) < pw * 2) { x = pw - d; z = ph + gap; } else { d -= pw * 2; x = -pw - gap; z = ph - d; }
+    x += (r() - 0.5) * 0.18; z += (r() - 0.5) * 0.18;
+    L.pos[i * 2] = x; L.pos[i * 2 + 1] = z;
+    _m4.compose(_p.set(x, y, z), _q.setFromAxisAngle(UP, r() * 6), _s.set(1, 1, 1)); L.bowls.setMatrixAt(i, _m4);
+  }
+  L.bowls.instanceMatrix.needsUpdate = true; L.n = LAMP_N; L.y = y;
+}
+function stepLamps(t, dt, rm) {
+  const L = R.lamps; if (!L || !L.n || !L.flames.visible) return;
+  // a breath of wind every few seconds runs round the courtyard and makes the flames lean and dip
+  L.gustAt -= dt; if (L.gustAt <= 0) { L.gust = 1; L.gustAt = 4 + Math.random() * 6; L.gx = Math.random() < 0.5 ? -1 : 1; }
+  L.gust *= Math.exp(-dt * 1.6);
+  const pools = L.pools.visible;
+  for (let i = 0; i < L.n; i++) {
+    const p = L.ph[i * 3], sp = L.ph[i * 3 + 1], x = L.pos[i * 2], z = L.pos[i * 2 + 1];
+    const wave = L.gust * Math.max(0, Math.sin(t * 2.2 - (x * L.gx) * 0.35));
+    const n = Math.sin(t * 9.1 * sp + p) * 0.5 + Math.sin(t * 13.7 * sp + p * 1.7) * 0.3 + Math.sin(t * 23.3 + p * 2.3) * 0.2;
+    const fl = rm ? 1 : clamp(1 + n * 0.12 - wave * 0.35, 0.45, 1.25);
+    const lean = rm ? 0 : (wave * 0.5 + Math.sin(t * 3.1 + p) * 0.06) * (L.gx || 1);
+    _e.set(0, 0, lean); _q.setFromEuler(_e);
+    _m4.compose(_p.set(x, L.y + 0.07, z), _q, _s.set(0.9 + n * 0.04, fl * (1.3 + wave * 0.2), 0.9)); L.flames.setMatrixAt(i, _m4);
+    if (!pools) continue;
+    _m4.compose(_p.set(x, L.y + 0.012, z), _q.identity(), _s.set(2.8 * (0.9 + fl * 0.1), 1, 2.8 * (0.9 + fl * 0.1))); L.pools.setMatrixAt(i, _m4);
+    _c.setRGB(1.0, 0.5, 0.16).multiplyScalar(0.62 * fl); L.pools.setColorAt(i, _c);
+  }
+  L.flames.instanceMatrix.needsUpdate = true; if (pools) { L.pools.instanceMatrix.needsUpdate = true; L.pools.instanceColor.needsUpdate = true; }
+}
+
 /* ------------------------------------------------------------ the intermission stage */
 function buildStage() {
   const g = new THREE.Group(); g.visible = false;
@@ -642,10 +785,11 @@ function queueBuild() {
   Q.push(() => { buildParticles(); compile(R.parts.pts); });
   Q.push(() => { buildFruit(); R.fruit.meshes.forEach((m) => hold(m)); });
   Q.push(() => { buildDiyas(); compile(R.diyas.m); });
+  Q.push(() => { buildLamps(); compile(R.lamps.bowls); compile(R.lamps.flames); compile(R.lamps.pools); });
   Q.push(() => { buildStage(); R.stage.visible = true; compile(R.stage); R.stage.visible = false; });
   // The post pass compiles its shaders the first time it draws: do that now, behind the menu, not mid-game.
   Q.push(() => { if (!R.soft) { R.warmPost = 2; } });
-  Q.push(() => { R.ready = true; applyTier(); });
+  Q.push(() => { R.ready = true; applyTier(); loadVFX(); });
 }
 function runQueue() {
   const t0 = performance.now();
@@ -669,6 +813,7 @@ function applyTier() {
   if (R.key.castShadow && R.key.shadow.mapSize.x !== t.map) { R.key.shadow.mapSize.set(t.map, t.map); if (R.key.shadow.map) { R.key.shadow.map.dispose(); R.key.shadow.map = null; } }
   if (R.parts) R.parts.density = t.fx;
   if (R.post) R.post.setQuality(R.q, R.lockQ);
+  if (VFX) VFX.setQuality(R.q);
   resize(R.ARC);
 }
 function setQuality(q) { q = clamp(q | 0, 0, 3); if (q === R.q) return; R.q = q; applyTier(); }
@@ -774,7 +919,7 @@ function updateCamera(a, G, dt) {
 }
 
 /* ------------------------------------------------------------ the frame */
-const SPS = { fright: false, flash: false, eyes: false };
+const SPS = { fright: false, flash: false, eyes: false, pitch: 0, roll: 0, look: 0, lookY: 0 };
 function render(a, G, ctx) {
   if (!R.ok) return false;
   const now = performance.now();
@@ -822,6 +967,7 @@ function render(a, G, ctx) {
     else { x = Hp.x + R.ox; z = Hp.y + R.oz; }
     HR.hop = Hp.moving && !cut ? Math.abs(Math.sin(t * 13)) * 0.035 : 0;
     HR.squash = cut ? 0 : (Hp.moving ? mouth * 0.5 : 0);
+    if (!pause) heroAct(G, Hp, ang, dt, cut, a.reducedMotion);
     HR.H.g.visible = vis; HR.MH.g.visible = vis;
     if (vis) {
       poseHeroMesh(HR.H, x, y + HR.hop, z, ang, mouth, sc, spin, HR.squash);
@@ -839,12 +985,35 @@ function render(a, G, ctx) {
     for (let i = 0; i < 4; i++) {
       const S = G.pose.sp[i];
       let x, z, y, vis = S.vis, dir = S.dir, flash = S.flash, fright = S.fright, eyes = S.eyes;
+      const PS = P.st[i];
       if (cut) { const C = G.cut.sp[i]; vis = C.vis; x = C.x; z = 0; y = 0.04 + C.y; dir = C.dir; fright = C.fright; flash = C.flash; eyes = false; }
-      else { x = S.x + R.ox; z = S.y + R.oz; y = 0.06 + Math.sin(t * 3.2 + i * 1.7) * 0.05; }
+      else {
+        // each spirit floats to its own rhythm, never in step with the others
+        x = S.x + R.ox; z = S.y + R.oz; y = 0.06 + Math.sin(t * PS.bf + i * 1.7) * PS.ba + Math.sin(t * PS.bf * 0.37 + i) * 0.012;
+        // frightened ones tremble; the one that catches the hero gives a little hop of glee
+        if (fright && !flash && !a.reducedMotion) { x += Math.sin(t * 37 + i * 3) * 0.018; z += Math.cos(t * 41 + i) * 0.014; }
+        if (G.phase === 'caught' && !fright) y += Math.abs(Math.sin(G.pt * 11 + i)) * 0.16;
+      }
       if (!vis) { P.body.setMatrixAt(i, ZERO_M); P.scl.setMatrixAt(i * 2, ZERO_M); P.scl.setMatrixAt(i * 2 + 1, ZERO_M); P.pup.setMatrixAt(i * 2, ZERO_M); P.pup.setMatrixAt(i * 2 + 1, ZERO_M); continue; }
       const want = Math.atan2(dir === 1 ? -1 : dir === 3 ? 1 : 0, dir === 0 ? -1 : dir === 2 ? 1 : 0);
       let da = want - P.face[i]; while (da > Math.PI) da -= TAU; while (da < -Math.PI) da += TAU;
-      P.face[i] += da * Math.min(1, dt * 12);
+      // a turn: the eyes swing first, the body follows a beat later with a little brake and a lean
+      if (dir !== PS.dir) { if (PS.dir >= 0 && !cut) PS.turn = 1; PS.dir = dir; }
+      PS.turn *= Math.exp(-dt * 6);
+      const prevFace = P.face[i];
+      P.face[i] += da * Math.min(1, dt * (fright ? 14 : PS.agile));
+      let rate = P.face[i] - prevFace; while (rate > Math.PI) rate -= TAU; while (rate < -Math.PI) rate += TAU;
+      const moving = !cut && G.phase === 'play' && S.st === 'active';
+      PS.roll += (clamp(-rate / Math.max(1e-3, dt) * 0.035, -0.35, 0.35) - PS.roll) * Math.min(1, dt * 10);
+      PS.pitch += (((moving ? 0.14 : 0.02) - PS.turn * 0.22) - PS.pitch) * Math.min(1, dt * 9);
+      // now and then a spirit glances over at the hero, each on its own clock
+      PS.gT -= dt;
+      if (PS.gT <= 0) { PS.gOn = PS.gOn > 0 ? 0 : 0.45 + Math.random() * 0.5; PS.gT = PS.gOn > 0 ? PS.gOn : 2.5 + Math.random() * 5; }
+      let lk = da;
+      if (PS.gOn > 0 && moving && !fright) { const hp = G.pose.hero; lk = Math.atan2(hp.x - S.x, hp.y - S.y) - P.face[i]; }
+      while (lk > Math.PI) lk -= TAU; while (lk < -Math.PI) lk += TAU;
+      PS.look += (clamp(Math.sin(lk) * 1.4, -1, 1) - PS.look) * Math.min(1, dt * 16);
+      SPS.pitch = a.reducedMotion ? PS.pitch * 0.4 : PS.pitch; SPS.roll = a.reducedMotion ? PS.roll * 0.4 : PS.roll; SPS.look = PS.look; SPS.lookY = fright ? 0 : (PS.gOn > 0 ? 0.3 : 0);
       let tumble = 0;
       if (cut && G.cut.sp[i].tumble) tumble = G.cut.sp[i].tumble;
       SPS.fright = fright; SPS.flash = flash; SPS.eyes = eyes;
@@ -872,7 +1041,9 @@ function render(a, G, ctx) {
     }
   }
   if (R.glow) { const g = R.glow; for (let i = g.n; i < GLOW_N; i++) g.g.setMatrixAt(i, ZERO_M); g.g.instanceMatrix.needsUpdate = true; if (g.g.instanceColor) g.g.instanceColor.needsUpdate = true; }
+  if (R.lamps) { const lv = !cut && (!R.soft || R.q >= 2); R.lamps.bowls.visible = lv; R.lamps.flames.visible = lv; R.lamps.pools.visible = lv && !R.soft && R.q >= 1; }
   if (R.diyas && !pause) stepDiyas(t, M);
+  if (!pause) stepLamps(t, dt, a.reducedMotion);
   if (!pause) stepParticles(dt);
   R.skyU.uTime.value = t;
   // The play camera looks down too steeply to see the sky: draw it only for the intermission, the opening swing and the results.
@@ -883,10 +1054,24 @@ function render(a, G, ctx) {
     if (R.warmPost) { R.post.setQuality(Math.max(1, R.q), true); R.warmPost--; if (!R.warmPost) R.post.setQuality(R.q, R.lockQ); }
   }
   const t0 = performance.now();
+  if (VFX) { VFX.setReduced(a.reducedMotion); VFX.update(pause ? 0 : dt); VFX.applyShake(R.camera); }
   try { if (R.post) R.post.render(R.scene, R.camera); else R.renderer.render(R.scene, R.camera); }
-  catch (e) { if (!R.lost) console.warn(e); return false; }
+  catch (e) { if (VFX) VFX.removeShake(R.camera); if (!R.lost) console.warn(e); return false; }
+  if (VFX) VFX.removeShake(R.camera);
   R.longest = Math.max(R.longest * 0.98, performance.now() - t0);
   return true;
+}
+
+/* ------------------------------------------------------------ spectacle (shared VFX, loaded after the maze is built) */
+// A golden jalebi sends an energy ring and a glow out from the hero, a gulped spirit bursts in its own
+// colour, and a cleared maze fires fireworks over the courtyard. Loaded only after the build, no lights.
+let VFX = null;
+const _vp = new THREE.Vector3();
+function loadVFX() {
+  if (VFX !== null) return; VFX = false;
+  import('/games/shared/vfx.js').then((m) => {
+    try { const v = m.createVFX(R.renderer, R.scene, R.camera, { quality: Math.max(0, R.q), unit: 0.7, groundY: 0, lights: 0, reduced: R.ARC ? R.ARC.reducedMotion : false }); v.warm(); VFX = v; window.__vfxState = 'ok'; } catch (e) { VFX = false; window.__vfxState = 'create: ' + (e && e.message); }
+  }).catch((e) => { VFX = false; window.__vfxState = 'import: ' + (e && e.message); });
 }
 
 /* ------------------------------------------------------------ effects */
@@ -897,12 +1082,14 @@ function fxEvent(type, d, G) {
   switch (type) {
     case 'eat':
       if (d.kind === 1) { eatPellet(d.i); burst(x, 0.26, z, 5, 1.8, ['#ffc04a', '#ff9a2a', '#fff0b0'], 0.35, 0.22, 4); }
-      else { burst(x, 0.3, z, 46, 6, ['#ffd23a', '#ffaa22', '#ffffff'], 0.8, 0.5, 2, 0.6); if (R.post && !rm) { R.post.flash(0.22, '#ffcf6a'); R.post.kick(4); } }
+      else { burst(x, 0.3, z, 46, 6, ['#ffd23a', '#ffaa22', '#ffffff'], 0.8, 0.5, 2, 0.6); if (R.post && !rm) { R.post.flash(0.22, '#ffcf6a'); R.post.kick(4); } if (VFX) { VFX.ring(_vp.set(x, 0.12, z), '#ffc93a', { size: 1.6 }); VFX.burst(_vp.set(x, 0.5, z), { color: '#ffd23a', size: 0.7 }); } }
       break;
     case 'power': break;
     case 'spirit': {
       const col = SPIRITS[d.i].col;
       burst(x, 0.5, z, 40, 7, [col, '#ffffff', SPIRITS[d.i].glow], 0.7, 0.55, 3);
+      if (R.hero) R.hero.joy = 1;
+      if (VFX) { VFX.burst(_vp.set(x, 0.5, z), { color: col, size: 0.8 }); VFX.ring(_vp.set(x, 0.1, z), col, { size: 1.2, kind: 'shock' }); }
       if (R.post && !rm) { R.post.flash(0.16, '#d8e4ff'); R.post.kick(-3); }
       break;
     }
@@ -914,6 +1101,7 @@ function fxEvent(type, d, G) {
     case 'clear':
       syncPellets(G);
       for (let i = 0; i < 5; i++) burst(rnd(M.W / 2), 4 + Math.random() * 2, rnd(M.H / 2), 40, 4, [M.neon, M.neon2, '#ffffff', '#ffd23a'], 2.4, 1.1, 3);
+      if (VFX) VFX.fireworks(_vp.set(0, 8, 0), { count: 5, size: 1.1, launch: true, color: M.neon, color2: M.neon2 });
       break;
     case 'fruit': burst(x, 0.4, z, 30, 4, [BONUS[d.kind].col, '#ffffff'], 0.8, 0.5, 2); break;
     case 'fruitShow': burst(x, 0.4, z, 14, 2.5, ['#ffffff', BONUS[d.kind].col], 0.6, 0.4, 0); break;

@@ -602,10 +602,15 @@ function cityMaterial() {
       .replace('#include <color_fragment>', '#include <color_fragment>\n' + `
 vec3 wEm = vec3(0.0); float wR = -1.0; float wM = -1.0;
 float kind = vWd.x;
+
 float fadeD = 1.0 - smoothstep(160.0, 640.0, vFogDepth);
 if (kind < 0.5) {
   float n = vn(vWp.xz * 0.3 + vWp.y * 0.17);
   diffuseColor.rgb *= 0.9 + 0.2 * mix(0.5, n, fadeD);
+#ifndef LITE
+  // street grime climbs the bottom of kerbs, plinths and props
+  diffuseColor.rgb *= 1.0 - 0.22 * (1.0 - smoothstep(0.0, 9.0, vWp.y)) * mix(0.6, n, fadeD);
+#endif
 } else if (kind < 1.9) {
   float cw = vWd.y, ch = vWd.z, seed = floor(vWd.w * 64.0 + 0.5) / 64.0;
   vec2 cell = vWuv / vec2(cw, ch);
@@ -624,6 +629,15 @@ if (kind < 0.5) {
   vec3 wall = diffuseColor.rgb;
   float streak = vn(vec2(vWuv.x * 0.12, vWuv.y * 0.015 + seed));
   wall *= 0.86 + 0.26 * mix(0.5, streak, fadeD);
+#ifndef LITE
+  // weathering: blotchy limewash, paint chipped back to the brick, and the dirt the street throws up every wall
+  float plas = vn(vWuv * 0.04 + seed * 13.0);
+  wall *= 0.88 + 0.22 * mix(0.5, plas, fadeD);
+  float chip = smoothstep(0.8, 0.84, vn(vWuv * 1.3 + seed * 5.0)) * smoothstep(0.58, 0.75, plas) * fadeD;
+  wall = mix(wall, wall * 0.6 + vec3(0.06, 0.03, 0.02), chip * 0.45);
+  float grime = 1.0 - smoothstep(0.0, 18.0, vWp.y);
+  wall *= 1.0 - 0.34 * grime * (0.65 + 0.35 * mix(0.5, vn(vWuv * vec2(0.25, 0.04) + seed), fadeD));
+#endif
   wall *= 0.8 + 0.2 * smoothstep(0.0, 0.1, f.y);
   if (id.y < 0.5 && !shop) wall *= 0.86;
   vec3 glass = glassT ? mix(vec3(0.05, 0.08, 0.12), vec3(0.14, 0.2, 0.28), rn2) : mix(vec3(0.025, 0.04, 0.065), vec3(0.11, 0.15, 0.21), rn2 * 0.8);
@@ -670,9 +684,19 @@ if (kind < 0.5) {
     float tr = (1.0 - smoothstep(0.0, 5.0, abs(au - (blvd ? 30.0 : 15.0)))) * 0.14;
     col *= 1.0 - tr * fadeD;
   }
+  float pud = 0.0;
+#ifndef LITE
+  // dust drifts against the kerb, the paint wears where tyres run
+  float kerb = smoothstep(hw - 12.0, hw - 1.0, au);
+  col = mix(col, vec3(0.21, 0.19, 0.16), kerb * 0.5 * mix(0.6, gr, fadeD));
+  paint *= 1.0 - 0.45 * smoothstep(0.55, 0.75, mix(0.5, vn(vWp.xz * 0.11), fadeD));
+  // puddles left by a passing shower sit in the dips by the kerb and in the odd pothole
+  pud = smoothstep(0.64, 0.7, vn(vWp.xz * 0.028 + 7.0) * (0.78 + 0.4 * kerb)) * fadeD;
+#endif
   col = mix(col, vec3(0.9, 0.9, 0.84), clamp(paint, 0.0, 1.0));
+  col *= 1.0 - 0.55 * pud;
   diffuseColor.rgb = col;
-  wR = 0.62 - 0.12 * paint;
+  wR = mix(0.62 - 0.12 * paint, 0.04, pud);
 } else if (kind < 3.5) {
   wEm = diffuseColor.rgb * 2.2;
   diffuseColor.rgb *= 0.25;
@@ -685,6 +709,11 @@ if (kind < 0.5) {
     vec2 g = fract(p / 8.0); float j = min(min(g.x, 1.0 - g.x), min(g.y, 1.0 - g.y)) * 8.0;
     float joint = 1.0 - smoothstep(0.0, 0.45 + fwidth(j), j);
     c *= (1.0 - 0.2 * joint * fadeD) * (0.9 + 0.2 * h21(floor(p / 8.0)));
+#ifndef LITE
+    // footfall stains and the odd cracked slab
+    float st = smoothstep(0.6, 0.78, vn(p * 0.07 + 2.0));
+    c *= 1.0 - 0.18 * st * fadeD - 0.12 * step(0.93, h21(floor(p / 8.0) + 4.0)) * fadeD;
+#endif
   } else if (pat == 2 || pat == 9) {
     float st = step(0.5, fract((p.x + p.y * 0.35) / (pat == 9 ? 14.0 : 22.0)));
     c *= (0.78 + 0.4 * n1) * (pat == 9 ? mix(0.86, 1.12, mix(0.5, st, fadeD)) : 1.0) * (0.92 + 0.16 * mix(0.5, n2, fadeD));
@@ -724,13 +753,15 @@ function vehicleMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.4, metalness: 0.2 });
   m.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float vk; attribute vec3 iCol; attribute vec2 iLamp; varying float vVk; varying vec2 vLamp;')
-      .replace('#include <color_vertex>', '#include <color_vertex>\nvColor.rgb = color.rgb * ((vk < 0.5) ? iCol : vec3(1.0)); vVk = vk; vLamp = iLamp;');
+      .replace('#include <common>', '#include <common>\nattribute float vk; attribute vec3 iCol; attribute vec2 iLamp; varying float vVk; varying vec2 vLamp; varying float vLy;')
+      .replace('#include <color_vertex>', '#include <color_vertex>\nvColor.rgb = color.rgb * ((vk < 0.5) ? iCol : vec3(1.0)); vVk = vk; vLamp = iLamp; vLy = position.y;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vVk; varying vec2 vLamp;')
+      .replace('#include <common>', '#include <common>\nvarying float vVk; varying vec2 vLamp; varying float vLy;')
       .replace('#include <color_fragment>', '#include <color_fragment>\n' + `
 float cR = 0.32; float cM = 0.28; vec3 cEm = vec3(0.0);
-if (vVk < 0.5) { cR = 0.3; cM = 0.3; }
+// road dust and spray dull the paint low down on every body
+float low = smoothstep(1.5, 8.0, vLy);
+if (vVk < 0.5) { cR = mix(0.72, 0.3, low); cM = 0.3 * low; diffuseColor.rgb *= mix(0.66, 1.0, low); }
 else if (vVk < 1.5) { cR = 0.05; cM = 0.92; }
 else if (vVk < 2.5) { cR = 0.2; cM = 0.0; cEm = vColor.rgb * vLamp.x * 3.2; }
 else if (vVk < 3.5) { cR = 0.25; cM = 0.0; cEm = vColor.rgb * vLamp.y * 2.6; }
@@ -802,6 +833,21 @@ function roadSides(b) {
 }
 
 const KEMIT = [3, 0, 0, 0];
+const SIGNC = ['#c7362b', '#e2b23a', '#1f6f9f', '#2f8a4f', '#e8e2d4', '#7a2f8f', '#d9772b', '#f0d24a'];
+// A sagging cable (a thin square tube in a few straight runs) for the overhead wiring over a bazaar lane.
+function wireG(g, ax, ay, az, bx, by, bz, sag, r, c) {
+  const n = 4;
+  let px = ax, py = ay, pz = az;
+  for (let i = 1; i <= n; i++) {
+    const t = i / n, x = ax + (bx - ax) * t, z = az + (bz - az) * t, y = ay + (by - ay) * t - sag * 4 * t * (1 - t);
+    const dx = x - px, dz = z - pz, l = Math.hypot(dx, dz) || 1, ux = -dz / l * r, uz = dx / l * r;
+    g.qh([px - ux, py + r, pz - uz, x - ux, y + r, z - uz, x + ux, y + r, z + uz, px + ux, py + r, pz + uz], [0, 1, 0], c);
+    g.qh([px - ux, py - r, pz - uz, x - ux, y - r, z - uz, x + ux, y - r, z + uz, px + ux, py - r, pz + uz], [0, -1, 0], c);
+    g.qh([px + ux, py - r, pz + uz, x + ux, y - r, z + uz, x + ux, y + r, z + uz, px + ux, py + r, pz + uz], [ux, 0, uz], c);
+    g.qh([px - ux, py - r, pz - uz, x - ux, y - r, z - uz, x - ux, y + r, z - uz, px - ux, py + r, pz - uz], [-ux, 0, -uz], c);
+    px = x; py = y; pz = z;
+  }
+}
 const lampHeads = [];   // filled by the chunk builder: world positions of lamp heads per chunk
 
 function treeG(g, t, out) {
@@ -1034,6 +1080,15 @@ function bldGeo(g, b, lampsOut) {
         g.qh([p0[0], 31, p0[1], p1[0], 31, p1[1], p1[0] + o[4] * 9, 24, p1[1] + o[5] * 9, p0[0] + o[4] * 9, 24, p0[1] + o[5] * 9], [o[4] * 0.5, 1, o[5] * 0.5], c);
         g.qh([p0[0] + o[4] * 9, 24, p0[1] + o[5] * 9, p1[0] + o[4] * 9, 24, p1[1] + o[5] * 9, p1[0] + o[4] * 9, 21.5, p1[1] + o[5] * 9, p0[0] + o[4] * 9, 21.5, p0[1] + o[5] * 9], [o[4], 0, o[5]], mulc(c, 0.85));
       }
+      // signboard clutter: painted blade signs stuck out over the pavement, a few lit, all slightly askew
+      if (LOD) {
+        const ns = 1 + ((hash2(b.x | 0, b.y | 0, s) * 2.4) | 0);
+        for (let k = 0; k < ns; k++) {
+          const h = hash2(b.x | 0, (b.y | 0) + k * 31, s + 7), a = 4 + h * (len - 8), y0 = 33 + hash2(k, b.x | 0, 3) * 12, sh = 7 + hash2(b.y | 0, k, 9) * 7;
+          const px = o[0] + o[2] * a, pz = o[1] + o[3] * a, col = lin(SIGNC[(h * SIGNC.length) | 0]), out = 7 + h * 3;
+          boxG(g, Math.min(px, px + o[4] * out) - (o[4] ? 0 : 0.5), y0, Math.min(pz, pz + o[5] * out) - (o[5] ? 0 : 0.5), Math.max(px, px + o[4] * out) + (o[4] ? 0 : 0.5), y0 + sh, Math.max(pz, pz + o[5] * out) + (o[5] ? 0 : 0.5), col, h > 0.72 ? KEMIT : D0);
+        }
+      }
     }
   }
   if (b.neon) {
@@ -1103,6 +1158,21 @@ function buildChunkGeo(tx, ty) {
       boxR(g, px + fx * 2, 38, pz + fz * 2, 4, 14, 4, 0, dark);
     }
     // median trees on boulevards
+  }
+  // overhead wiring strung across the narrow streets of the old town
+  if (LOD) {
+    const wc = lin('#1b1c1e');
+    for (const s of RB[k].segs) {
+      if (s.R.blvd) continue;
+      const mid = (s.a + s.b) / 2, did = districtAt(s.v ? s.R.c : mid, s.v ? mid : s.R.c).id;
+      if (did !== 'bazaar' && did !== 'fort' && did !== 'res') continue;
+      const span = s.R.hw + 12;
+      for (let p = s.a + 30; p < s.b - 25; p += 58 + hash2(p | 0, s.R.c | 0, 5) * 30) {
+        const y0 = 54 + hash2(p | 0, 1, s.R.c | 0) * 8, y1 = 54 + hash2(p | 0, 2, s.R.c | 0) * 8, sk = (hash2(p | 0, 3, 3) - 0.5) * 16, sag = 4 + hash2(p | 0, 4, 4) * 5;
+        if (s.v) wireG(g, s.R.c - span, y0, p, s.R.c + span, y1, p + sk, sag, 0.5, wc);
+        else wireG(g, p, y0, s.R.c - span, p + sk, y1, s.R.c + span, sag, 0.5, wc);
+      }
+    }
   }
   for (const s of RB[k].segs) {
     if (!s.R.blvd) continue;
@@ -1476,6 +1546,13 @@ function buildDynamics(scene) {
   FX.rings = inst(ringG, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }), 48);
   const beamG = new THREE.CylinderGeometry(1, 1, 1, 20, 1, true); beamG.translate(0, 0.5, 0);
   FX.beams = inst(beamG, addMat(FX.texBeam), 40);
+  // contact shadows: a soft dark footprint under every person and vehicle, so nothing floats where the shadow map is coarse or off
+  const csCv = newCv(64, 64), csc = csCv.getContext('2d'), csg = csc.createRadialGradient(32, 32, 0, 32, 32, 32);
+  csg.addColorStop(0, 'rgba(0,0,0,1)'); csg.addColorStop(0.42, 'rgba(0,0,0,.72)'); csg.addColorStop(0.75, 'rgba(0,0,0,.22)'); csg.addColorStop(1, 'rgba(0,0,0,0)');
+  csc.fillStyle = csg; csc.fillRect(0, 0, 64, 64);
+  const csTex = new THREE.CanvasTexture(csCv);
+  FX.cs = new THREE.InstancedMesh(flat, new THREE.MeshBasicMaterial({ map: csTex, color: 0x000000, transparent: true, opacity: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }), CS_MAX);
+  FX.cs.frustumCulled = false; FX.cs.count = 0; FX.cs.renderOrder = 1; scene.add(FX.cs);
   const billG = new THREE.BoxGeometry(8, 1.1, 14);
   FX.bills = new THREE.InstancedMesh(billG, new THREE.MeshBasicMaterial({ color: 0x7dff9b, toneMapped: false }), 16); FX.bills.frustumCulled = false; FX.bills.count = 0; scene.add(FX.bills);
 
@@ -1621,7 +1698,9 @@ function initGL(arc) {
   applyTOD(G.hour);
   // Shared post pass: bloom on windows, neon, headlights and the sea glint, grade, grain. A crane shot
   // over the city settles onto the player at the start; the results drift slowly over the streets.
-  POST = createPost(renderer, { arc, soft: GL.soft, intro: { yaw: 1.0, up: 1.1, back: 0.9, dur: 3.0 }, results: { yaw: 0.4, rise: 0.25 }, target: (v) => v.set(CAM.ground.x, 10, CAM.ground.y), look: { bloom: 0.6, bloomWide: 0.45, threshold: 0.68 } });
+  // A natural filmic grade over the dusk (cool shadows, warm highlights, no candy saturation), a camera held by a
+  // person behind the menu and the results, and a shallow focus on the street behind the results panel.
+  POST = createPost(renderer, { arc, soft: GL.soft, preset: 'natural', handheld: { amount: 1.2 }, dof: { results: 0.6, radius: 0.22 }, intro: { yaw: 1.0, up: 1.1, back: 0.9, dur: 3.0 }, results: { yaw: 0.4, rise: 0.25 }, target: (v) => v.set(CAM.ground.x, 10, CAM.ground.y), look: { bloom: 0.5, bloomWide: 0.38, threshold: 0.7 } });
 }
 
 function resizeGL(arc) {
@@ -1765,7 +1844,18 @@ function toScreen(x, y, z) {
 /* ================================================================ sync the sim into the scene every frame */
 function setCol(mesh, i, c, k) { const a = mesh.instanceColor.array; k = k == null ? 1 : k; a[i * 3] = c[0] * k; a[i * 3 + 1] = c[1] * k; a[i * 3 + 2] = c[2] * k; }
 const WARM = [1.0, 0.66, 0.32];
-let nPool = 0, nCone = 0, nRing = 0, nBeam = 0;
+let nPool = 0, nCone = 0, nRing = 0, nBeam = 0, nCs = 0;
+const CS_MAX = 220;
+// Pavements stand 1.2 above the asphalt; a footprint shadow sits on whichever is under it.
+function onRoad(x, y) {
+  for (let i = 0; i < NX; i++) if (Math.abs(x - XC[i]) < XR[i].hw) return true;
+  for (let j = 0; j < NY; j++) if (Math.abs(y - YC[j]) < YR[j].hw) return true;
+  return false;
+}
+function addCs(x, z, sx, sz, a, y) {
+  if (nCs >= CS_MAX) return;
+  const M = FX.mats; M.p.set(x, y, z); M.e.set(0, -a, 0); M.q.setFromEuler(M.e); M.v1.set(sx, 1, sz); M.m1.compose(M.p, M.q, M.v1); FX.cs.setMatrixAt(nCs++, M.m1);
+}
 function addPool(x, y, z, size, col, k) {
   if (nPool >= 220 || k < 0.01) return;
   const M = FX.mats; M.p.set(x, y, z); M.q.identity(); M.v1.set(size, 1, size); M.m1.compose(M.p, M.q, M.v1); FX.pools.setMatrixAt(nPool, M.m1); setCol(FX.pools, nPool, col, k); nPool++;
@@ -1784,6 +1874,7 @@ function syncVehicles(dt) {
   const M = FX.mats, lampK = TOD.lamp, fr = GL.frustum, reduced = arcRef.reducedMotion;
   for (const t in VM) { VM[t].n = 0; VM[t].nw = 0; }
   let nb = 0, nr = 0;
+  nCs = 0;
   for (let vi = 0; vi < V.length; vi++) {
     const v = V[vi], vm = VM[v.type]; if (!vm || vm.n >= VCAP) continue;
     const dxc = v.x - CAM.x, dzc = v.y - CAM.z, d2 = dxc * dxc + dzc * dzc;
@@ -1850,6 +1941,7 @@ function syncVehicles(dt) {
       GL.spot.intensity = 1100 * lampK;
       GL.spot.position.set(v.x + ca * T.L * 0.4, 9, v.y + sa * T.L * 0.4); GL.spot.target.position.set(v.x + ca * 220, 0, v.y + sa * 220); GL.spot.target.updateMatrixWorld();
     }
+    if (!GL.soft && d2 < 900 * 900) addCs(v.x, v.y, T.L * 1.12, T.Wd * (v.type === 'bike' ? 1.7 : 1.32), v.a, onRoad(v.x, v.y) ? 0.5 : 1.7);
   }
   if (!pl.veh || lampK <= 0.02) GL.spot.intensity = 0;
   for (const t in VM) {
@@ -1860,34 +1952,233 @@ function syncVehicles(dt) {
   FX.rider.count = nr; if (nr) FX.rider.instanceMatrix.needsUpdate = true;
 }
 
-function syncPeds() {
-  const M = FX.mats, d = M.d;
+/* ---------------------------------------------------------------- spectacle (the shared VFX library) */
+// Festival fireworks over the skyline at dusk, Holi powder and fireworks when a job pays out, sparks and
+// dust on every knock, a real fireball when a car is wrecked (cars only, never people), and a victory
+// shower when the hustle ends. The library loads after the menu is up; until then nothing is missed but
+// the spectacle. It adds no lights, so no material ever recompiles.
+const VX = { fx: null, state: 0, v: new THREE.Vector3(), n: new THREE.Vector3(0, 1, 0), fwT: 4, q: -1, red: null };
+const vxGround = (x, z) => (onRoad(x, z) ? 0.3 : 1.2);
+function loadVfx() {
+  if (VX.state || !GL.renderer) return;
+  VX.state = 1;
+  import('/games/shared/vfx.js').then((m) => {
+    try {
+      VX.fx = m.createVFX(GL.renderer, GL.scene, GL.camera, { quality: vxQ(), unit: 10, groundY: vxGround, lights: 0, soft: GL.soft, reduced: !!arcRef.reducedMotion });
+      VX.state = 2; const w = VX.fx.warm(); if (w && w.catch) w.catch(() => {});
+    } catch (e) { VX.state = -1; }
+  }).catch(() => { VX.state = -1; });
+}
+const vxQ = () => (GL.q >= 2 ? 3 : GL.q === 1 ? 2 : GL.soft ? 0 : 1);
+const vxOn = () => VX.state === 2 && VX.fx;
+function vxTick(dt) {
+  if (VX.state === 0 && GL.clock > 2.5) loadVfx();
+  if (!vxOn()) return;
+  const q = vxQ(); if (q !== VX.q) { VX.q = q; VX.fx.setQuality(q); }
+  const red = !!arcRef.reducedMotion; if (red !== VX.red) { VX.red = red; VX.fx.setReduced(red); }
+  // festival fireworks over the city from dusk on, behind the menu and during play
+  if (q >= 1 && TOD.lamp > 0.2) {
+    VX.fwT -= dt;
+    if (VX.fwT <= 0) {
+      VX.fwT = (arcRef.state === 'menu' ? 2.2 : 5) + rr() * 6;
+      // beyond the play area but inside the haze, so they glow through it rather than vanish in it
+      // the menu camera looks along the sea road and sees the sky; the chase camera looks down the street, so
+      // in play the shells burst lower, just over the rooftops in the top of the frame
+      const menu = arcRef.state === 'menu', a = CAM.yaw + (rr() - 0.5) * (menu ? 1.1 : 0.7), d = menu ? 560 + rr() * 420 : 430 + rr() * 220;
+      VX.fx.fireworks(VX.v.set(CAM.x + Math.cos(a) * d, menu ? 300 + rr() * 220 : CAM.y + 40 + d * 0.06 + rr() * 50, CAM.z + Math.sin(a) * d), { size: menu ? 8 + rr() * 5 : 6 + rr() * 3, launch: true });
+    }
+  }
+  VX.fx.update(dt);
+}
+const vxAt = (x, y, z) => VX.v.set(x, y, z);
+// payday: a Holi burst of coloured powder around you and a shell going up over the street
+function vxPayday() {
+  if (!vxOn()) return;
+  // three colours of gulal thrown at once, a sparkle, and a shell over the street ahead
+  for (let k = 0; k < 3; k++) VX.fx.impact(vxAt(pl.x + (k - 1) * 9, 6 + k * 3, pl.y + ((k * 7) % 3 - 1) * 8), VX.n, { kind: 'powder', size: 1.5 });
+  VX.fx.burst(vxAt(pl.x, 14, pl.y), { size: 1.6 });
+  VX.fx.fireworks(vxAt(pl.x + Math.cos(CAM.yaw) * 220, CAM.y + 50, pl.y + Math.sin(CAM.yaw) * 220), { size: 6, launch: true });
+}
+/* ---------------------------------------------------------------- real people near the camera */
+// The few people nearest the lens (and you, on foot) are full rigs from the shared people library: proportions,
+// faces that blink and glance, a gait driven by real speed. Everyone further off stays a cheap instanced figure.
+// The library loads after the menu is up and only where the GPU can afford it; until then, and on a software
+// renderer, the instanced figures carry the whole crowd.
+const HUM = { lib: null, state: 0, rigs: [], me: null, v: null, t: 0, cand: [] };
+const PANTS_C = ['#1d2433', '#2f3a52', '#4a4a4f', '#6a5d4d', '#2b2b2e', '#7a7468'];
+function loadHumans() {
+  if (HUM.state || GL.soft || !LOD || !GL.renderer) return;
+  HUM.state = 1;
+  import('/games/shared/human.js').then((m) => { HUM.lib = m; HUM.state = 2; }).catch(() => { HUM.state = -1; });
+}
+function rigCount() { return GL.q >= 2 ? 9 : GL.q === 1 ? 5 : 0; }
+function makeRig(i) {
+  const q = GL.q >= 2 ? 3 : 1;
+  const h = HUM.lib.createHuman({ seed: 4100 + i * 37, unit: 10, quality: q, lod: i < 4 && q >= 3 ? 'full' : 'mid' });
+  h.group.visible = false; GL.scene.add(h.group);
+  return { h, p: null, act: '', idleAct: '' };
+}
+function syncHumans(dt) {
+  if (HUM.state === 0 && GL.clock > 2) loadHumans();
+  if (HUM.state !== 2) return;
+  const want = rigCount();
+  if (!HUM.v) HUM.v = new THREE.Vector3();
+  // build the pool a rig a frame, so nothing stalls; the shaders were warmed with the first one
+  if (HUM.rigs.length < want) {
+    const r = makeRig(HUM.rigs.length); HUM.rigs.push(r);
+    if (HUM.rigs.length === 1) { r.h.group.visible = true; r.h.group.position.set(CAM.x, -200, CAM.z); try { GL.renderer.compile(GL.scene, GL.camera); } catch (e) { /* lost */ } r.h.group.visible = false; }
+  }
+  if (!HUM.me && want) { HUM.me = makeRig(99); HUM.me.h.setOutfit({ top: '#FF6940', bottom: '#14161f', sleeves: 'short' }); }
+  // who gets a rig: the nearest people in view, holding on to a rig a little past the distance it was given at
+  HUM.t -= dt;
+  if (HUM.t <= 0) {
+    HUM.t = 0.25;
+    const fx = CAM.ground.x, fy = CAM.ground.y, R = 300;
+    for (let i = 0; i < HUM.rigs.length; i++) { const r = HUM.rigs[i]; if (r.p && (i >= want || hyp(r.p.x - fx, r.p.y - fy) > R * 1.3 || (PD.indexOf(r.p) < 0 && !r.p.vendor))) { r.h.stop(); r.p.rig = null; r.p = null; } }
+    const cand = HUM.cand; cand.length = 0;
+    const consider = (p) => { if (p.rig) return; const d = hyp(p.x - fx, p.y - fy); if (d > R) return; _sph.center.set(p.x, 9, p.y); _sph.radius = 18; if (!GL.frustum.intersectsSphere(_sph)) return; cand.push(d, p); };
+    for (let i = 0; i < PD.length; i++) consider(PD[i]);
+    if (VEND) for (let i = 0; i < VEND.length; i++) consider(VEND[i]);
+    for (let i = 0; i < HUM.rigs.length && i < want; i++) {
+      const r = HUM.rigs[i];
+      if (r.p || !cand.length) continue;
+      let bi = -1, bd = 1e9; for (let k = 0; k < cand.length; k += 2) if (cand[k] < bd && !cand[k + 1].rig) { bd = cand[k]; bi = k; }
+      if (bi < 0) break;
+      const p = cand[bi + 1]; r.p = p; p.rig = r; r.act = ''; r.idleAct = '';
+      // the person takes the rig's own face and hair; their clothes stay their own
+      p.skin = r.h.skin;
+      r.h.setOutfit({ top: p.shirt, bottom: PANTS_C[((p.ph || 0) * 100 | 0) % PANTS_C.length], sleeves: ((p.ph || 0) * 10 | 0) % 3 === 0 ? 'long' : 'short' });
+    }
+  }
+  const v = HUM.v;
+  for (const r of HUM.rigs) {
+    const h = r.h, p = r.p;
+    if (!p) { h.group.visible = false; continue; }
+    h.group.visible = true;
+    h.group.position.set(p.x, onRoad(p.x, p.y) ? 0.3 : 1.2, p.y);
+    h.group.rotation.y = PI / 2 - p.a;
+    poseRig(r, p, dt);
+    h.update(dt, { speed: p.mv || 0 });
+  }
+  const me = HUM.me;
+  if (me) {
+    const on = (G.phase === 'play' || G.phase === 'over') && !pl.veh && !(pl.inv > 0 && Math.floor(G.time * 14) % 2 === 0);
+    me.h.group.visible = on;
+    if (on) {
+      me.h.group.position.set(pl.x, onRoad(pl.x, pl.y) ? 0.3 : 1.2, pl.y); me.h.group.rotation.y = PI / 2 - pl.a;
+      me.h.update(dt, { speed: hyp(pl.vx, pl.vy) });
+    }
+  }
+}
+// What a rigged person is doing, from the same state the instanced figures read.
+function poseRig(r, p, dt) {
+  const h = r.h, v = HUM.v;
+  if (p.lookT > 0) h.lookAt(v.set(p.lx, 15, p.ly)); else if (p.idle === 'chat' && p.mate) h.lookAt(v.set(p.mate.x, 15, p.mate.y)); else h.lookAt(null);
+  const want = p.state === 'dive' ? 'dive' : p.react === 'shout' ? 'fistPump' : p.react === 'startle' ? 'handsOnHead' : (p.vendor && p.waveT > 0) ? 'wave' : '';
+  if (want && want !== r.act) { h.play(want, { intensity: want === 'handsOnHead' ? 0.7 : 1 }); }
+  r.act = want;
+  // idle business that lasts: a phone held up to read, a word with a friend
+  const idle = p.state === 'walk' && !(p.mv > 0.5) ? (p.vendor ? 'tend' : p.idle) : '';
+  if (idle !== r.idleAct) {
+    if (r.idleAct === 'phone') h.stop('reach');
+    if (idle === 'phone') { const ca = Math.cos(p.a), sa = Math.sin(p.a); h.play('reach', { hold: true, side: 'right', intensity: 0.6, target: v.set(p.x + ca * 3, 13.5, p.y + sa * 3) }); }
+    r.idleAct = idle;
+  }
+  if (idle === 'chat' && !h.playing('shrug') && !h.playing('point') && Math.random() < dt * 0.25) h.play(Math.random() < 0.5 ? 'shrug' : 'point', { intensity: 0.5, side: Math.random() < 0.5 ? 'left' : 'right' });
+}
+
+let VEND = null;
+const NECK_DN = new THREE.Matrix4().makeTranslation(0, -15.2, 0);
+// Stallholders in the chowk: they stay put, tidy the goods, chat across the lane and call out to anyone walking by.
+function vendors() {
+  if (VEND) return VEND;
+  VEND = [];
+  for (let k = 0; k < BK.length; k++) for (const b of BK[k].b) if (b.k === 'stall') {
+    const s = (b.seed | 0) * 7919;
+    VEND.push({ x: b.x + 11, y: b.y + 2.5, a: PI / 2, vendor: true, state: 'walk', mv: 0, anim: 0, hs: 0.93 + (s % 13) / 100, bw: 0.95 + (s % 17) / 100, ph: (s % 628) / 100, shirt: SHIRTS[s % SHIRTS.length], skin: SKINS[s % 7], hair: s % 5 === 0 ? '#9a9690' : '#16110d', bag: false, idle: 'tend', react: '', reactT: 0, lookT: 0, lx: 0, ly: 0, hy: 0, gT: 0, gz: 0, waveT: 0 });
+  }
+  return VEND;
+}
+function syncPeds(dt) {
+  const M = FX.mats, d = M.d, T = GL.clock, k = Math.min(1, dt * 7);
   let n = 0, nl = 0, nb = 0;
   const put2 = (p, isPlayer) => {
     if (n >= 80) return;
     const dx = p.x - CAM.x, dz = p.y - CAM.z; if (dx * dx + dz * dz > 1100 * 1100) return;
     _sph.center.set(p.x, 9, p.y); _sph.radius = 16; if (!GL.frustum.intersectsSphere(_sph)) return;
-    const run = p.state === 'flee' || p.state === 'dive' || (isPlayer && pl.sprint);
-    const phase = isPlayer ? pl.step : p.anim, moving = isPlayer ? pl.moving : (p.state !== 'walk' || p.pause <= 0);
-    const sw = moving ? Math.sin(phase) * (run ? 1.05 : 0.7) : 0, bob = moving ? Math.abs(Math.cos(phase)) * (run ? 0.9 : 0.5) : 0;
-    d.position.set(p.x, bob, p.y); d.rotation.set(p.state === 'dive' ? 1.25 : 0, -p.a, 0, 'YXZ'); d.scale.set(1, 1, 1); d.updateMatrix();
+    // a person carried by a full rig only needs the soft shadow at their feet
+    if (isPlayer ? HUM.me && HUM.me.h.group.visible : p.rig) { addCs(p.x, p.y, 12, 11, p.a, onRoad(p.x, p.y) ? 0.5 : 1.7); return; }
+    const near = !GL.soft && dx * dx + dz * dz < 520 * 520;
+    const dive = p.state === 'dive', run = p.state === 'flee' || dive || (isPlayer && pl.sprint);
+    const speed = isPlayer ? (pl.moving ? (pl.sprint ? 60 : 30) : 0) : p.mv;
+    const phase = isPlayer ? pl.step : p.anim, moving = isPlayer ? pl.moving : speed > 0.5;
+    const ph = isPlayer ? 0 : p.ph, hs = isPlayer ? 1 : p.hs, bw = isPlayer ? 1 : p.bw;
+    // gait: stride and arm swing grow with speed, the pelvis bobs twice a cycle, the body leans into a run;
+    // standing still, a person breathes and shifts their weight from foot to foot, never in step with anyone else
+    const amp = moving ? (run ? 1.0 : clamp(0.3 + speed * 0.022, 0.38, 0.72)) : 0;
+    const sw = Math.sin(phase) * amp;
+    let bob = moving ? Math.abs(Math.cos(phase)) * (run ? 0.9 : 0.42) : 0.1 + Math.sin(T * 1.6 + ph) * 0.1;
+    const lean = moving ? (run ? -0.17 : -0.045) : 0;
+    const sway = moving ? Math.sin(phase) * 0.035 : Math.sin(T * 0.43 + ph * 1.3) * 0.032;
+    // head: look at what caught the eye, glance about while waiting, down at a phone
+    let hyT = 0, hpT = 0;
+    if (!isPlayer) {
+      if (p.lookT > 0) hyT = -clamp(wrapA(Math.atan2(p.ly - p.y, p.lx - p.x) - p.a), -1.25, 1.25);
+      else if (!moving) { p.gT = (p.gT || 0) - dt; if (p.gT <= 0) { p.gT = 1.2 + ((T * 7.3 + ph * 11) % 1) * 2.4; p.gz = (((T * 13.1 + ph * 5) % 1) - 0.5) * 1.6; } hyT = p.idle === 'phone' ? 0 : p.gz; }
+      if (p.idle === 'phone' && !moving && p.lookT <= 0) hpT = -0.5;
+      if (p.react === 'shout') hpT = 0.12;
+      p.hy = (p.hy || 0) + (hyT - (p.hy || 0)) * k; p.hp = (p.hp || 0) + (hpT - (p.hp || 0)) * k;
+      if (p.react === 'startle') bob += 1.3 * Math.sin(clamp(p.reactT / 0.5, 0, 1) * PI);
+    }
+    d.position.set(p.x, bob, p.y); d.rotation.set(dive ? 1.25 : sway, -p.a, lean, 'YXZ'); d.scale.set(bw, hs, bw); d.updateMatrix();
     M.m1.copy(d.matrix);
-    PEDS.torso.setMatrixAt(n, M.m1); PEDS.head.setMatrixAt(n, M.m1); PEDS.hair.setMatrixAt(n, M.m1);
+    PEDS.torso.setMatrixAt(n, M.m1);
+    if (isPlayer || !near) { PEDS.head.setMatrixAt(n, M.m1); PEDS.hair.setMatrixAt(n, M.m1); }
+    else {
+      d.position.set(0, 15.2, 0); d.rotation.set(0, p.hy, p.hp, 'YXZ'); d.scale.set(1, 1, 1); d.updateMatrix();
+      M.m3.multiplyMatrices(M.m1, d.matrix).multiply(NECK_DN); PEDS.head.setMatrixAt(n, M.m3); PEDS.hair.setMatrixAt(n, M.m3);
+    }
     const shirt = isPlayer ? lin('#FF6940') : lin(p.shirt), skin = lin(p.skin), hair = lin(p.hair);
     setCol(PEDS.torso, n, shirt, 1); setCol(PEDS.head, n, skin, 1); setCol(PEDS.hair, n, hair, 1);
     const pants = isPlayer ? [0.07, 0.08, 0.12] : (((p.x * 7 + p.y) | 0) % 3 === 0 ? [0.1, 0.12, 0.2] : ((p.shirt.length + (p.y | 0)) % 2 ? [0.18, 0.16, 0.14] : [0.06, 0.06, 0.07]));
     for (let s = 0; s < 2; s++) {
       const sg = s ? -1 : 1;
-      d.position.set(0, 8.4, sg * 1.5); d.rotation.set(0, 0, sg * sw, 'XYZ'); d.updateMatrix(); M.m2.multiplyMatrices(M.m1, d.matrix); PEDS.legs.setMatrixAt(nl, M.m2); setCol(PEDS.legs, nl, pants, 1);
-      d.position.set(0, 14.3, sg * 3.5); d.rotation.set(0, 0, -sg * sw * 0.9, 'XYZ'); d.updateMatrix(); M.m2.multiplyMatrices(M.m1, d.matrix); PEDS.arms.setMatrixAt(nl, M.m2); setCol(PEDS.arms, nl, skin, 1);
+      // arm pose: counter-swing when walking, else what the person is doing with their hands
+      let az = -sg * sw * 0.9, ax = -sg * 0.07;
+      if (!isPlayer && !moving) {
+        const busy = p.react || p.idle;
+        if (busy === 'shout') az = s ? 2.45 + 0.22 * Math.sin(T * 15 + ph) : 0.25;
+        else if (busy === 'startle') { az = 0.45; ax = -sg * 0.55; }
+        else if (busy === 'phone') az = s ? 1.25 + 0.05 * Math.sin(T * 2 + ph) : 0.05;
+        else if (busy === 'chat') az = s ? 0.05 : (Math.sin(T * 0.6 + ph) > 0 ? 0.35 + 0.4 * Math.max(0, Math.sin(T * 2.6 + ph)) : 0.08);
+        else if (busy === 'tend') az = p.waveT > 0 ? (s ? 2.6 + 0.35 * Math.sin(T * 9 + ph) : 0.1) : 0.85 + 0.25 * Math.sin(T * 1.9 + ph + s * 1.7);
+        else az = 0.04 * Math.sin(T * 0.9 + ph + s);
+      }
+      d.position.set(0, 8.4, sg * 1.5); d.rotation.set(moving ? 0 : -sg * 0.04, 0, sg * sw, 'XYZ'); d.updateMatrix(); M.m2.multiplyMatrices(M.m1, d.matrix); PEDS.legs.setMatrixAt(nl, M.m2); setCol(PEDS.legs, nl, pants, 1);
+      d.position.set(0, 14.3, sg * 3.5); d.rotation.set(ax, 0, az, 'XYZ'); d.updateMatrix(); M.m2.multiplyMatrices(M.m1, d.matrix); PEDS.arms.setMatrixAt(nl, M.m2); setCol(PEDS.arms, nl, skin, 1);
       nl++;
     }
     if (p.bag) { PEDS.bag.setMatrixAt(nb, M.m1); setCol(PEDS.bag, nb, [0.3, 0.2, 0.12], 1); nb++; }
     n++;
+    addCs(p.x, p.y, p.state === 'dive' ? 20 : 12, p.state === 'dive' ? 12 : 11, p.a, onRoad(p.x, p.y) ? 0.5 : 1.7);
   };
   for (let i = 0; i < PD.length; i++) put2(PD[i], false);
+  // stallholders: only when the chowk is close; they wave at anyone on foot who comes near
+  if (GL.q > 0 || !GL.soft) {
+    const VL = vendors(), px = pl.x, py = pl.y, foot = !pl.veh && (G.phase === 'play');
+    for (let i = 0; i < VL.length; i++) {
+      const v = VL[i], ddx = v.x - CAM.x, ddz = v.y - CAM.z; if (ddx * ddx + ddz * ddz > 700 * 700) continue;
+      if (v.lookT > 0) v.lookT -= dt;
+      if (v.waveT > 0) v.waveT -= dt;
+      const dp = hyp(px - v.x, py - v.y);
+      if (foot && dp < 80 && v.lookT <= 0 && rr() < dt * 0.9) { pedLook(v, px, py, 1.5 + rr()); if (rr() < 0.35) v.waveT = 1.2 + rr() * 0.8; }
+      put2(v, false);
+    }
+  }
   if ((G.phase === 'play' || G.phase === 'over') && !pl.veh && !(pl.inv > 0 && Math.floor(G.time * 14) % 2 === 0)) { pl.sprint = pl.sprint || false; put2(pl, true); }
   PEDS.torso.count = PEDS.head.count = PEDS.hair.count = n; PEDS.legs.count = PEDS.arms.count = nl; PEDS.bag.count = nb;
+  FX.cs.count = nCs; if (nCs) FX.cs.instanceMatrix.needsUpdate = true;
+  FX.cs.material.opacity = 0.42 + 0.14 * TOD.day;
   for (const k in PEDS) { PEDS[k].instanceMatrix.needsUpdate = true; if (PEDS[k].instanceColor) PEDS[k].instanceColor.needsUpdate = true; }
 }
 
@@ -1962,6 +2253,7 @@ function syncFx(dt) {
     else if (p.k === 'spark') FX.glow.add(p.x, 3 + p.h, p.y, c[0], c[1], c[2], a, p.size * 2.6);
     else if (p.k === 'fire') FX.glow.add(p.x, 3 + p.h, p.y, a > 0.5 ? 1 : 1, a > 0.5 ? 0.75 : 0.35, a > 0.5 ? 0.24 : 0.12, a * 0.85, p.size * (1.4 + a));
     else if (p.k === 'cash') FX.soft.add(p.x, 3 + p.h, p.y, c[0], c[1], c[2], Math.min(1, a * 1.6), p.size * 2.2);
+    else if (p.k === 'debris') FX.soft.add(p.x, 0.9 + p.h, p.y, c[0], c[1], c[2], c[3] * Math.min(1, a * 4), p.size * 1.6);
   }
   FX.soft.flush(); FX.glow.flush();
   const scale = GL.renderer.getPixelRatio() * GL.h / (2 * Math.tan(GL.camera.fov * PI / 360));
@@ -2025,10 +2317,14 @@ function render3D(arc) {
   GL.key.position.set(kx + TOD.keyDir.x * 800, TOD.keyDir.y * 800, kz + TOD.keyDir.z * 800);
   GL.key.target.updateMatrixWorld();
   syncVehicles(dt);
-  syncPeds();
+  syncHumans(dt);
+  syncPeds(dt);
+  vxTick(dt);
   syncFx(dt);
   const tc1 = performance.now();
-  if (POST) { POST.setQuality(GL.q >= 2 ? 3 : GL.q === 1 ? 2 : 0, GL.pinned); POST.render(GL.scene, cam); } else r.render(GL.scene, cam);
+  if (vxOn()) VX.fx.applyShake(cam);
+  try { if (POST) { POST.setQuality(GL.q >= 2 ? 3 : GL.q === 1 ? 2 : 0, GL.pinned); POST.render(GL.scene, cam); } else r.render(GL.scene, cam); }
+  finally { if (vxOn()) VX.fx.removeShake(cam); }
   GL.cpuSync = lerp(GL.cpuSync || 0, tc1 - tc0, 0.1); GL.cpuRender = lerp(GL.cpuRender || 0, performance.now() - tc1, 0.1);
 }
 
@@ -2066,7 +2362,18 @@ function updateParts(dt) {
     const p = PART[i]; if (!p.on) continue;
     p.life -= dt; if (p.life <= 0) { p.on = false; continue; }
     p.x += p.vx * dt; p.y += p.vy * dt;
-    p.h += p.vh * dt; if (p.k === 'spark' || p.k === 'cash') { p.vh -= 130 * dt; if (p.h < 0.5) { p.h = 0.5; p.vh = Math.abs(p.vh) * 0.3; } }
+    p.h += p.vh * dt;
+    if (p.k === 'spark' || p.k === 'cash' || p.k === 'debris') {
+      p.vh -= 130 * dt;
+      // a spark bounces low and skids to a stop; a bill flutters down; a chip of trim tumbles, then lies still
+      if (p.h < 0.5) { p.h = 0.5; p.vh = Math.abs(p.vh) * (p.k === 'spark' ? 0.32 : p.k === 'debris' ? 0.22 : 0.12); p.vx *= p.k === 'debris' ? 0.45 : 0.6; p.vy *= p.k === 'debris' ? 0.45 : 0.6; if (p.vh < 3) p.vh = 0; }
+    } else if (p.k === 'dust') {
+      // kicked up, then air drag and its own weight bring it back down to settle
+      p.vh = p.vh * Math.pow(0.12, dt) - 7 * dt; if (p.h < 0.6) { p.h = 0.6; p.vh = 0; }
+    } else if (p.k === 'smoke') {
+      // warm smoke rises, slowing as it cools and spreads
+      p.vh *= Math.pow(0.55, dt);
+    }
     const dr = p.k === 'smoke' || p.k === 'dust' ? 0.9 : 0.995;
     p.vx *= Math.pow(dr, dt * 60); p.vy *= Math.pow(dr, dt * 60);
     if (p.k === 'fire') p.vy -= 60 * dt;
@@ -2147,6 +2454,11 @@ function stepVeh(v, dt) {
     if (rr() < dt * 22) emit('dust', bx, by, (rr() - 0.5) * 14, (rr() - 0.5) * 14, 0.7, 5 + rr() * 5, 'rgba(225,225,225,.5)');
     if (v.player && rr() < dt * 3) arcRef.sfx.noise(0.18, { freq: 2600, filter: 'bandpass', vol: 0.07 });
   } else v.sk[4] = 0;
+  // a fast car lifts a thin haze of dust off its rear tyres; much more off the road, on sand and earth
+  if (!GL.soft && spd > 110 && !dead && v.type !== 'bike' && rr() < dt * 9 && vDist(v) < 650) {
+    const off = !onRoad(v.x, v.y);
+    if (off || rr() < 0.22) { const sd = rr() < 0.5 ? 1 : -1; emit('dust', bx + px * sd, by + py * sd, -v.vx * 0.12 + (rr() - 0.5) * 10, -v.vy * 0.12 + (rr() - 0.5) * 10, off ? 1.3 : 0.8, off ? 7 + rr() * 5 : 4 + rr() * 3, off ? 'rgba(206,182,140,.42)' : 'rgba(190,178,160,.18)'); }
+  }
   v.age += dt;
   if (v.crashCd > 0) v.crashCd -= dt;
 }
@@ -2179,12 +2491,26 @@ function damage(v, amt) {
 function wreckVeh(v) {
   v.hp = 0; v.wreck = true; v.wreckT = 0; v.ai = null; v.c.thr = v.c.brk = v.c.str = 0; v.siren = false;
   if (v.player) { arcRef.haptic('fail', 0.9); banner('Car wrecked', 'Get out before it burns. Press F', 3000, '#FF8A3D'); arcRef.sfx.tone(120, 0.6, { type: 'sawtooth', slide: 50, vol: 0.2 }); }
+  // the car goes up in a fireball: flash, rolling smoke, sparks, debris and a shockwave across the tarmac
+  if (vxOn() && vDist(v) < 1100) VX.fx.explosion(vxAt(v.x, 8, v.y), { size: v.type === 'bike' ? 0.9 : 1.5 });
   for (let i = 0; i < 12; i++) emit('smoke', v.x, v.y, (rr() - 0.5) * 60, (rr() - 0.5) * 60, 1.4, 10 + rr() * 8, 'rgba(60,60,60,.55)');
 }
 
 function crashFx(v, spd, px, py) {
+  // everyone near a bang turns to look; the closest flinch
+  for (let i = 0; i < PD.length; i++) { const p = PD[i], dd = hyp(p.x - px, p.y - py); if (dd < 220 && p.state === 'walk') { pedLook(p, px, py, 1.6 + rr() * 1.4); if (dd < 110 && spd > 90 && !p.react) { p.react = 'startle'; p.reactT = 0.3 + rr() * 0.3; } } }
   const n = Math.min(10, 3 + (spd / 30) | 0);
   for (let i = 0; i < n; i++) { const a = rr() * TAU; emit('spark', px, py, Math.cos(a) * (90 + rr() * 150), Math.sin(a) * (90 + rr() * 150), 0.28 + rr() * 0.25, 1.6 + rr() * 1.4, '#ffcf6b'); }
+  if (vxOn() && vDist(v) < 900) {
+    VX.fx.impact(vxAt(px, 6, py), VX.n, { kind: 'spark', size: clamp(spd / 180, 0.5, 1.8) });
+    if (spd > 120) VX.fx.impact(vxAt(px, 2, py), VX.n, { kind: 'dust', size: clamp(spd / 160, 0.8, 2) });
+  }
+  // a hard knock sheds bits of trim and glass that skitter across the road and lie there a while
+  if (spd > 110 && !GL.soft) {
+    const nd = Math.min(8, (spd / 45) | 0);
+    for (let i = 0; i < nd; i++) { const a = rr() * TAU, s = 40 + rr() * 110; emit('debris', px, py, Math.cos(a) * s + v.vx * 0.2, Math.sin(a) * s + v.vy * 0.2, 3 + rr() * 2.5, 1.1 + rr() * 1.2, rr() < 0.4 ? 'rgba(170,205,220,.9)' : 'rgba(40,40,44,.95)'); }
+    emit('dust', px, py, (rr() - 0.5) * 20, (rr() - 0.5) * 20, 1.2, 9, 'rgba(190,175,150,.35)');
+  }
   if (v.player) {
     arcRef.sfx.noise(0.26, { freq: 650 + rr() * 300, vol: clamp(spd / 340, 0.1, 0.4) });
     arcRef.sfx.tone(90 + rr() * 30, 0.2, { type: 'square', slide: 45, vol: clamp(spd / 500, 0.08, 0.28) });
@@ -2257,11 +2583,14 @@ function collideVeh(a, b) {
 
 /* ---------------------------------------------------------------- pedestrians */
 const SHIRTS = ['#d9534f', '#e8a33a', '#3aa6b5', '#5b7fd1', '#c9477f', '#7bb35a', '#f0e6d0', '#8a5ad0', '#e07a3a', '#3c8d5a'];
-const SKINS = ['#e0b08a', '#c68a5e', '#a96f45', '#8a5a38', '#d9a27a'];
+// Mostly South Asian skin tones, light to deep, with a few visitors' tones besides.
+const SKINS = ['#e6b994', '#d9a27a', '#c98f66', '#b97c54', '#a96f45', '#94603b', '#7d4d2f', '#663d25', '#f1ccad', '#5a3622'];
 function mkPed(cn) {
   const p = {
-    x: 0, y: 0, vx: 0, vy: 0, a: 0, c: cn, prev: null, tx: 0, ty: 0, state: 'walk', t: 0, sp: 24 + rr() * 8, shirt: pick(SHIRTS), skin: pick(SKINS), hair: pick(['#1a1410', '#2b1d12', '#3a2a1a', '#101010', '#6b6b6b']),
+    // A walking pace of 1.3 to 2 m/s (one unit is ten centimetres); a stride that suits the height.
+    x: 0, y: 0, vx: 0, vy: 0, a: 0, c: cn, prev: null, tx: 0, ty: 0, state: 'walk', t: 0, sp: 13 + rr() * 7, shirt: pick(SHIRTS), skin: pick(SKINS), hair: pick(['#1a1410', '#2b1d12', '#3a2a1a', '#101010', '#101010', '#6b6b6b', '#9a9690']),
     anim: rr() * 10, cool: 0, fx: 0, fy: 0, dive: 0, bag: rr() < 0.25, dupatta: rr() < 0.2, scared: 0, pause: 0,
+    hs: 0.92 + rr() * 0.16, bw: 0.88 + rr() * 0.24, ph: rr() * TAU, idle: '', idleT: 0, mate: null, react: '', reactT: 0, lookT: 0, lx: 0, ly: 0, mv: 0, foot: 0,
   };
   const q = cornerPos(cn);
   p.x = q.x + (rr() - 0.5) * 6; p.y = q.y + (rr() - 0.5) * 6;
@@ -2286,9 +2615,14 @@ function pedPick(p) {
   p.tx = q.x + (rr() - 0.5) * 6; p.ty = q.y + (rr() - 0.5) * 6;
 }
 
+// Something worth a glance: the player's car tearing past, a horn, a crash. People look, then go back to their day.
+function pedLook(p, x, y, t) { p.lx = x; p.ly = y; p.lookT = Math.max(p.lookT, t); }
+const PED_FLEE = 62;
 function updatePed(p, dt) {
-  p.anim += dt * (p.state === 'flee' ? 14 : 8);
   if (p.cool > 0) p.cool -= dt;
+  if (p.lookT > 0) p.lookT -= dt;
+  if (p.reactT > 0) { p.reactT -= dt; if (p.reactT <= 0) p.react = ''; }
+  p.mv = 0;
   // threats: moving vehicles
   let threat = false;
   for (let i = 0; i < V.length; i++) {
@@ -2301,8 +2635,8 @@ function updatePed(p, dt) {
       if (p.state !== 'dive') {
         const sgn = lat >= 0 ? 1 : -1;
         p.fx = -uy * sgn; p.fy = ux * sgn;
-        if (p.state !== 'flee') p.state = 'flee';
-        p.t = 1.4;
+        if (p.state !== 'flee') { p.state = 'flee'; p.idle = ''; p.pause = 0; if (p.mate) { p.mate.mate = null; p.mate = null; } }
+        p.t = 1.4; p.byPlayer = !!v.player; pedLook(p, v.x, v.y, 1.6);
       }
       let hitC = false;
       for (let k = 0; k < v.T.circ.length; k++) { const o = v.T.circ[k]; const ccx = v.x + Math.cos(v.a) * o - p.x, ccy = v.y + Math.sin(v.a) * o - p.y; if (ccx * ccx + ccy * ccy < (v.T.r + 4) * (v.T.r + 4)) { hitC = true; break; } }
@@ -2320,18 +2654,46 @@ function updatePed(p, dt) {
   }
   if (p.state === 'flee') {
     p.t -= dt;
-    const sp = 105;
-    p.x += p.fx * sp * dt; p.y += p.fy * sp * dt; p.a = Math.atan2(p.fy, p.fx);
-    if (p.t <= 0 && !threat) { p.state = 'walk'; p.scared = 2; const q = cornerPos(p.c); p.tx = q.x; p.ty = q.y; }
+    // a real sprint out of the way, about 6 m/s, a stride of about 1.3 m
+    const sp = PED_FLEE * Math.min(1, 0.55 + p.t);
+    p.x += p.fx * sp * dt; p.y += p.fy * sp * dt; p.a = Math.atan2(p.fy, p.fx); p.mv = sp; p.anim += dt * PI * sp / (13 * p.hs);
+    if (p.t <= 0 && !threat) {
+      p.state = 'walk'; p.scared = 2; const q = cornerPos(p.c); p.tx = q.x; p.ty = q.y;
+      // the car that nearly had them: stop, turn and tell the driver what they think of it
+      if (p.byPlayer && rr() < 0.7) { p.react = 'shout'; p.reactT = 1.4 + rr() * 0.8; p.pause = p.reactT; p.idle = ''; pedLook(p, p.lx, p.ly, p.reactT); p.a = Math.atan2(p.ly - p.y, p.lx - p.x); }
+      p.byPlayer = false;
+    }
     if (solidAt(p.x, p.y)) { p.x -= p.fx * sp * dt; p.y -= p.fy * sp * dt; const t0 = p.fx; p.fx = -p.fy; p.fy = t0; }
     return;
   }
-  if (p.pause > 0) { p.pause -= dt; return; }
+  // the player passing close, fast, earns a glance
+  if (p.lookT <= 0 && rr() < dt * 1.2) {
+    const pv = pl.veh, px = pv ? pv.x : pl.x, py = pv ? pv.y : pl.y, dd = hyp(px - p.x, py - p.y);
+    if (dd < 90 && (pv ? vSpeed(pv) > 70 : pl.moving)) pedLook(p, px, py, 0.8 + rr() * 1.2);
+  }
+  if (p.pause > 0) {
+    p.pause -= dt;
+    if (p.idle === 'chat' && p.mate) { pedLook(p, p.mate.x, p.mate.y, 0.3); p.a += wrapA(Math.atan2(p.mate.y - p.y, p.mate.x - p.x) - p.a) * Math.min(1, dt * 2.5); }
+    if (p.pause <= 0) { if (p.mate) { p.mate.mate = null; p.mate = null; } p.idle = ''; }
+    return;
+  }
   const dx = p.tx - p.x, dy = p.ty - p.y, d = hyp(dx, dy);
-  if (d < 4) { if (rr() < 0.12) p.pause = 0.6 + rr() * 2; pedPick(p); return; }
+  if (d < 4) {
+    // at the corner: wait a moment, check the phone, or stop for a word with someone who has stopped too
+    if (rr() < 0.32) {
+      p.pause = 1.6 + rr() * 4.5;
+      let m = null;
+      for (let i = 0; i < PD.length && !m; i++) { const o = PD[i]; if (o !== p && !o.mate && o.state === 'walk' && o.pause > 1 && hyp(o.x - p.x, o.y - p.y) < 26) m = o; }
+      if (m) { p.idle = m.idle = 'chat'; p.mate = m; m.mate = p; p.pause = m.pause = Math.max(m.pause, 3 + rr() * 4); }
+      else p.idle = rr() < 0.55 ? 'phone' : 'wait';
+    }
+    pedPick(p); return;
+  }
   const sp = p.sp * (p.scared > 0 ? 1.6 : 1);
   if (p.scared > 0) p.scared -= dt;
-  p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; p.a = Math.atan2(dy, dx);
+  p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; p.a = Math.atan2(dy, dx); p.mv = sp;
+  // the legs keep pace with the ground: one step per 0.7 m or so, scaled by height
+  p.anim += dt * PI * sp / (7 * p.hs + sp * 0.12);
 }
 
 /* ================================================================ roads, traffic AI */
@@ -2885,6 +3247,7 @@ function completeJob(msg, sub, base, bonus) {
   arcRef.haptic('success', 1);
   if (POST) POST.flash(0.16, '#d8ffd8');
   for (let i = 0; i < 24; i++) { const a = rr() * TAU, s = 60 + rr() * 140; emit('cash', pl.x, pl.y, Math.cos(a) * s, Math.sin(a) * s - 40, 0.9 + rr() * 0.5, 2 + rr() * 2, rr() < 0.5 ? '#7dff9b' : '#FFB736', 220); }
+  vxPayday();
   endJobCleanup(j); G.job = null;
 }
 function failJob(why, quiet) {
@@ -3010,7 +3373,12 @@ function updatePlayer(dt) {
     G.hornCd = 0.27; const s = arcRef.sfx;
     s.tone(392, 0.24, { type: 'square', vol: 0.13 }); s.tone(494, 0.24, { type: 'square', vol: 0.1 });
     if (pl.veh) pl.veh.horn = 0.25;
-    for (const p of PD) if (hyp(p.x - pl.x, p.y - pl.y) < 150 && p.state === 'walk') { p.state = 'flee'; p.t = 1.1; const d = hyp(p.x - pl.x, p.y - pl.y) || 1; p.fx = (p.x - pl.x) / d; p.fy = (p.y - pl.y) / d; }
+    // people in the road step out of it; people on the pavement flinch, turn and glare
+    for (const p of PD) {
+      if (hyp(p.x - pl.x, p.y - pl.y) >= 150 || p.state !== 'walk') continue;
+      if (onRoad(p.x, p.y)) { p.state = 'flee'; p.t = 1.1; const d = hyp(p.x - pl.x, p.y - pl.y) || 1; p.fx = (p.x - pl.x) / d; p.fy = (p.y - pl.y) / d; p.idle = ''; p.pause = 0; if (p.mate) { p.mate.mate = null; p.mate = null; } }
+      else { p.react = rr() < 0.4 ? 'shout' : 'startle'; p.reactT = 0.35 + rr() * 0.25 + (p.react === 'shout' ? 0.9 : 0); p.pause = Math.max(p.pause, p.reactT + 0.2); pedLook(p, pl.x, pl.y, p.reactT + 0.4); }
+    }
   }
   if (pl.veh) {
     const v = pl.veh, ax = inp.axis(), c = v.c;
@@ -3243,6 +3611,11 @@ function endHustle() {
   if (G.phase !== 'play') return;
   G.phase = 'over'; G.active = false;
   stopHum();
+  if (vxOn()) {
+    const fx = Math.cos(CAM.yaw), fz = Math.sin(CAM.yaw);
+    VX.fx.winBurst(vxAt(pl.x + fx * 120, 4, pl.y + fz * 120), { size: 4 });
+    for (let k = 0; k < 3; k++) VX.fx.fireworks(vxAt(pl.x + fx * (380 + k * 90) + fz * (k - 1) * 200, CAM.y + 60 + k * 25, pl.y + fz * (380 + k * 90) - fx * (k - 1) * 200), { size: 7, launch: true, delay: k * 0.45 });
+  }
   const arc = arcRef;
   arc.sfx.tone(520, 0.2, { type: 'triangle', vol: 0.15 }); arc.sfx.tone(780, 0.3, { type: 'triangle', vol: 0.15, delay: 0.18 });
   arc.haptic('success');
@@ -3685,6 +4058,8 @@ const arc = Arcade.create({
       cash(n) { G.cash = n; }, heat(n) { G.heat = n; G.unseen = 0; }, time(h) { G.hour = h; }, hustle(s) { G.hustleLeft = s; },
       car(type) { const v = mkVeh(type || 'hatch', pl.x + 40, pl.y, 0); v.driver = false; v.parked = true; v.c.hb = true; return v; },
       enter() { tryEnter(); }, leave() { leaveCar(false); }, V, PD, G, pl, SAFE, CAM, GL, quality(q) { GL.q = q; GL.pinned = true; applyQuality(); },
+      vfx: () => VX.state, payday() { vxPayday(); },
+      wreck() { let b = null, bd = 1e9; for (const v of V) { if (v.player || v.wreck) continue; const d = hyp(v.x - CAM.lx, v.y - CAM.lz); if (d < bd) { bd = d; b = v; } } if (b) wreckVeh(b); return !!b; },
       job(type) { const o = G.offers.find((q) => q.type === type); if (o) { pl.x = o.x; pl.y = o.y; if (pl.veh) { pl.veh.x = o.x; pl.veh.y = o.y; } startJob(o); } },
       finish() { const j = G.job; if (j && j.tx != null) { pl.x = j.tx; pl.y = j.ty; if (pl.veh) { pl.veh.x = j.tx; pl.veh.y = j.ty; } } },
     };

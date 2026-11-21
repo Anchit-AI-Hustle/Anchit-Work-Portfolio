@@ -98,7 +98,7 @@ const MAPS = {
     look: {
       skyTop: '#2a2b55', skyMid: '#8b4f6e', skyHor: '#ff9450', sun: '#ffa260', sunI: 3.1, sunEl: 0.13, sunAz: -1.25,
       fog: '#6b4a4a', fogD: 0.014, hemiSky: '#c4b0d8', hemiGnd: '#6a4a36', hemiI: 1.7, exposure: 1.2, cloud: 0.55,
-      grade: [1.06, 0.98, 0.9], lift: [0.012, 0.004, 0.018], sat: 1.08, env: 0.6, rain: 0, dust: 1, bloom: 0.9
+      grade: [1.05, 0.99, 0.92], lift: [0.014, 0.01, 0.02], sat: 0.98, env: 0.6, rain: 0, dust: 1, bloom: 0.8
     }
   },
   roof: {
@@ -118,7 +118,7 @@ const MAPS = {
     look: {
       skyTop: '#3b4f8c', skyMid: '#d98a6a', skyHor: '#ffc06a', sun: '#ffb468', sunI: 3.6, sunEl: 0.1, sunAz: 1.9,
       fog: '#c99b7a', fogD: 0.009, hemiSky: '#d9c6b0', hemiGnd: '#b07a4a', hemiI: 1.35, exposure: 1.08, cloud: 0.3,
-      grade: [1.08, 1.0, 0.88], lift: [0.015, 0.008, 0.0], sat: 1.1, env: 0.7, rain: 0, dust: 1, bloom: 0.85
+      grade: [1.06, 1.0, 0.9], lift: [0.016, 0.01, 0.006], sat: 0.99, env: 0.7, rain: 0, dust: 1, bloom: 0.78
     }
   }
 };
@@ -223,6 +223,9 @@ const CALLS = {
   reload: ['{n}: Reloading, cover me!', '{n}: Hopper dry, swapping in!', '{n}: Refilling!'],
   down: ['{n}: I am splatted, back in a few!', '{n}: Got me! Heading out.', '{n}: Tagged, respawning.'],
   nice: ['{n}: Nice splat!', '{n}: Clean shot!', '{n}: That is how it is done!', '{n}: Great tag!'],
+  got: ['{n}: Got one!', '{n}: Splat! One down.', '{n}: Tagged! Moving up.', '{n}: Yes! Scratch one.'],
+  rivalOut: ['{n}: Argh, good shot!', '{n}: Okay, okay, you got me.', '{n}: Not again!', '{n}: Lucky one!'],
+  close: ['{n}: Whoa, close one!', '{n}: That nearly had me.'],
   follow: ['{n}: On you, lead the way.', '{n}: Right behind you.', '{n}: Moving with you.'],
   flagTaken: ['{n}: They have our flag! Stop the carrier!'],
   flagGot: ['{n}: You have the flag, run it home!', '{n}: Flag is ours, escort the carrier!'],
@@ -539,6 +542,9 @@ void main(){
   c = c * uGain + uLift * (1.0 - c);
   float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
   c = mix(vec3(l), c, uSat * (1.0 - uDesat));
+  // split toning, as film and a real sky do it: shadows lean cool, highlights warm
+  float lw = smoothstep(0.04, 0.8, l);
+  c += mix(vec3(-0.012, -0.002, 0.016), vec3(0.016, 0.006, -0.014), lw) * (0.4 + 0.6 * (1.0 - abs(lw * 2.0 - 1.0)));
   c *= 1.0 - smoothstep(0.18, 0.75, r2) * uVig;
   c = mix(c, uHurtCol, smoothstep(0.08, 0.42, r2) * uHurt);
   c = clamp(c, 0.0, 1.0);
@@ -1141,9 +1147,20 @@ function buildDecor(S, mapId, G, K, cx) {
 }
 
 /* ------------------------------------------------------------ decals, markers, flags */
+// A run of paint: a thin trail with a fat drop at the bottom, anchored at its top edge.
+function dripTex() {
+  if (TX.drip) return TX.drip;
+  const Wd2 = 32, Hd = 128, c = mkCanvas(Wd2, Hd), g = c.getContext('2d');
+  g.fillStyle = '#fff';
+  g.beginPath(); g.moveTo(Wd2 / 2 - 7, 0); g.quadraticCurveTo(Wd2 / 2 - 3, Hd * 0.55, Wd2 / 2 - 4, Hd - 14); g.lineTo(Wd2 / 2 + 4, Hd - 14); g.quadraticCurveTo(Wd2 / 2 + 3, Hd * 0.55, Wd2 / 2 + 7, 0); g.closePath(); g.fill();
+  g.beginPath(); g.ellipse(Wd2 / 2, Hd - 11, 7, 9, 0, 0, TAU); g.fill();
+  TX.drip = toTex(c, { clamp: true });
+  return TX.drip;
+}
+const GROW_N = 96;
 function makeDecals(group) {
   const mat = stdMat({ map: splatTex(), transparent: true, depthWrite: false, roughness: 0.18, metalness: 0, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
-  const MAX = 420, im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, MAX);
+  const MAX = 600, im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, MAX);
   im.count = 0; im.frustumCulled = false; im.receiveShadow = true; im.renderOrder = 2;
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
   for (let i = 0; i < MAX; i++) { im.setMatrixAt(i, zero); im.setColorAt(i, new THREE.Color(1, 1, 1)); }
@@ -1153,27 +1170,92 @@ function makeDecals(group) {
   body.frustumCulled = false; body.renderOrder = 3;
   for (let i = 0; i < BMAX; i++) { body.setMatrixAt(i, zero); body.setColorAt(i, new THREE.Color(1, 1, 1)); }
   group.add(body);
-  return { im, MAX, n: 0, body, BMAX, bn: 0, bodyList: new Array(BMAX).fill(null), zero };
+  // paint that runs down a wall: grows from the splat under its own weight, slowing as it thins
+  const dmat = mat.clone(); dmat.map = dripTex(); dmat.polygonOffsetFactor = -5; dmat.polygonOffsetUnits = -5;
+  const dg = new THREE.PlaneGeometry(1, 1); dg.translate(0, -0.5, 0);
+  const DMAX = 72, drip = new THREE.InstancedMesh(dg, dmat, DMAX);
+  drip.frustumCulled = false; drip.renderOrder = 2; drip.count = 0;
+  for (let i = 0; i < DMAX; i++) { drip.setMatrixAt(i, zero); drip.setColorAt(i, new THREE.Color(1, 1, 1)); }
+  group.add(drip);
+  // splats that are still spreading, satellites still in flight and runs still running
+  const grow = [];
+  for (let i = 0; i < GROW_N; i++) grow.push({ on: false, kind: 0, i: 0, p: new THREE.Vector3(), q: new THREE.Quaternion(), sx: 1, sy: 1, t: 0, dur: 0.15, delay: 0, len: 0, rate: 1 });
+  return { im, MAX, n: 0, body, BMAX, bn: 0, bodyList: new Array(BMAX).fill(null), zero, drip, DMAX, dn: 0, grow, gi: 0 };
+}
+const _q2 = new THREE.Quaternion(), _v4 = new THREE.Vector3(), _v5 = new THREE.Vector3(), _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _tn = new THREE.Vector3(), UPV = new THREE.Vector3(0, 1, 0);
+function growSlot(D) { for (let k = 0; k < GROW_N; k++) { const g = D.grow[(D.gi + k) % GROW_N]; if (!g.on) { D.gi = (D.gi + k + 1) % GROW_N; return g; } } return null; }
+// Advance spreading splats and running drips (pure matrix updates, nothing allocated).
+function growSplats(D, dt) {
+  let mi = false, md = false;
+  for (let k = 0; k < GROW_N; k++) {
+    const g = D.grow[k]; if (!g.on) continue;
+    g.t += dt;
+    const t = g.t - g.delay;
+    if (g.kind === 0) {
+      if (t < 0) continue;
+      const e = 1 - Math.pow(1 - Math.min(1, t / g.dur), 3), s = 0.22 + 0.78 * e;
+      _m.compose(g.p, g.q, _s.set(g.sx * s, g.sy * s, 1)); D.im.setMatrixAt(g.i, _m); mi = true;
+      if (t >= g.dur) g.on = false;
+    } else {
+      if (t < 0) continue;
+      const L = g.len * (1 - Math.exp(-t * g.rate));
+      _m.compose(g.p, g.q, _s.set(g.sx, Math.max(0.001, L), 1)); D.drip.setMatrixAt(g.i, _m); md = true;
+      if (t > 2.2 / g.rate) g.on = false;
+    }
+  }
+  if (mi) D.im.instanceMatrix.needsUpdate = true;
+  if (md) D.drip.instanceMatrix.needsUpdate = true;
 }
 const _q = new THREE.Quaternion(), _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _m = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _m3 = new THREE.Matrix4(), _s = new THREE.Vector3(), _c = new THREE.Color(), _e = new THREE.Euler();
 const ZAXIS = new THREE.Vector3(0, 0, 1), YAXIS = new THREE.Vector3(0, 1, 0);
-function addSplat(D, x, y, z, nx, ny, nz, color, size) {
+// A splat on a surface. With the ball's velocity it smears along its line of travel (a glancing hit runs long)
+// and, given time to grow, spreads out from the impact point over a few frames instead of appearing whole.
+function addSplat(D, x, y, z, nx, ny, nz, color, size, vx, vy, vz, delay) {
   const i = D.n % D.MAX; D.n++;
   _v.set(nx, ny, nz).normalize();
   _q.setFromUnitVectors(ZAXIS, _v);
-  _q.multiply(new THREE.Quaternion().setFromAxisAngle(ZAXIS, Math.random() * TAU));
+  let ang = Math.random() * TAU, st = 1;
+  if (vx != null) {
+    const sp = Math.hypot(vx, vy, vz) || 1, dn = vx * _v.x + vy * _v.y + vz * _v.z;
+    _v3.set(vx - dn * _v.x, vy - dn * _v.y, vz - dn * _v.z);
+    const tl = _v3.length() / sp;
+    if (tl > 0.12) {
+      st = 1 + 1.25 * tl * tl;
+      _v3.normalize();
+      _v4.set(1, 0, 0).applyQuaternion(_q);
+      ang = Math.atan2(_v5.crossVectors(_v4, _v3).dot(_v), _v4.dot(_v3));
+      x += _v3.x * size * 0.22 * (st - 1); y += _v3.y * size * 0.22 * (st - 1); z += _v3.z * size * 0.22 * (st - 1);
+    }
+  }
+  _q.multiply(_q2.setFromAxisAngle(ZAXIS, ang));
   _v2.set(x + nx * 0.012, y + ny * 0.012, z + nz * 0.012);
-  const s = size * (0.8 + Math.random() * 0.5);
-  _s.set(s * (0.85 + Math.random() * 0.3), s * (0.85 + Math.random() * 0.3), 1);
-  _m.compose(_v2, _q, _s);
-  D.im.setMatrixAt(i, _m); D.im.setColorAt(i, _c.set(color));
+  const s = size * (0.8 + Math.random() * 0.5), sx = s * (0.85 + Math.random() * 0.3) * st, sy = s * (0.85 + Math.random() * 0.3) / Math.sqrt(st);
+  const g = vx != null && !(ARC && ARC.reducedMotion) ? growSlot(D) : null;
+  if (g) {
+    g.on = true; g.kind = 0; g.i = i; g.p.copy(_v2); g.q.copy(_q); g.sx = sx; g.sy = sy; g.t = 0; g.delay = delay || 0; g.dur = 0.1 + size * 0.12;
+    D.im.setMatrixAt(i, D.zero);
+  } else { _m.compose(_v2, _q, _s.set(sx, sy, 1)); D.im.setMatrixAt(i, _m); }
+  D.im.setColorAt(i, _c.set(color));
   D.im.count = Math.min(D.MAX, D.n);
   D.im.instanceMatrix.needsUpdate = true; if (D.im.instanceColor) D.im.instanceColor.needsUpdate = true;
+}
+// A run of paint below a splat on a wall. Its length is limited by the floor below it.
+function addDrip(D, x, y, z, nx, nz, color, width, len, delay) {
+  const g = growSlot(D); if (!g) return;
+  const i = D.dn % D.DMAX; D.dn++;
+  _v.set(nx, 0, nz).normalize();
+  _v4.crossVectors(UPV, _v);
+  _m.makeBasis(_v4, UPV, _v); g.q.setFromRotationMatrix(_m);
+  g.on = true; g.kind = 1; g.i = i; g.p.set(x + nx * 0.016, y, z + nz * 0.016); g.sx = width; g.len = len; g.rate = 0.7 + Math.random() * 0.8; g.t = 0; g.delay = delay;
+  D.drip.setMatrixAt(i, D.zero); D.drip.setColorAt(i, _c.set(color));
+  D.drip.count = Math.min(D.DMAX, D.dn);
+  D.drip.instanceMatrix.needsUpdate = true; if (D.drip.instanceColor) D.drip.instanceColor.needsUpdate = true;
 }
 function clearSplats(D) {
   for (let i = 0; i < D.MAX; i++) D.im.setMatrixAt(i, D.zero);
   D.n = 0; D.im.count = 0; D.im.instanceMatrix.needsUpdate = true;
   D.bodyList.fill(null); D.bn = 0;
+  D.dn = 0; D.drip.count = 0; D.grow.forEach((g) => { g.on = false; });
 }
 
 function makeMarkers(group) {
@@ -1218,7 +1300,7 @@ const PARTS = {};
 const MAXC = 16;
 function makePeople(scene) {
   const P = { list: [], group: new THREE.Group() };
-  const mk = (name, geo, mat, shadow) => { const im = new THREE.InstancedMesh(geo, mat, MAXC); im.frustumCulled = false; im.castShadow = shadow !== false; im.receiveShadow = true; for (let i = 0; i < MAXC; i++) { im.setMatrixAt(i, _m.makeScale(0, 0, 0)); im.setColorAt(i, _c.set('#ffffff')); } P.group.add(im); P[name] = im; P.list.push(im); return im; };
+  const mk = (name, geo, mat, shadow) => { const im = new THREE.InstancedMesh(geo, mat, MAXC); im.name = name; im.frustumCulled = false; im.castShadow = shadow !== false; im.receiveShadow = true; for (let i = 0; i < MAXC; i++) { im.setMatrixAt(i, _m.makeScale(0, 0, 0)); im.setColorAt(i, _c.set('#ffffff')); } P.group.add(im); P[name] = im; P.list.push(im); return im; };
   const fabric = stdMat({ roughness: 0.82 }), skin = stdMat({ roughness: 0.6 }), plastic = stdMat({ roughness: 0.38, metalness: 0.05 });
   const CAP = (r, l, sx, sy, sz) => { const g = new THREE.CapsuleGeometry(r, l, 4, 10); if (sx) g.scale(sx, sy, sz); return g; };
   const rbox = (w, h, d) => { const g = new THREE.BoxGeometry(w, h, d, 3, 3, 3), p = g.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const k = 0.22; const ax = Math.abs(v.x) / (w / 2), ay = Math.abs(v.y) / (h / 2), az = Math.abs(v.z) / (d / 2); const m = Math.max(ax, ay, az); if (m > 0.99) { const sq = Math.sqrt(ax * ax + ay * ay + az * az) / Math.sqrt(3); v.multiplyScalar(lerp(1, 1 / Math.max(0.6, sq), k)); } p.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return g; };
@@ -1237,6 +1319,15 @@ function makePeople(scene) {
   mk('bootL', rbox(0.135, 0.11, 0.27), plastic); mk('bootR', rbox(0.135, 0.11, 0.27), plastic);
   const gun = mergeParts([[BOX(0.07, 0.1, 0.42), M4(0, 0, 0), '#ffffff'], [CYL(0.018, 0.018, 0.34, 8), M4(0, 0.01, -0.36, Math.PI / 2, 0, 0), '#2a2d33'], [new THREE.SphereGeometry(0.075, 10, 8), M4(0, 0.1, -0.02, 0, 0, 0, 1, 0.8, 1.3), '#ffe680'], [CYL(0.035, 0.035, 0.2, 8), M4(0, -0.02, 0.28, Math.PI / 2, 0, 0), '#e8eef2'], [BOX(0.04, 0.12, 0.05), M4(0, -0.09, 0.08, 0.3, 0, 0), '#2a2d33']]);
   mk('gun', gun, stdMat({ vertexColors: true, roughness: 0.35, metalness: 0.15 }));
+  // contact shadows: a soft dark footprint under everyone, so nobody floats where the shadow map is coarse or off
+  const cc = mkCanvas(64, 64), cg = cc.getContext('2d'), rg = cg.createRadialGradient(32, 32, 0, 32, 32, 32);
+  rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(0.45, 'rgba(0,0,0,.65)'); rg.addColorStop(0.8, 'rgba(0,0,0,.15)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+  cg.fillStyle = rg; cg.fillRect(0, 0, 64, 64);
+  const csG = new THREE.PlaneGeometry(1, 1); csG.rotateX(-Math.PI / 2);
+  P.cs = new THREE.InstancedMesh(csG, new THREE.MeshBasicMaterial({ map: toTex(cc, { clamp: true, linear: true }), color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 }), MAXC);
+  P.cs.frustumCulled = false; P.cs.renderOrder = 4;
+  for (let i = 0; i < MAXC; i++) P.cs.setMatrixAt(i, _m.makeScale(0, 0, 0));
+  P.group.add(P.cs);
   scene.add(P.group);
   P.visor.castShadow = false;
   return P;
@@ -1252,6 +1343,7 @@ function setPart(im, i, frame, ox, oy, oz, rx, ry, rz, py, sx, sy, sz) {
   im.setMatrixAt(i, _m2);
   return _m2;
 }
+const LEGS = [['thighL', 'shinL', 'bootL', -0.1, 0], ['thighR', 'shinR', 'bootR', 0.1, Math.PI]];
 function poseCharacter(P, i, c, frames) {
   const hide = !c.visible || c.fade <= 0.01;
   if (hide) { P.list.forEach((im) => im.setMatrixAt(i, _m.makeScale(0, 0, 0))); return; }
@@ -1261,8 +1353,7 @@ function poseCharacter(P, i, c, frames) {
   const pel = lerp(0.95, 0.64, cr) + Math.abs(Math.sin(ph)) * 0.035 * run;
   _up.copy(_fr).multiply(_m3.makeTranslation(0, pel, 0));
   // legs: hip, knee, a flat boot
-  const legs = [['thighL', 'shinL', 'bootL', -0.1, 0], ['thighR', 'shinR', 'bootR', 0.1, Math.PI]];
-  legs.forEach(([th, sh, bo, ox, off]) => {
+  LEGS.forEach(([th, sh, bo, ox, off]) => {
     const lp = ph + off, sw = Math.sin(lp) * 0.75 * run, kn = Math.max(0, -Math.cos(lp)) * 1.0 * run;
     const t0 = cr * 1.15 + sw + (c.air ? 0.55 : 0), k0 = -(cr * 1.95 + kn) - (c.air ? 0.85 : 0);
     const m = setPart(P[th], i, _up, ox, -0.06, 0, t0, 0, 0, -0.215);
@@ -1272,15 +1363,17 @@ function poseCharacter(P, i, c, frames) {
     setPart(P[bo], i, _leg, 0, -0.44, -0.06, -k0 - t0, 0, 0, 0);
   });
   setPart(P.hips, i, _up, 0, 0, 0, 0, 0, 0, 0);
-  const lean = 0.12 * run + cr * 0.32 + (c.tagged ? -0.1 : 0);
-  _e.set(-lean, c.twist || 0, 0); _q.setFromEuler(_e); _m.compose(_v.set(0, 0.06, 0), _q, _s.set(1, 1, 1)); _up.multiply(_m);
+  // a hit rocks the body back and twists it; standing still, the chest rises and falls
+  const fk = c.flinchK || 0, br = run < 0.2 && !c.tagged ? Math.sin(R3.time * 1.7 + i * 1.3) * 0.012 : 0;
+  const lean = 0.12 * run + cr * 0.32 + (c.tagged ? -0.1 : 0) - fk * 0.22 + br;
+  _e.set(-lean, (c.twist || 0) + fk * 0.28 * (c.flinchSide || 1), 0); _q.setFromEuler(_e); _m.compose(_v.set(0, 0.06, 0), _q, _s.set(1, 1, 1)); _up.multiply(_m);
   setPart(P.torso, i, _up, 0, 0.27, 0, 0, 0, 0, 0);
   setPart(P.pack, i, _up, 0, 0.3, 0.19, 0, 0, 0, 0);
   setPart(P.rig, i, _up, 0, 0.3, -0.13, 0.05, 0, 0, 0);
   // head and mask
   const pitch = c.tagged ? -0.25 : clamp(c.pitch, -0.9, 0.9);
   _hd.copy(_up).multiply(_m3.makeTranslation(0, 0.66, 0));
-  _e.set(pitch * 0.6, 0, 0); _q.setFromEuler(_e); _m.compose(_v.set(0, 0, 0), _q, _s.set(1, 1, 1)); _hd.multiply(_m);
+  _e.set(pitch * 0.6 - fk * 0.25, c.tagged ? 0 : (c.look || 0), 0, 'YXZ'); _q.setFromEuler(_e); _m.compose(_v.set(0, 0, 0), _q, _s.set(1, 1, 1)); _hd.multiply(_m); _e.order = 'XYZ';
   setPart(P.head, i, _hd, 0, 0, 0, 0, 0, 0, 0);
   setPart(P.helmet, i, _hd, 0, 0.02, 0.01, -0.1, 0, 0, 0);
   setPart(P.mask, i, _hd, 0, -0.02, -0.08, 0, 0, 0, 0);
@@ -1298,11 +1391,135 @@ function poseCharacter(P, i, c, frames) {
     _e.set(ap + rec * 0.1, 0, 0); _q.setFromEuler(_e); _m.compose(_v.set(0, 0, 0), _q, _s.set(1, 1, 1)); _aim.multiply(_m);
     setPart(P.uarmR, i, _aim, 0.24, -0.02, -0.02, 0.95, 0, 0.2, -0.15);
     setPart(P.farmR, i, _aim, 0.2, -0.2, -0.2, 1.45, -0.3, 0, -0.13);
-    setPart(P.uarmL, i, _aim, -0.24, -0.02, -0.02, 1.25 - rl * 0.4, 0, -0.35, -0.15);
-    setPart(P.farmL, i, _aim, -0.1, -0.12, -0.3 + rl * 0.1, 1.55 - rl * 0.5, 0.7, 0, -0.13);
+    // the free hand comes off the marker for a fist pump after a tag
+    const cht = c.cheerT || 0, ck = cht > 0 ? smooth01(Math.min((0.9 - cht) / 0.2, cht / 0.25)) : 0, pump = ck > 0 ? Math.sin(R3.time * 14) * 0.12 * ck : 0;
+    setPart(P.uarmL, i, _aim, -0.24, -0.02, -0.02, lerp(1.25 - rl * 0.4, Math.PI - 0.35 + pump, ck), 0, lerp(-0.35, 0.25, ck), -0.15);
+    setPart(P.farmL, i, _aim, lerp(-0.1, -0.33, ck), lerp(-0.12, 0.4, ck), lerp(-0.3 + rl * 0.1, 0.02, ck), lerp(1.55 - rl * 0.5, Math.PI - 0.15 + pump, ck), lerp(0.7, 0, ck), lerp(0, 0.12, ck), -0.13);
     setPart(P.gun, i, _aim, 0.1, -0.12 - rl * 0.08, -0.34 + rec * 0.06, rl * 0.5, 0, rl * 0.3, 0);
   }
   if (frames) frames[i] = { up: _up.clone(), head: _hd.clone() };
+}
+
+/* ------------------------------------------------------------ spectacle (the shared VFX library) */
+// Paint only: a puff of air and paint mist at every rival's marker, a coloured powder cloud where a ball
+// lands near you, a Holi-style burst of powder in the tagger's colour on a tag-out, a stadium burst for a
+// flag capture and a victory shower of confetti and fireworks over the podium. Loads after the menu is up;
+// it adds no lights, so no material ever recompiles.
+const VX = { fx: null, state: 0, v: new THREE.Vector3(), n: new THREE.Vector3(), q: -1, red: null };
+function vxGround(x, z) { const W = Wd; if (!W) return 0; const cx = toCell(x), cz = toCell(z); if (!inGrid(cx, cz)) return 0; const h = W.G.h[cz * GN + cx]; return h > 50 ? 0 : h; }
+function loadVfx() {
+  if (VX.state || !R3) return;
+  VX.state = 1;
+  import('/games/shared/vfx.js').then((m) => {
+    try {
+      VX.fx = m.createVFX(R3.renderer, R3.scene, R3.camera, { quality: Math.max(0, R3.quality), unit: 1, groundY: vxGround, lights: 0, soft: R3.soft, reduced: !!(ARC && ARC.reducedMotion) });
+      VX.state = 2; const w = VX.fx.warm(); if (w && w.catch) w.catch(() => {});
+    } catch (e) { VX.state = -1; }
+  }).catch(() => { VX.state = -1; });
+}
+const vxOn = (W) => VX.state === 2 && VX.fx && (!W || Wd === W);
+function vxTick(dt) {
+  if (!vxOn()) return;
+  const q = Math.max(0, R3.quality); if (q !== VX.q) { VX.q = q; VX.fx.setQuality(q); }
+  const red = !!(ARC && ARC.reducedMotion); if (red !== VX.red) { VX.red = red; VX.fx.setReduced(red); }
+  VX.fx.update(dt);
+}
+const vxNear = (x, y, z, d) => { const p = R3.camera.position; return (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y) + (p.z - z) * (p.z - z) < d * d; };
+/* ------------------------------------------------------------ real people (the shared people library) */
+// From tier 1 up every player is a full rig from the shared people library: real proportions, a face that
+// blinks and glances behind the mask, a gait driven by real speed with the feet planted, both hands on the
+// marker through the arm aim, a fist pump after a tag, hands up and a slump when tagged out. The kit
+// (helmet, mask, visor, chest rig, pack, marker) stays instanced and rides the rig's head, chest and right
+// wrist, so it is still one draw per piece for the whole field. Tier 0 and a software renderer keep the
+// instanced figures. The library loads after the menu is up.
+const HU = { lib: null, state: 0, rigs: [] };
+const HEADFIX = new THREE.Matrix4().makeRotationY(Math.PI).premultiply(new THREE.Matrix4().makeTranslation(0, 0.1, 0.012));
+const CHESTFIX = new THREE.Matrix4().makeRotationY(Math.PI).premultiply(new THREE.Matrix4().makeTranslation(0, -0.215, 0.005));
+const _hv = new THREE.Vector3(), _hf = new THREE.Vector3(), _hr = new THREE.Vector3(), _hq = new THREE.Quaternion(), _hm = new THREE.Matrix4();
+const GEAR = ['helmet', 'mask', 'visor', 'rig', 'pack', 'gun'];
+function loadPeopleLib() {
+  if (HU.state || !R3 || R3.soft) return;
+  HU.state = 1;
+  import('/games/shared/human.js').then((m) => { HU.lib = m; HU.state = 2; }).catch(() => { HU.state = -1; });
+}
+const rigsOn = () => HU.state === 2 && R3 && R3.quality >= 1;
+function rigFor(W, i, c) {
+  let r = HU.rigs[i];
+  const key = c.id + ':' + c.team + ':' + (c.isBoss ? 1 : 0) + ':' + c.name;
+  if (r && r.key === key) return r;
+  if (!r) {
+    const q = R3.quality >= 3 ? 3 : 2;
+    const h = HU.lib.createHuman({ seed: 900 + i * 53, unit: 1, quality: q, lod: q >= 3 ? 'full' : 'mid', build: i % 3 ? 'athletic' : 'average', hair: 'short' });
+    h.group.visible = false; R3.scene.add(h.group);
+    r = HU.rigs[i] = { h, key: '', vR: new THREE.Vector3(), vL: new THREE.Vector3(), crouch: false, tagged: false, cheer: false, air: false, hit: 0, pod: false };
+  }
+  const T = TEAMS[c.team];
+  r.h.setOutfit({ top: c.isBoss ? '#5a2a8a' : T.vest, top2: T.trim, sleeves: 'long', bottom: T.pants, legs: 'trousers', shoes: '#1a1b1f', soles: '#44464a', gloves: '#1d2026', number: null });
+  r.key = key; r.crouch = r.tagged = r.cheer = r.air = r.pod = false; r.h.stop(); r.h.aim('right', null); r.h.aim('left', null);
+  return r;
+}
+// One player's rig for this frame, and their kit on its bones. Returns false when the rig is not drawn.
+function poseRig(W, Pp, i, c, dt, show) {
+  const r = rigFor(W, i, c), h = r.h, g = h.group;
+  if (!show) { g.visible = false; return false; }
+  g.visible = true;
+  const sc = c.fade * (c.isBoss ? 1.16 : 1);
+  g.position.copy(c.pos); g.rotation.y = c.yaw + Math.PI; g.scale.setScalar(sc);
+  const pod = !!(W.podium && W.podium.list.indexOf(c) >= 0);
+  // aim frame: where the marker points
+  const cp = Math.cos(c.pitch), fx = -Math.sin(c.yaw) * cp, fy = Math.sin(c.pitch), fz = -Math.cos(c.yaw) * cp, rx = Math.cos(c.yaw), rz = -Math.sin(c.yaw);
+  if (pod) {
+    if (!r.pod) { r.pod = true; h.aim('right', null); h.aim('left', null); h.stop(); }
+    if (!h.playing('cheer') && !h.playing('celebrate')) h.play(Math.random() < 0.5 ? 'cheer' : 'celebrate', { speed: 0.9 + Math.random() * 0.2 });
+  } else if (c.tagged) {
+    // marker up over the head, then the long walk off
+    if (!r.tagged) { r.tagged = true; h.play('slump', { intensity: 0.6 }); }
+    h.bones.head.getWorldPosition(_hv);
+    r.vR.set(_hv.x + rx * 0.15 + fx * 0.15, _hv.y + 1.2, _hv.z + rz * 0.15 + fz * 0.15); r.vL.set(_hv.x - rx * 0.15 + fx * 0.15, _hv.y + 1.2, _hv.z - rz * 0.15 + fz * 0.15);
+    h.aim('right', r.vR, { elbow: 0.35 }); h.aim('left', r.vL, { elbow: 0.35 });
+  } else {
+    r.tagged = false; r.pod = false;
+    // both hands on the marker: the right on the grip, tucked toward the chest, the left out under the barrel
+    h.bones.shoulderR.getWorldPosition(_hv);
+    r.vR.set(_hv.x + fx * 0.5 - rx * 0.16, _hv.y + fy * 0.5 - 0.34, _hv.z + fz * 0.5 - rz * 0.16);
+    h.bones.shoulderL.getWorldPosition(_hv);
+    r.vL.set(_hv.x + fx * 0.8 + rx * 0.2, _hv.y + fy * 0.8 - 0.1, _hv.z + fz * 0.8 + rz * 0.2);
+    const ck = c.cheerT || 0;
+    h.aim('right', r.vR, { elbow: 1.45 - (c.reloadK || 0) * 0.3 });
+    if (ck > 0) { if (!r.cheer) { r.cheer = true; h.aim('left', null); h.play('fistPump', { side: 'left' }); } }
+    else { r.cheer = false; h.aim('left', r.vL, { elbow: 0.55 + (c.reloadK || 0) * 0.6 }); }
+  }
+  // crouch, the hop of a jump, a flinch when a ball lands
+  const cr = c.crouchK > 0.5 && !pod;
+  if (cr !== r.crouch) { r.crouch = cr; if (cr) h.play('crouch'); else h.stop('crouch'); }
+  if (c.air && !r.air && !pod) h.play('jump', { intensity: 0.6 });
+  r.air = c.air;
+  if ((c.hitFlash || 0) > 0.95 && r.hit <= 0 && !c.tagged) { h.play('stumble', { intensity: 0.3 }); r.hit = 0.5; }
+  r.hit -= dt;
+  // eyes on the rival they are fighting, else their own glances
+  const T = c.bot && c.bot.vis && c.bot.target && c.bot.target.alive ? c.bot.target : null;
+  if (T) h.lookAt(_hf.set(T.pos.x, T.pos.y + 1.55, T.pos.z)); else h.lookAt(null);
+  h.setMood(pod ? 1 : c.tagged ? -0.7 : (c.cheerT || 0) > 0 ? 0.9 : 0);
+  h.update(dt, { speed: Math.hypot(c.vel.x, c.vel.z) });
+  g.updateMatrixWorld(true);
+  // the kit rides the bones
+  _hm.multiplyMatrices(h.bones.head.matrixWorld, HEADFIX);
+  setPart(Pp.helmet, i, _hm, 0, 0.02, 0.01, -0.1, 0, 0, 0);
+  setPart(Pp.mask, i, _hm, 0, -0.02, -0.08, 0, 0, 0, 0);
+  setPart(Pp.visor, i, _hm, 0, 0.02, -0.133, 0, 0, 0, 0);
+  _hm.multiplyMatrices(h.bones.chest.matrixWorld, CHESTFIX);
+  setPart(Pp.pack, i, _hm, 0, 0.3, 0.19, 0, 0, 0, 0);
+  setPart(Pp.rig, i, _hm, 0, 0.3, -0.13, 0.05, 0, 0, 0);
+  // the marker in the right hand, pointing where its owner aims (up over the head when tagged)
+  h.bones.fingersR.getWorldPosition(_hv);
+  if (c.tagged && !pod) { _e.set(0, c.yaw + Math.PI / 2, 0, 'YXZ'); _q.setFromEuler(_e); _e.order = 'XYZ'; _hm.compose(_hv, _q, _s.set(sc, sc, sc)); }
+  else { _e.set(c.pitch + (c.reloadK || 0) * 0.5, c.yaw, (c.reloadK || 0) * 0.3, 'YXZ'); _q.setFromEuler(_e); _e.order = 'XYZ'; _hm.compose(_hv, _q, _s.set(sc, sc, sc)).multiply(_m3.makeTranslation(0, 0.09, -0.08)); }
+  Pp.gun.setMatrixAt(i, _hm);
+  return true;
+}
+// Hide the instanced body parts a rig replaces (the kit is placed by poseRig).
+function hideBody(Pp, i) {
+  for (const im of Pp.list) { if (GEAR.indexOf(im.name) < 0) im.setMatrixAt(i, _m.makeScale(0, 0, 0)); }
 }
 
 /* ------------------------------------------------------------ the marker in your hands */
@@ -1336,13 +1553,32 @@ function buildViewModel(gun, team) {
     shell.position.set(0, 0.13, -0.02); shell.scale.set(0.95, 0.82, 1.3); gunG.add(shell);
     const lid = new THREE.Mesh(CYL(0.04, 0.045, 0.012, 16), stdMat({ color: G.acc, roughness: 0.4 })); lid.position.set(0, 0.186, -0.02); gunG.add(lid);
   }
-  // gloves and sleeves
-  const sleeve = stdMat({ color: T.vest, roughness: 0.85 }), glove = stdMat({ color: '#1d2026', roughness: 0.7 });
-  const rh = new THREE.Mesh(BOX(0.07, 0.07, 0.1), glove); rh.position.set(0.0, -0.09, 0.1); rh.rotation.x = 0.32;
-  const rs = new THREE.Mesh(BOX(0.08, 0.08, 0.24), sleeve); rs.position.set(0.035, -0.14, 0.24); rs.rotation.set(0.3, 0.14, 0);
-  const lh = new THREE.Mesh(BOX(0.07, 0.065, 0.11), glove); lh.position.set(-0.01, -0.07, -0.2); lh.rotation.z = -0.3;
-  const ls = new THREE.Mesh(BOX(0.075, 0.075, 0.3), sleeve); ls.position.set(-0.07, -0.13, -0.06); ls.rotation.set(0.25, -0.38, 0);
-  gunG.add(rh, rs, lh, ls);
+  // hands and forearms: gloved fingers wrapped round the grip and the fore-grip, a strip of wrist, rolled sleeves
+  const sleeve = stdMat({ color: T.vest, roughness: 0.86 }), glove = stdMat({ vertexColors: true, roughness: 0.62 });
+  const seg = (ax, ay, az, bx, by, bz, ra, rb, col) => {
+    _v.set(bx - ax, by - ay, bz - az); const l = _v.length(); _v.normalize();
+    return [CYL(rb, ra, l, 12), new THREE.Matrix4().compose(new THREE.Vector3((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2), new THREE.Quaternion().setFromUnitVectors(YAXIS, _v), new THREE.Vector3(1, 1, 1)), col];
+  };
+  const SPH = new THREE.SphereGeometry(1, 12, 8), FING = (r, l) => new THREE.CapsuleGeometry(r, l, 3, 8);
+  const gl = '#22252b', gl2 = '#2c3038', sk = SKIN[(team * 3 + 2) % SKIN.length];
+  const hands = [
+    // right hand round the pistol grip: palm, four curled fingers, thumb over the top, index on the trigger
+    [SPH, M4(0.016, -0.1, 0.112, 0.32, 0, 0, 0.038, 0.05, 0.034), gl],
+    [FING(0.0115, 0.034), M4(-0.002, -0.084, 0.064, 0.32, 0, Math.PI / 2), gl2], [FING(0.0115, 0.034), M4(-0.002, -0.104, 0.07, 0.32, 0, Math.PI / 2), gl2], [FING(0.011, 0.03), M4(-0.002, -0.123, 0.076, 0.32, 0, Math.PI / 2), gl2],
+    [FING(0.0105, 0.042), M4(0.012, -0.052, 0.035, Math.PI / 2 - 0.3, 0, 0), gl2],
+    [FING(0.012, 0.04), M4(-0.03, -0.066, 0.1, 0.9, 0, 0.35), gl2],
+    seg(0.018, -0.125, 0.14, 0.024, -0.137, 0.17, 0.034, 0.04, gl), seg(0.024, -0.137, 0.17, 0.034, -0.15, 0.2, 0.031, 0.033, sk),
+    // left hand cupped under the fore-grip, fingers up its far side, thumb along the near side
+    [SPH, M4(-0.004, -0.096, -0.2, 0, 0, -0.25, 0.042, 0.022, 0.056), gl],
+    [FING(0.011, 0.032), M4(0.032, -0.07, -0.226, 0, 0, -0.15), gl2], [FING(0.011, 0.034), M4(0.034, -0.07, -0.203, 0, 0, -0.12), gl2], [FING(0.0105, 0.03), M4(0.032, -0.072, -0.18, 0, 0, -0.1), gl2],
+    [FING(0.0115, 0.036), M4(-0.033, -0.068, -0.205, 0.2, 0, 0.2), gl2],
+    seg(-0.022, -0.108, -0.16, -0.04, -0.122, -0.122, 0.034, 0.039, gl), seg(-0.04, -0.122, -0.122, -0.055, -0.133, -0.092, 0.031, 0.033, sk)
+  ];
+  const gh = new THREE.Mesh(mergeParts(hands), glove);
+  const arms = mergeParts([seg(0.034, -0.15, 0.2, 0.09, -0.215, 0.44, 0.047, 0.056, '#ffffff'), seg(-0.055, -0.133, -0.092, -0.14, -0.205, 0.13, 0.046, 0.055, '#ffffff'),
+    [new THREE.TorusGeometry(0.047, 0.009, 6, 14), M4(0.036, -0.152, 0.205, 1.35, 0.25, 0), '#ffffff'], [new THREE.TorusGeometry(0.046, 0.009, 6, 14), M4(-0.057, -0.135, -0.088, 1.25, -0.35, 0), '#ffffff']]);
+  const sl = new THREE.Mesh(arms, sleeve);
+  gunG.add(gh, sl);
   // muzzle pop
   const flash = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: glowTex('rgba(255,255,255,1)'), color: new THREE.Color(T.paint).multiplyScalar(2.5), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   flash.position.set(0, 0.012, -0.2 - len); flash.visible = false; gunG.add(flash);
@@ -1523,7 +1759,10 @@ function newChar(W, team, name, isPlayer, idx) {
     pos: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: 0, pitch: 0, onGround: true, air: false, crouch: false, crouchK: 0, runK: 0, phase: 0,
     gun: isPlayer ? (W.cfg.gun | 0) : (idx * 7 + team) % 3, ammo: GUNS.map((g) => g.mag), reloadT: 0, fireT: 0, burstLeft: 0, burstT: 0, adsK: 0, sprint: false,
     alive: true, tagged: false, taggedT: 0, respawnT: 0, visible: true, fade: 1, regenT: 9, lastHitBy: null, streak: 0, tags: 0, outs: 0, caps: 0, carry: -1,
-    recoilK: 0, reloadK: 0, twist: 0, hitFlash: 0, footT: 0, splats: 0, bot: isPlayer ? null : { state: 'roam', target: null, path: null, pathT: 0, goal: null, reactT: 0, seenT: 0, aimYaw: 0, aimPitch: 0, strafeT: 0, strafeDir: 1, coverT: 0, role: 'hunt', thinkT: Math.random() * 0.3, trig: false, trigHit: false, stuckT: 0, lastPos: new THREE.Vector3(), errX: 0, errY: 0, errT: 0, crouchT: 0, slot: idx }
+    recoilK: 0, reloadK: 0, twist: 0, hitFlash: 0, footT: 0, splats: 0, bot: isPlayer ? null : { state: 'roam', target: null, path: null, pathT: 0, goal: null, reactT: 0, seenT: 0, aimYaw: 0, aimPitch: 0, strafeT: 0, strafeDir: 1, coverT: 0, role: 'hunt', thinkT: Math.random() * 0.3, trig: false, trigHit: false, stuckT: 0, lastPos: new THREE.Vector3(), errX: 0, errY: 0, errT: 0, crouchT: 0, slot: idx,
+      // a person, not a turret: a better or worse day, a moment of doubt before breaking cover, a flinch when hit
+      form: 0.86 + Math.random() * 0.28, settle: 0, ready: false, hesT: 0, nearT: 0, scanT: 0, scanTo: 0, prevCoverT: 0 },
+    look: 0, flinchK: 0, cheerT: 0
   };
 }
 function newWorld(cfg) {
@@ -1722,6 +1961,7 @@ function shoot(W, c, yaw, pitch) {
     for (let i = 0; i < 3; i++) FX.emit('soft', start.x + dir.x * 0.15, start.y + dir.y * 0.15, start.z + dir.z * 0.15, dir.x * 2 + (Math.random() - 0.5), dir.y * 2 + Math.random() * 0.5, dir.z * 2 + (Math.random() - 0.5), 0.35 + Math.random() * 0.2, 0.12 * k, '#dfe6ee', 0.32, -0.4, 2, 3.5);
     FX.emit('add', start.x, start.y, start.z, 0, 0, 0, 0.06, 0.25 * k, col, 0.9, 0, 0, 1.8);
   }
+  if (!c.isPlayer && vxOn(W) && vxNear(start.x, start.y, start.z, 30)) VX.fx.muzzle(start, dir, { color: col, size: 0.5 });
   return true;
 }
 // Trigger logic for every marker: auto, three round burst, single.
@@ -1769,6 +2009,7 @@ function stepBalls(W, dt) {
           hitChar(W, c, b.owner, b.dmg * (head ? 1.5 : 1) * (b.drone ? 1 : 1), hx, hy, hz, b.vx, b.vz, head, b.col);
           gone = true; break;
         }
+        if (c.bot && d2 < 0.9 && c.bot.nearT <= 0) { c.bot.nearT = 0.6; if (c.team === 0 && !W.attract && Math.random() < 0.15) call(W, 'close', c); }
       }
       if (gone) break;
       // floors, walls, cover
@@ -1781,11 +2022,12 @@ function stepBalls(W, dt) {
         else if (pcz !== cz) { nz = pcz < cz ? -1 : 1; ny = 0; z = cw(Math.max(cz, pcz)); }
         else { y = sh; }
         if (ny === 0) { const t = Math.abs(b.x - b.px) > 1e-4 && nx ? (x - b.px) / (b.x - b.px) : Math.abs(b.z - b.pz) > 1e-4 && nz ? (z - b.pz) / (b.z - b.pz) : 1; y = lerp(b.py, b.y, clamp(t, 0, 1)); if (nx) z = lerp(b.pz, b.z, clamp(t, 0, 1)); else x = lerp(b.px, b.x, clamp(t, 0, 1)); }
-        splatWorld(W, x, Math.min(y, sh > 50 ? 9 : sh), z, nx, ny, nz, b.col, 0.55 * splatScale(b), b.owner);
+        const fi = inGrid(pcx, pcz) ? G.h[pcz * GN + pcx] : 0;
+        splatWorld(W, x, Math.min(y, sh > 50 ? 9 : sh), z, nx, ny, nz, b.col, 0.55 * splatScale(b), b.owner, b.vx, b.vy, b.vz, fi > 50 ? 0 : fi);
         gone = true; break;
       }
       const over = G.id === 'roof' && (!inGrid(cx, cz) || G.kind[cz * GN + cx] === 'x');
-      if (b.y <= 0 && !over) { splatWorld(W, b.x, 0, b.z, 0, 1, 0, b.col, 0.6 * splatScale(b), b.owner); gone = true; break; }
+      if (b.y <= 0 && !over) { splatWorld(W, b.x, 0, b.z, 0, 1, 0, b.col, 0.6 * splatScale(b), b.owner, b.vx, b.vy, b.vz, 0); gone = true; break; }
       if (b.life > 2.4 || b.y < -40) { gone = true; break; }
     }
     if (gone) live.splice(i, 1);
@@ -1793,10 +2035,33 @@ function stepBalls(W, dt) {
 }
 // A ball that has barely left the barrel leaves a small mark, so a wall at arm's length is not one big blot.
 function splatScale(b) { return b.sx == null ? 1 : clamp(Math.hypot(b.x - b.sx, b.z - b.sz) / 5, 0.3, 1); }
-function splatWorld(W, x, y, z, nx, ny, nz, col, size, owner) {
+function splatWorld(W, x, y, z, nx, ny, nz, col, size, owner, vx, vy, vz, floorY) {
   if (Wd !== W) return;
   const S = R3 && R3.S;
-  if (S) addSplat(S.decals, x, y, z, nx, ny, nz, col, size);
+  if (S) {
+    const D = S.decals, dens = FX ? FX.density : 0.5;
+    addSplat(D, x, y, z, nx, ny, nz, col, size, vx, vy, vz, 0);
+    if (vx != null) {
+      // droplets thrown off the impact land a moment later, mostly ahead of the ball's line
+      _tn.set(nx, ny, nz); _t1.set(Math.abs(ny) > 0.9 ? 1 : 0, Math.abs(ny) > 0.9 ? 0 : 1, 0).cross(_tn).normalize(); _t2.crossVectors(_tn, _t1);
+      const sp = Math.hypot(vx, vy, vz) || 1, fa = (vx * _t1.x + vy * _t1.y + vz * _t1.z) / sp, fb = (vx * _t2.x + vy * _t2.y + vz * _t2.z) / sp;
+      const n = Math.round(3 * dens);
+      for (let k = 0; k < n; k++) {
+        const r = size * (0.5 + Math.random() * 1.1), a = Math.random() * TAU;
+        const ox = Math.cos(a) * r + fa * r * 0.9, oy = Math.sin(a) * r + fb * r * 0.9;
+        addSplat(D, x + _t1.x * ox + _t2.x * oy, y + _t1.y * ox + _t2.y * oy, z + _t1.z * ox + _t2.z * oy, nx, ny, nz, col, size * (0.12 + Math.random() * 0.14), vx * 0.2, vy * 0.2, vz * 0.2, 0.04 + Math.random() * 0.14);
+      }
+      // on a wall, paint runs: one or two trails creep down under their own weight
+      if (Math.abs(ny) < 0.3 && dens >= 0.7 && floorY != null) {
+        const runs = Math.random() < 0.55 ? 2 : 1;
+        for (let k = 0; k < runs; k++) {
+          const off = (Math.random() - 0.5) * size * 0.7, top = y - size * (0.05 + Math.random() * 0.15);
+          const room = top - floorY - 0.03; if (room < 0.1) continue;
+          addDrip(D, x + _t1.x * off, top, z + _t1.z * off, nx, nz, col, size * (0.07 + Math.random() * 0.05), Math.min(room, size * (0.5 + Math.random() * 1.2)), 0.15 + Math.random() * 0.35);
+        }
+      }
+    }
+  }
   if (FX) {
     const n = Math.round(6 * FX.density) + 2;
     for (let i = 0; i < n; i++) {
@@ -1806,6 +2071,8 @@ function splatWorld(W, x, y, z, nx, ny, nz, col, size, owner) {
     FX.emit('soft', x + nx * 0.08, y + ny * 0.08, z + nz * 0.08, nx * 0.4, 0.3, nz * 0.4, 0.5, 0.35, col, 0.35, 0, 2, 2.2);
   }
   if (owner && owner.isPlayer) sfxSplat(x, y, z, 0.6); else sfxSplat(x, y, z, 0.35);
+  // a little cloud of coloured powder hangs where the ball burst (close to you only, it is a lot of paint)
+  if (vxOn(W) && vxNear(x, y, z, owner && owner.isPlayer ? 40 : 14)) VX.fx.impact(VX.v.set(x + nx * 0.05, y + ny * 0.05, z + nz * 0.05), VX.n.set(nx, ny, nz), { kind: 'powder', color: col, size: 0.28 });
 }
 function hitChar(W, c, shooter, dmg, x, y, z, vx, vz, head, col) {
   if (!c.alive) return;
@@ -1828,7 +2095,12 @@ function hitChar(W, c, shooter, dmg, x, y, z, vx, vz, head, col) {
     sfxHurt();
     feel('hit', clamp(dmg / 55, 0.3, 1), Math.round(clamp(dmg * 1.2, 12, 70)), [clamp(dmg / 100, 0.15, 1), clamp(dmg / 160, 0.1, 0.6), 120 + dmg * 2]);
   }
-  if (c.bot && shooter && c.alive) { c.bot.threat = shooter; c.bot.threatT = 2.5; if (!c.bot.target) { c.bot.target = shooter; c.bot.reactT = Math.max(c.bot.reactT, W.D.react * 0.6); } }
+  if (c.bot && shooter && c.alive) {
+    c.bot.threat = shooter; c.bot.threatT = 2.5; if (!c.bot.target) { c.bot.target = shooter; c.bot.reactT = Math.max(c.bot.reactT, W.D.react * 0.6); }
+    // a hit knocks the aim off and costs a beat
+    c.bot.errX += (Math.random() - 0.5) * 0.22; c.bot.reactT = Math.max(c.bot.reactT, 0.1 + Math.random() * 0.15); c.bot.settle = Math.max(c.bot.settle, 0.5);
+  }
+  c.flinchK = 1; c.flinchSide = Math.random() < 0.5 ? -1 : 1;
   if (c.hp <= 0) tagOut(W, c, shooter, head);
 }
 function tagOut(W, c, shooter, head) {
@@ -1848,6 +2120,11 @@ function tagOut(W, c, shooter, head) {
       if (s.streak === 3) { W.radarT = 12; addPop(W, 'RADAR PING', '#38e1ff'); feel('boost', 0.8, 30, [0.3, 0.7, 300]); ARC && ARC.toast('Radar ping', 'Rivals show on your minimap', 1600); sfxStreak(); }
       if (s.streak === 5) { launchDrone(W, s); addPop(W, 'PAINT DRONE', '#ffd23f'); feel('boost', 1, 40, [0.3, 0.8, 400]); ARC && ARC.toast('Paint drone launched', 'It hunts rivals for you', 1700); sfxStreak(); }
       if (Math.random() < 0.4) call(W, 'nice', W.chars.find((o) => o.team === 0 && o.bot && o.alive), '');
+      else if (c.bot && Math.random() < 0.3) call(W, 'rivalOut', c);
+    } else if (s.bot) {
+      // a fist pump, and the squad hears about it
+      if (Math.random() < 0.65) s.cheerT = 0.9;
+      if (s.team === 0 && !W.attract && Math.random() < 0.35) call(W, 'got', s);
     }
   }
   if (c.isPlayer) { W.stats.outs++; startTagCam(W, c, s); }
@@ -1859,6 +2136,14 @@ function tagOut(W, c, shooter, head) {
     else if (W.obj && W.obj.def.t === 'tag') W.obj.count++;
   }
   if (FX && Wd === W) for (let i = 0; i < 16 * FX.density; i++) FX.emit('soft', c.pos.x, c.pos.y + 1 + Math.random(), c.pos.z, (Math.random() - 0.5) * 5, Math.random() * 4, (Math.random() - 0.5) * 5, 0.7, 0.07, s ? TEAMS[s.team].paint : '#fff', 1, 9.8, 0.4, 1, 0.02);
+  // tagged out: a Holi burst, a cloud of the tagger's colour round the player and a ring of it on the floor
+  if (vxOn(W) && !(c.isPlayer && R3 && R3.firstPerson)) {
+    const tc = s ? TEAMS[s.team].paint : '#ffd23f';
+    // sized so the cloud hangs round the tagged player and thins in a second or two, never a wall across the field
+    VX.fx.impact(VX.v.set(c.pos.x, c.pos.y + 1.1, c.pos.z), VX.n.set(0, 1, 0), { kind: 'powder', color: tc, size: 1.05 });
+    VX.fx.impact(VX.v.set(c.pos.x, c.pos.y + 0.6, c.pos.z), VX.n.set(0, 1, 0), { kind: 'powder', size: 0.7 });
+    VX.fx.ring(VX.v.set(c.pos.x, c.pos.y + 0.03, c.pos.z), tc, { size: 1.4, kind: 'shock' });
+  }
   if (!W.over && W.mode === 'splat' && s && W.score[s.team] >= W.target) finishMatch(W, s.team, 'score', c);
 }
 function addBodySplat(D, c, x, y, z, vx, vz, col) {
@@ -1900,16 +2185,30 @@ function moveBody(W, c, wx, wz, speed, dt, jump) {
   const g = groundAt(G, c.pos.x, c.pos.z, RAD * 0.7, c.pos.y);
   if (c.pos.y <= g) {
     if (!c.onGround && c.vel.y < -4 && c.isPlayer) { W.land = Math.min(1, -c.vel.y / 9); sfxLand(); }
+    if (!c.onGround && c.vel.y < -3.5) footPuff(W, c, 5);
     c.pos.y = g; c.vel.y = 0; c.onGround = true; c.air = false;
   } else if (c.pos.y > g + 0.05) { c.onGround = false; if (c.vel.y < -1.5) c.air = true; }
   // a body walking off a crate steps down instead of floating
   if (c.onGround && c.pos.y > g + 0.01) c.pos.y = g;
   const moved = Math.hypot(c.pos.x - ox, c.pos.z - oz) / Math.max(dt, 1e-4);
   c.runK = damp(c.runK, clamp(moved / 4.5, 0, 1.25), 10, dt);
-  c.phase += moved * dt * 2.1;
+  // stride lengthens with speed (about 1 m crouched, 1.5 m at a jog, 1.8 m flat out), so the feet keep pace with the ground
+  c.phase += moved * dt * Math.PI / (0.6 + 0.2 * moved);
   c.crouchK = damp(c.crouchK, c.crouch ? 1 : 0, 12, dt);
-  if (c.onGround && moved > 1) { c.footT -= moved * dt; if (c.footT <= 0) { c.footT = c.sprint ? 1.55 : 1.25; if (Wd === W) sfxStep(c, moved); } }
+  if (c.onGround && moved > 1) { c.footT -= moved * dt; if (c.footT <= 0) { c.footT = c.sprint ? 1.55 : 1.25; if (Wd === W) { sfxStep(c, moved); if (moved > 3.2) footPuff(W, c, 2); } } }
   if (W.mode === 'ctf' || (W.obj && W.obj.carried)) { /* carriers are a touch slower, handled by speed */ }
+}
+// Each footfall kicks a little dust off the mill floor or the fort's sand (it rises a hand's width and settles),
+// or a splash off a wet roof.
+function footPuff(W, c, n) {
+  if (Wd !== W || !FX || !R3 || R3.quality < 1 || (c.isPlayer && R3.firstPerson)) return;
+  const L = W.M.look, wet = !!L.rain;
+  n = Math.round(n * FX.density);
+  for (let k = 0; k < n; k++) {
+    const x = c.pos.x + (Math.random() - 0.5) * 0.35, z = c.pos.z + (Math.random() - 0.5) * 0.35;
+    if (wet) FX.emit('soft', x, c.pos.y + 0.03, z, (Math.random() - 0.5) * 1.2, 1 + Math.random() * 1.2, (Math.random() - 0.5) * 1.2, 0.35, 0.05, '#cfdbe6', 0.45, 9.8, 0.4, 1, c.pos.y + 0.02);
+    else FX.emit('soft', x, c.pos.y + 0.06, z, (Math.random() - 0.5) * 0.7 - c.vel.x * 0.05, 0.25 + Math.random() * 0.35, (Math.random() - 0.5) * 0.7 - c.vel.z * 0.05, 1 + Math.random() * 0.7, 0.16 + Math.random() * 0.1, W.mapId === 'fort' ? '#d9b68c' : '#9c8c7a', 0.22, 0.35, 2.4, 2.6, c.pos.y + 0.02);
+  }
 }
 function aliveEnemies(W, team) { return W.chars.filter((o) => o.alive && o.team !== team); }
 
@@ -1967,7 +2266,8 @@ function botThink(W, c) {
     if (s < bs) { bs = s; best = o; }
   }
   if (best) {
-    if (B.target !== best || !B.vis) { B.reactT = D.react * (0.7 + Math.random() * 0.6) * (B.target === best ? 0.4 : 1); }
+    // seeing someone is not shooting them: human reaction time, slower on an off day, quicker to re-find a face already seen
+    if (B.target !== best || !B.vis) { B.reactT = Math.max(0.16, D.react * (0.7 + Math.random() * 0.6) * (B.target === best ? 0.4 : 1) / B.form); B.ready = false; }
     B.target = best; B.vis = true; B.lastSeen = [best.pos.x, best.pos.z]; B.lostT = 0;
     const known = W.intel[c.team][best.id];
     if (!known || W.t - known.t > 4) {
@@ -2079,10 +2379,14 @@ function stepBot(W, c, dt) {
     const dx = px - _a.x, dz = pz - _a.z, hd = Math.hypot(dx, dz);
     const drop = 0.5 * G.drop * tof * tof;
     B.errT -= dt;
-    if (B.errT <= 0) { B.errT = 0.3 + Math.random() * 0.45; const e = D.aim * Math.PI / 180 * (1 + hd / 28) * (T.isPlayer && T.crouchK > 0.5 ? 1.25 : 1) * (Math.hypot(T.vel.x, T.vel.z) > 3 ? 1.3 : 1); B.errX = (Math.random() - 0.5) * 2 * e; B.errY = (Math.random() - 0.5) * e; }
+    if (B.reactT <= 0 && !B.ready) { B.ready = true; B.settle = 0.75; B.errT = 0; }
+    B.settle = Math.max(0, B.settle - dt * 1.2); B.nearT = Math.max(0, B.nearT - dt);
+    // aim error: wider far away, against a moving or crouched target, in the first shots before the aim settles,
+    // right after a near miss, and on an off day
+    if (B.errT <= 0) { B.errT = 0.3 + Math.random() * 0.45; const e = D.aim * Math.PI / 180 * (1 + hd / 28) * (T.isPlayer && T.crouchK > 0.5 ? 1.25 : 1) * (Math.hypot(T.vel.x, T.vel.z) > 3 ? 1.3 : 1) * (1 + B.settle) * (B.nearT > 0 ? 1.5 : 1) * (2 - B.form); B.errX = (Math.random() - 0.5) * 2 * e; B.errY = (Math.random() - 0.5) * e; }
     wantYaw = Math.atan2(-dx, -dz) + B.errX; wantPitch = Math.atan2(ty + drop - _a.y, hd) + B.errY;
     const err = Math.abs(angDiff(B.aimYaw, wantYaw - B.errX));
-    if (B.reactT <= 0 && hd < G.range * 1.15 && err < 0.14) {
+    if (B.reactT <= 0 && B.hesT <= 0 && hd < G.range * 1.15 && err < 0.14) {
       B.fireT = (B.fireT || 0) - dt;
       if (G.mode === 'auto') { if (B.fireT <= 0) { B.firing = !B.firing; B.fireT = B.firing ? 0.45 + Math.random() * 0.6 * D.burst : (0.35 + Math.random() * 0.4) / D.burst; } held = B.firing; }
       else if (G.mode === 'burst') { pressed = B.fireT <= 0; if (pressed) B.fireT = (0.25 + Math.random() * 0.35) / D.burst; }
@@ -2095,6 +2399,10 @@ function stepBot(W, c, dt) {
   B.aimYaw += angDiff(B.aimYaw, wantYaw) * Math.min(1, (fighting ? D.track : 5) * dt);
   B.aimPitch = damp(B.aimPitch, clamp(wantPitch, -0.9, 0.9), fighting ? D.track : 4, dt);
   c.yaw = B.aimYaw; c.pitch = B.aimPitch;
+  // out of a fight the head keeps checking left and right
+  B.scanT -= dt; if (B.scanT <= 0) { B.scanT = 0.7 + Math.random() * 1.8; B.scanTo = fighting ? 0 : (Math.random() - 0.5) * 1.5; }
+  c.look = damp(c.look, fighting ? 0 : B.scanTo, 5, dt);
+  c.flinchK = Math.max(0, c.flinchK - dt * 4); c.cheerT = Math.max(0, c.cheerT - dt);
   if (c.ammo[c.gun] <= 0 || (!fighting && c.ammo[c.gun] < GUNS[c.gun].mag * 0.4)) startReload(W, c);
   runGun(W, c, dt, held, pressed, c.yaw, c.pitch);
   // walk the path
@@ -2114,8 +2422,15 @@ function stepBot(W, c, dt) {
   // personal space
   for (const o of W.chars) { if (o === c || !o.alive || o.team !== c.team) continue; const dx = c.pos.x - o.pos.x, dz = c.pos.z - o.pos.z, d = Math.hypot(dx, dz); if (d < 1.3 && d > 0.01) { wx += dx / d * (1.3 - d) * 1.5; wz += dz / d * (1.3 - d) * 1.5; } }
   const inCover = B.mode === 'cover' && B.goal && Math.hypot(B.goal[0] - c.pos.x, B.goal[1] - c.pos.z) < 1.0;
+  // the moment to leave cover comes, and a person waits a beat before going
+  if (B.prevCoverT > 0 && B.coverT <= 0 && inCover && fighting) B.hesT = 0.25 + Math.random() * 0.65 * (2 - B.form);
+  B.prevCoverT = B.coverT;
+  if (B.hesT > 0) { B.hesT -= dt; wx = 0; wz = 0; }
+  // a ball cracking past the head makes anyone duck for a moment
+  if (B.nearT > 0.35 && !c.crouch && c.gun !== 2) { wx *= 0.4; wz *= 0.4; }
   c.crouch = (inCover && B.coverLow && !(c.reloadT <= 0 && B.coverT < 0.8)) || (c.gun === 2 && fighting && B.reactT < 0 && Math.random() < 0.02 ? !c.crouch : (c.gun === 2 && fighting ? c.crouch : false));
   if (inCover && !B.coverLow) c.crouch = false;
+  if ((B.hesT > 0 && inCover && B.coverLow) || B.nearT > 0.3) c.crouch = true;
   c.sprint = !fighting && B.path && B.path.length > 2 && !c.crouch;
   let speed = c.sprint ? 6.1 : 4.4; if (c.crouch) speed = 2.3; if (c.carry >= 0) speed *= 0.9; if (c.isBoss) speed *= 0.8;
   // stuck
@@ -2139,6 +2454,7 @@ function stepFlags(W, dt) {
         W.score[c.team]++; c.caps++; c.carry = -1; f.state = 'home'; f.pos.copy(f.home); f.carrier = null;
         pushFeed(W, c.name, 'captured the flag', TEAMS[c.team].ui, '');
         if (c.isPlayer) { W.stats.caps++; addPop(W, 'CAPTURE +500', '#ffd23f'); feel('success', 1, 50, [0.7, 0.5, 260]); }
+        if (vxOn(W)) VX.fx.goalBurst(VX.v.set(f.home.x, f.home.y + 0.4, f.home.z), { color: TEAMS[c.team].paint, color2: '#ffd23f', size: 0.6 });
         if (!W.attract && ARC) ARC.toast(TEAMS[c.team].name + ' capture', W.score[0] + ' : ' + W.score[1], 1800);
         sfxCapture(c.team === 0);
         if (W.score[c.team] >= W.target && !W.over) finishMatch(W, c.team, 'caps', c);
@@ -2304,6 +2620,12 @@ function setupPodium(W) {
   W.balls.length = 0; W.drone = null;
   if (FX) FX.clear();
   if (R3) R3.camInit = false;
+  // the victory shower over the podium
+  if (vxOn(W)) {
+    const T = TEAMS[win];
+    VX.fx.winBurst(VX.v.set(cx0, 0.2, cz0), { colors: [T.paint, '#ffd23f', '#ffffff', T.ui], size: 0.7 });
+    VX.fx.fireworks(VX.v.set(cx0, 9, cz0 - Math.cos(W.podium.yaw) * 6), { size: 0.8, launch: true, delay: 0.4 });
+  }
 }
 function stepPodium(W, dt) {
   const Pd = W.podium; if (!Pd) return;
@@ -2368,7 +2690,7 @@ function activateWorld(W) {
 function applyTier() {
   const r = R3, t = TIERS[Math.max(0, r.quality)];
   r.scene.traverse((o) => {
-    if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && !o.material.isShaderMaterial) {
+    if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && !o.material.isShaderMaterial && !(o.material.userData && o.material.userData.keepMat)) {
       const full = fullOf(o.material), want = t.cheap ? cheapOf(full) : full;
       if (o.material !== want) o.material = want;
     }
@@ -2542,22 +2864,34 @@ function renderScene(W, dt, a, I) {
   updateCamera(W, dt, a, I);
   const cam = r.camera;
   // people
-  const showSelf = !r.firstPerson;
+  const showSelf = !r.firstPerson, rigs = rigsOn();
+  if (!rigs) for (let k = 0; k < HU.rigs.length; k++) if (HU.rigs[k]) HU.rigs[k].h.group.visible = false;
   for (let i = 0; i < MAXC; i++) {
     const c = W.chars[i];
-    if (!c) { Pp.list.forEach((im) => im.setMatrixAt(i, _m.makeScale(0, 0, 0))); continue; }
+    if (!c) { Pp.list.forEach((im) => im.setMatrixAt(i, _m.makeScale(0, 0, 0))); Pp.cs.setMatrixAt(i, _m.makeScale(0, 0, 0)); if (HU.rigs[i]) HU.rigs[i].h.group.visible = false; continue; }
     const hideSelf = c === P && !showSelf;
     const vis = c.visible, fade = c.fade;
     if (hideSelf) { c.visible = false; }
     if (c.isBoss) c.fade = fade * 1.16;
-    poseCharacter(Pp, i, c, null);
+    if (rigs) {
+      const show = c.visible && c.fade > 0.01;
+      if (show) hideBody(Pp, i); else Pp.list.forEach((im) => im.setMatrixAt(i, _m.makeScale(0, 0, 0)));
+      poseRig(W, Pp, i, c, dt, show);
+    } else poseCharacter(Pp, i, c, null);
+    if (c.onGround) c.gy = c.pos.y;
+    if (c.visible && c.fade > 0.05) {
+      const gy = c.gy == null ? c.pos.y : c.gy, k = clamp(1 - (c.pos.y - gy) * 0.9, 0.35, 1) * Math.min(1, c.fade), w = (0.62 + 0.22 * c.crouchK) * k + 0.08;
+      _m.compose(_v.set(c.pos.x, gy + 0.012, c.pos.z), _q.identity(), _s.set(w, 1, w * 1.15)); Pp.cs.setMatrixAt(i, _m);
+    } else Pp.cs.setMatrixAt(i, _m.makeScale(0, 0, 0));
     c.visible = vis; c.fade = fade;
   }
+  Pp.cs.instanceMatrix.needsUpdate = true;
   for (let i = 0; i < W.chars.length && i < MAXC; i++) Pp.gun.setColorAt(i, _c.set(GUNS[W.chars[i].gun].body));
   if (Pp.gun.instanceColor) Pp.gun.instanceColor.needsUpdate = true;
   Pp.list.forEach((im) => { im.instanceMatrix.needsUpdate = true; });
   // paint on people
   const D = S.decals;
+  growSplats(D, dt);
   for (let k = 0; k < D.BMAX; k++) {
     const s = D.bodyList[k];
     const c = s && W.chars[s.cid];
@@ -2567,7 +2901,7 @@ function renderScene(W, dt, a, I) {
     const ang = c.yaw + s.ang;
     const nx = Math.sin(ang), nz = Math.cos(ang);
     _v.set(c.pos.x + nx * rr, c.pos.y + hh, c.pos.z + nz * rr);
-    _q.setFromUnitVectors(ZAXIS, _v2.set(nx, 0, nz)).multiply(new THREE.Quaternion().setFromAxisAngle(ZAXIS, s.rot));
+    _q.setFromUnitVectors(ZAXIS, _v2.set(nx, 0, nz)).multiply(_q2.setFromAxisAngle(ZAXIS, s.rot));
     _m.compose(_v, _q, _s.set(s.s * c.fade, s.s * c.fade, 1));
     D.body.setMatrixAt(k, _m);
   }
@@ -3279,6 +3613,7 @@ function debugState() {
 const dev = {
   world: () => Wd,
   r3: () => R3,
+  vfx: () => VX.state,
   quality: (q) => { if (R3) R3.lockQ = true; setQuality(q); },
   setQuality: (q) => { if (R3) R3.lockQ = true; setQuality(q); },
   skipIntro: () => { if (Wd && Wd.phase === 'intro') Wd.phaseT = Wd.introDur; },
@@ -3375,6 +3710,17 @@ Arcade.create({
     let lost = R3.lost; try { lost = lost || R3.renderer.getContext().isContextLost(); } catch (e) { lost = true; }
     if (lost) { ctx.fillStyle = 'rgba(6,5,3,.85)'; ctx.fillRect(0, 0, a.w, a.h); txt(ctx, 'Graphics paused. Restoring...', a.w / 2, a.h / 2, 16, INK, 'center', '600'); return; }
     measureFps(dtRaw);
+    if (VX.state === 0 && R3.time > 2) loadVfx();
+    vxTick(a.state === 'pause' ? 0 : dtReal * (W.slow || 1));
+    if (HU.state === 0 && R3.time > 1.5) loadPeopleLib();
+    else if (HU.state === 2 && !HU.warm && R3.quality >= 1) {
+      // the first rig is made, shown for one compile and hidden again, so its shaders never hitch the match
+      HU.warm = true;
+      const h = HU.lib.createHuman({ seed: 1, unit: 1, quality: 2, lod: 'mid' });
+      h.group.position.set(0, -50, 0); R3.scene.add(h.group);
+      try { R3.renderer.compile(R3.scene, R3.camera); } catch (e) { /* lost context */ }
+      R3.scene.remove(h.group); h.dispose();
+    }
     if (R3.world !== W) { activateWorld(W); R3.qWarm = 0; }
     const sl = a.state === 'pause' ? 0 : dtReal * (W.slow || 1);
     renderScene(W, sl, a, a.state === 'play' ? R3.lastI : null);

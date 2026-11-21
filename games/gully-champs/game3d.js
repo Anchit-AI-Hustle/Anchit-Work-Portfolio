@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import * as HUMAN from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 
 /*
  * Gully Champs 3D: street cricket in a real 3D lane at golden hour.
@@ -291,6 +293,15 @@ function paintPlaster() {
     const px = sr() * 440, py = sr() * 440;
     c.fillStyle = sr() < 0.5 ? 'rgba(255,255,255,.17)' : 'rgba(70,46,30,.14)';
     c.beginPath(); c.moveTo(px, py); c.lineTo(px + 20 + sr() * 34, py + 4); c.lineTo(px + 26 + sr() * 22, py + 20 + sr() * 18); c.lineTo(px + 4, py + 24 + sr() * 18); c.closePath(); c.fill();
+  }
+  // chipped paint: small flakes gone down to the old brick and cement, each with a thin shadowed lip
+  for (let k = 0; k < 22; k++) {
+    const px = 10 + sr() * 492, py = 10 + sr() * 492, rx = 3 + sr() * 13, ry = 2 + sr() * 8, n = 7;
+    c.beginPath();
+    for (let i = 0; i < n; i++) { const a = i / n * TAU, q = 0.55 + sr() * 0.7; c.lineTo(px + cos(a) * rx * q, py + sin(a) * ry * q); }
+    c.closePath();
+    c.fillStyle = sr() < 0.6 ? 'rgba(150,82,62,.55)' : 'rgba(170,160,145,.5)'; c.fill();
+    c.strokeStyle = 'rgba(40,24,14,.28)'; c.lineWidth = 1; c.stroke();
   }
   return cv;
 }
@@ -1195,6 +1206,249 @@ class PLayer {
   }
 }
 
+/* ------------------------------------------------------------ real people
+ * The kids, the aunty and the neighbours are the shared people library's bodies: real proportions for 11 to 14
+ * year olds, faces that blink and follow the ball, a gait that comes from how fast each one is really moving.
+ * The game still decides everything: where each kid stands and runs, when the bowler lets go, the arc of the bat
+ * (its old rig stays, unseen, and the batter's hands are taken to its handle by IK), who dives and who throws.
+ * The kids react to what happens, each at their own moment. Any failure leaves the old figures. */
+const HK = { on: false, kids: {}, aunty: null, nb: [], held: {}, look: new THREE.Vector3(), tmp: new THREE.Vector3(), g0: new THREE.Vector3(), g1: new THREE.Vector3(),
+  q: new THREE.Quaternion(), qp: new THREE.Quaternion(), m: new THREE.Matrix4(), S: new THREE.Vector3(), M: new THREE.Vector3(), E: new THREE.Vector3(),
+  u: new THREE.Vector3(), f: new THREE.Vector3(), x: new THREE.Vector3(), y: new THREE.Vector3(), z: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), pole: new THREE.Vector3(), lastArm: {}, lastDive: {}, wasFlight: false };
+const HU = { look: null }, HF = {};
+const KID_BODY = { bat: [1.5, 'm', 'slim', 'short'], bowl: [1.56, 'm', 'athletic', 'curly'], f0: [1.42, 'm', 'average', 'buzz'], f1: [1.44, 'f', 'slim', 'ponytail'], f2: [1.38, 'm', 'slim', 'short'], f3: [1.47, 'm', 'average', 'short'] };
+const hq = () => (W3.q <= 1 ? 3 : W3.q === 2 ? 2 : W3.q === 3 ? 1 : 0);
+function buildGullyHumans(root) {
+  if (typeof HUMAN.createHuman !== 'function') return;
+  try {
+    const q = hq();
+    Object.keys(KID_BODY).forEach((key, i) => {
+      const st = KID_STYLES[key], kb = KID_BODY[key];
+      const h = HUMAN.createHuman({ seed: 900 + i * 53, height: kb[0], sex: kb[1], build: kb[2], hair: kb[3], skin: st.skin, hairColor: st.hair, quality: q, lod: q >= 1 ? 'full' : 'mid',
+        outfit: { top: st.tee, sleeves: 'short', bottom: st.shorts, legs: 'shorts', shoes: st.shoe, soles: '#e9e6df', cap: st.cap || null } });
+      root.add(h.group); HK.kids[key] = h;
+      const rig = ACT.kids[key];
+      rig.root.traverse((o) => { if (o.isMesh && o !== rig.bat) o.visible = false; });
+    });
+    // the aunty: a dupatta pink kurta, steps out through her balcony door with the watering can
+    const a = HUMAN.createHuman({ seed: 77, sex: 'f', age: 'older', build: 'heavy', hair: 'bun', height: 1.56, quality: q, lod: 'full', outfit: { top: '#e04a8f', top2: '#f2c860', sleeves: 'long', bottom: '#f2c860', legs: 'trousers', shoes: '#7a3a2a' } });
+    a.group.visible = false; root.add(a.group); HK.aunty = a;
+    // the open door she comes out of: a dark doorway with a pale frame on her balcony wall
+    {
+      const door = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 2.05), new THREE.MeshStandardMaterial({ color: '#1c1410', roughness: 1 }));
+      door.position.set(ZW - 0.012, AUNTY.h + 1.03, -AUNTY.x); door.rotation.y = -PI / 2; root.add(door);
+      const fr = new GB(); fr.box(0.03, 2.15, 0.08, ZW - 0.02, AUNTY.h + 1.08, -AUNTY.x + 0.51, '#eadfc6'); fr.box(0.03, 2.15, 0.08, ZW - 0.02, AUNTY.h + 1.08, -AUNTY.x - 0.51, '#eadfc6'); fr.box(0.03, 0.08, 1.1, ZW - 0.02, AUNTY.h + 2.12, -AUNTY.x, '#eadfc6');
+      root.add(new THREE.Mesh(fr.build(), matFlat()));
+    }
+    ACT.aunty.g.visible = false; ACT.aunty.hide = true;
+    a.bones.wristR.add(ACT.aunty.can); ACT.aunty.can.position.set(0, -0.08, 0.04); ACT.aunty.can.scale.setScalar(0.8);
+    // neighbours watching from their balconies and a doorway, at lower detail
+    if (q >= 1) {
+      const spots = [[-4.0, 1, 1, 'f', 'older'], [3.5, -1, 1, 'm', 'adult'], [16.3, -1, 1, 'f', 'adult'], [10.5, 1, 1, 'm', 'older'], [-7.4, -1, 1, 'm', 'adult']];
+      spots.forEach((sp, i) => {
+        const h = HUMAN.createHuman({ seed: 300 + i * 29, sex: sp[3], age: sp[4], quality: q, lod: 'mid', height: sp[3] === 'f' ? 1.58 : 1.7 });
+        const sd = sp[1], zz = sd * (ZW - 0.42);
+        h.group.position.set(zz, sp[2] * STOREY + 0.01, -sp[0]); h.group.rotation.y = sd > 0 ? -PI / 2 : PI / 2;
+        root.add(h.group); HK.nb.push({ h, x: sp[0], side: sd, delay: 0, act: '', base: h.group.rotation.y });
+      });
+      // the shopkeeper on his stool at the kirana counter
+      const sk = HUMAN.createHuman({ seed: 512, sex: 'm', age: 'older', build: 'heavy', quality: q, lod: 'mid', outfit: { top: '#e8e2d6', sleeves: 'short', bottom: '#5a6b7c', legs: 'trousers' } });
+      sk.group.position.set(ZW - 0.95, 0, -16.6); sk.group.rotation.y = -PI / 2; root.add(sk.group); sk.play('sit', { hold: true });
+      HK.nb.push({ h: sk, x: 16.6, side: 1, delay: 0, act: '', base: sk.group.rotation.y, seated: true });
+    }
+    HK.on = true;
+  } catch (e) {
+    HK.on = false;
+    try { console.warn('gully-champs: people library unavailable', e && e.message); } catch (er) { /* ignore */ }
+    for (const k in HK.kids) { try { HK.kids[k].dispose(); } catch (er) { /* ignore */ } }
+    Object.keys(ACT.kids).forEach((k) => ACT.kids[k].root.traverse((o) => { if (o.isMesh) o.visible = true; }));
+  }
+}
+function hAim(bone, dir, bend) {
+  const H = HK;
+  H.y.copy(dir).multiplyScalar(-1).normalize();
+  H.x.copy(bend).addScaledVector(H.y, -bend.dot(H.y));
+  if (H.x.lengthSq() < 1e-8) H.x.set(1, 0, 0).addScaledVector(H.y, -H.y.x);
+  H.x.normalize(); H.z.crossVectors(H.x, H.y);
+  H.m.makeBasis(H.x, H.y, H.z); H.q.setFromRotationMatrix(H.m);
+  bone.parent.getWorldQuaternion(H.qp);
+  bone.quaternion.copy(H.qp.invert().multiply(H.q));
+  bone.updateMatrixWorld(true);
+}
+function hIK(A, T, l1, l2, pole, outM, outE) {
+  HK.a.subVectors(T, A); let d = HK.a.length();
+  if (d < 1e-5) { HK.a.set(0, -1, 0); d = 1e-5; } else HK.a.multiplyScalar(1 / d);
+  const dm = min(d, l1 + l2 - 0.002), along = (l1 * l1 - l2 * l2 + dm * dm) / (2 * dm), hh = sqrt(max(0, l1 * l1 - along * along));
+  HK.b.copy(pole).addScaledVector(HK.a, -pole.dot(HK.a));
+  if (HK.b.lengthSq() < 1e-6) HK.b.set(0, 0, 1).addScaledVector(HK.a, -HK.a.z);
+  HK.b.normalize();
+  outM.copy(A).addScaledVector(HK.a, along).addScaledVector(HK.b, hh);
+  outE.copy(A).addScaledVector(HK.a, dm);
+}
+// an arm to a hand target with this body's own bone lengths: elbows out and down
+function hArm(h, right, T, pole) {
+  const b = h.bones, sc = h.height / 1.75, sh = right ? b.shoulderR : b.shoulderL, el = right ? b.elbowR : b.elbowL;
+  sh.getWorldPosition(HK.S);
+  hIK(HK.S, T, 0.29 * sc, 0.255 * sc, pole, HK.M, HK.E);
+  HK.u.subVectors(HK.M, HK.S); HK.f.subVectors(HK.E, HK.M);
+  HK.pole.crossVectors(HK.f, HK.u); if (HK.pole.lengthSq() < 1e-8) HK.pole.set(1, 0, 0);
+  hAim(sh, HK.u, HK.pole); hAim(el, HK.f, HK.pole);
+  (right ? b.wristR : b.wristL).rotation.set(0, 0, 0);
+}
+function kidAct(key, name, o) { const h = HK.kids[key]; if (!h) return; try { h.play(name, o); } catch (e) { /* ignore */ } }
+// After a ball, each kid reacts on their own beat; the neighbours a beat later.
+function kidsReact(kind, trial) {
+  if (!HK.on || trial) return;
+  const later = (fn, d) => setTimeout(() => { if (HK.on) fn(); }, d * 1000);
+  const fld = ['f0', 'f1', 'f2', 'f3', 'bowl'];
+  const out = kind === 'caught' || kind === 'tip' || kind === 'bowled' || kind === 'runout';
+  if (out) {
+    fld.forEach((k) => later(() => kidAct(k, rnd() < 0.5 ? 'celebrate' : rnd() < 0.5 ? 'cheer' : 'jump'), 0.12 + rnd() * 0.4));
+    later(() => kidAct('bat', rnd() < 0.5 ? 'slump' : 'handsOnHead'), 0.35 + rnd() * 0.3);
+  } else if (kind === 'six' || kind === 'sixgate') {
+    later(() => kidAct('bat', 'fistPump'), 0.2); later(() => kidAct('bat', 'handsOnHead'), 1.4);
+    fld.forEach((k) => later(() => kidAct(k, rnd() < 0.6 ? 'handsOnHead' : 'point', { target: HK.look }), 0.2 + rnd() * 0.5));
+  } else if (kind === 'four' || kind === 'two') {
+    later(() => kidAct('bat', kind === 'four' ? 'fistPump' : 'clap'), 0.25);
+    fld.forEach((k) => { if (rnd() < 0.5) later(() => kidAct(k, rnd() < 0.5 ? 'slump' : 'shrug'), 0.2 + rnd() * 0.5); });
+  } else if (kind === 'glass') {
+    ['bat'].concat(fld).forEach((k) => later(() => kidAct(k, 'handsOnHead'), 0.1 + rnd() * 0.35));
+  } else if (kind === 'dot' && rnd() < 0.5) later(() => kidAct('bowl', rnd() < 0.5 ? 'fistPump' : 'clap', { intensity: 0.7 }), 0.2);
+  const big = kind === 'six' || kind === 'sixgate' || kind === 'glass' || out || kind === 'four';
+  if (big) HK.nb.forEach((n) => { if (rnd() < 0.75) later(() => { try { n.h.play(kind === 'glass' ? 'handsOnHead' : out ? (rnd() < 0.5 ? 'clap' : 'point') : rnd() < 0.5 ? 'cheer' : 'clap', { target: HK.look }); } catch (e) { /* ignore */ } }, 0.3 + rnd() * 0.8); });
+}
+function syncHumans(dt) {
+  const kids = ACT.kids, b = BALL;
+  const ballOn = !(b.state === 'none' || b.hidden || b.state === 'gone');
+  if (ballOn) HK.look.set(b.z, b.h, -b.x); else HK.look.set(0, 1.1, -BOWL_X);
+  const flight = G.phase === 'flight' || G.phase === 'runup';
+  for (const key in HK.kids) {
+    const h = HK.kids[key], r = kids[key];
+    h.group.position.copy(r.root.position); h.group.rotation.y = r.root.rotation.y;
+    HU.look = key === 'bowl' && G.phase === 'runup' ? null : HK.look; h.update(dt, HU);
+    if (key === 'bat') {
+      // both hands on the handle wherever the stroke has taken it
+      if (!h.playing()) {
+        r.root.updateMatrixWorld(true);
+        HK.g0.set(0, -0.4, 0.04); r.swing.localToWorld(HK.g0); HK.g1.set(0, -0.5, 0.04); r.swing.localToWorld(HK.g1);
+        h.bones.chest.rotation.y += r.body.rotation.y * 0.8; h.bones.spine.rotation.x += 0.08;
+        h.group.updateMatrixWorld(true);
+        HK.pole.set(0, -0.4, -1).applyQuaternion(h.group.quaternion);
+        hArm(h, true, HK.g1, HK.pole); hArm(h, false, HK.g0, HK.pole);
+      }
+      continue;
+    }
+    if (!HF.ok) { FIELDERS.forEach((x) => { HF[x.key] = x; }); HF.ok = 1; }
+    const f = HF[key];
+    if (!f) continue;
+    // catching and diving: one action each time the game asks for one
+    if (f.armUp > 0 && !(HK.lastArm[key] > 0)) kidAct(key, b.h > 1.7 ? 'jump' : 'reach', { target: HK.look, speed: 1.3 });
+    if (f.dive > 0 && !(HK.lastDive[key] > 0)) kidAct(key, 'dive', { side: (b.z - f.z) * (f.face > 0 ? 1 : -1) > 0 ? 'left' : 'right', speed: 1.2 });
+    HK.lastArm[key] = f.armUp; HK.lastDive[key] = f.dive;
+    // the ready crouch while the ball is on its way, for the keeper and anyone standing still
+    const set = flight && f.role !== 'bowler' && f.walk < 0.3 && !b.batted;
+    if (set && !HK.held[key]) { kidAct(key, 'crouch', { hold: true, intensity: f.role === 'keeper' ? 1 : 0.6 }); HK.held[key] = 1; }
+    else if (!set && HK.held[key]) { h.stop('crouch'); HK.held[key] = 0; }
+  }
+  // the bowler's arm comes over as he reaches the crease
+  if (G.phase === 'runup' && BOWLER.arm > 0.62 && !HK.bowled) { HK.bowled = 1; kidAct('bowl', 'throw', { speed: 1.6 }); }
+  if (G.phase !== 'runup') HK.bowled = 0;
+  // the aunty walks out of her door onto the balcony, scolds, and goes back in
+  const A_ = AUNTY, ah = HK.aunty;
+  if (ah) {
+    ah.group.visible = A_.up > 0.001;
+    if (ah.group.visible) {
+      const zIn = ZW + 0.35, zOut = A_.z - 0.05;
+      ah.group.position.set(lerp(zIn, zOut, sstep(0, 1, A_.up)), A_.h + 0.01, -A_.x); ah.group.rotation.y = -PI / 2;
+      HU.look = A_.state === 'scold' ? HK.tmp.set(BAT.z || 0, 1.2, -BAT.x) : HK.look; ah.update(dt, HU);
+      if (A_.state === 'scold' && !HK.scold) { HK.scold = 1; ah.play('point', { target: HK.tmp, hold: true }); }
+      else if (A_.state !== 'scold' && HK.scold) { HK.scold = 0; ah.stop('point'); }
+      ACT.aunty.can.visible = A_.state !== 'scold';
+    }
+  }
+  HU.look = HK.look;
+  for (const n of HK.nb) n.h.update(dt, HU);
+}
+
+/* ------------------------------------------------------------ the big moments (shared spectacle layer)
+ * A six over the roof: the taped ball streaks away on a hot trail, the colony lets off rockets over the rooftops
+ * and the neighbours throw marigold petals off their balconies. Out: the crate goes over in a burst of dust and
+ * splinters, in slow motion. A catch: a puff off the hands and petals from above. Glass: real shards. The chase
+ * won: the whole lane erupts. Tiered by quality, thin on a software renderer, gentle under reduced motion. */
+let VFX = null, VFXK = 1, VTRAIL = null;
+const VP = new THREE.Vector3(), VN = new THREE.Vector3(0, 1, 0);
+const MARIGOLD = ['#ff8a1c', '#ffb31a', '#ff6a10', '#ffd040', '#e8442a', '#fff3c4'];
+const vfxOn = () => VFX && G.phase !== 'attract';
+function vfxPetals(x) {
+  // from the balconies nearest the ball, on both sides
+  let n = 0;
+  for (const b of BALC) { if (n >= 3) break; if (abs((b.x0 + b.x1) / 2 - x) > 9) continue; VP.set(b.side * (ZW - 0.6), b.hb + 1.3, -(b.x0 + b.x1) / 2); VFX.confetti(VP, { count: 45, size: 0.9, colors: MARIGOLD }); n++; }
+}
+function vfxSix(x) {
+  if (!vfxOn()) return;
+  try {
+    for (let i = 0; i < 3; i++) { VP.set(rr(-2, 2), 15 + rr(0, 5), -(x + 6 + i * 4)); VFX.fireworks(VP, { launch: true, delay: 0.25 + i * 0.4, burst: i ? 'mixed' : 'peony', color: pick(MARIGOLD), color2: '#fff3c4', size: 0.9 }); }
+    vfxPetals(x); VFX.timeWarp(0.5, 0.6);
+  } catch (e) { /* ignore */ }
+}
+function vfxOut(kind, x, h, z) {
+  if (!vfxOn()) return;
+  try {
+    if (kind === 'bowled' || kind === 'runout') {
+      VP.set(0, 0.4, -CRATE_X); VFX.impact(VP, VN.set(0, 0.5, 1).normalize(), { kind: 'dust', color: '#d9c3a0', size: 1.2 });
+      VFX.impact(VP, VN, { kind: 'spark', color: '#ffd8a0', size: 0.6 }); VFX.ring(VP.setY(0.03), '#e8d6b4', { size: 1.4, kind: 'shock' });
+      VFX.timeWarp(0.3, 1.0);
+    } else if (kind === 'caught' || kind === 'tip') {
+      VP.set(z, h, -x); VFX.impact(VP, VN.set(0, 1, 0), { kind: 'dust', color: '#efe2c8', size: 0.6 }); vfxPetals(x); VFX.timeWarp(0.45, 0.6);
+    }
+  } catch (e) { /* ignore */ }
+}
+function vfxGlass(w) {
+  if (!vfxOn() || !w) return;
+  try { VP.set(w.side * (ZW - 0.05), (w.h0 + w.h1) / 2, -w.cx); VFX.impact(VP, VN.set(-w.side, 0, 0), { kind: 'glass', size: 1.1 }); } catch (e) { /* ignore */ }
+}
+function vfxTrail(on) {
+  if (!VFX) return;
+  try {
+    if (on && !VTRAIL && ACT.ball) VTRAIL = VFX.trail(ACT.ball.m, { color: '#fff1b8', width: 0.14, life: 0.45, core: 0.9 });
+    else if (!on && VTRAIL) { VTRAIL.stop(); VTRAIL = null; }
+  } catch (e) { VTRAIL = null; }
+}
+
+/* Scuffs on the lane: instanced soft marks with their own fade, one draw for all. Three-space x / z. */
+const STAIN = {
+  ok: false, n: 18, head: 0, mesh: null, aA: null, life: null, max: null, a0: null, d: new THREE.Object3D(), live: 0, col: new THREE.Color('#efe2c8'),
+  build(root) {
+    const n = this.n, g = new THREE.PlaneGeometry(1, 1); g.rotateX(-PI / 2);
+    const seeds = new Float32Array(n); for (let i = 0; i < n; i++) seeds[i] = rnd();
+    this.aA = new THREE.InstancedBufferAttribute(new Float32Array(n), 1).setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute('aA', this.aA); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 1));
+    this.mesh = new THREE.InstancedMesh(g, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -5, polygonOffsetUnits: -5,
+      vertexShader: 'attribute float aA; attribute float aSeed; varying float vA; varying float vS; varying vec2 vUv; void main(){ vUv = uv; vA = aA; vS = aSeed; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform vec3 uC; varying float vA; varying float vS; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + vS * 91.3) * 43758.5453); } void main(){ vec2 d = vUv - 0.5; float ang = atan(d.y, d.x); float r = length(d) * 2.0; float edge = 0.6 + 0.2 * sin(ang * 3.0 + vS * 20.0) + 0.1 * sin(ang * 5.0 + vS * 9.0); float sp = step(0.8, h(floor(vUv * 16.0))) * smoothstep(1.2, 0.5, r); float a = (smoothstep(edge, edge * 0.4, r) * 0.7 + sp * 0.35) * vA; if (a < 0.01) discard; gl_FragColor = vec4(uC, a);\n #include <colorspace_fragment>\n }',
+      uniforms: { uC: { value: this.col } },
+    }), n);
+    this.life = new Float32Array(n); this.max = new Float32Array(n); this.a0 = new Float32Array(n);
+    this.d.scale.set(0, 0, 0); this.d.updateMatrix();
+    for (let i = 0; i < n; i++) this.mesh.setMatrixAt(i, this.d.matrix);
+    this.mesh.frustumCulled = false; this.mesh.renderOrder = 2; root.add(this.mesh); this.ok = true;
+  },
+  add(X, Z, w, l, alpha, life) {
+    if (!this.ok) return;
+    const i = this.head; this.head = (this.head + 1) % this.n;
+    this.d.position.set(X, 0.015, Z); this.d.rotation.set(0, (rnd() - 0.5) * 0.5, 0); this.d.scale.set(w, 1, l); this.d.updateMatrix();
+    this.mesh.setMatrixAt(i, this.d.matrix); this.mesh.instanceMatrix.needsUpdate = true;
+    this.life[i] = life; this.max[i] = life; this.a0[i] = alpha; this.live = 1;
+  },
+  step(dt) {
+    if (!this.live) return;
+    let any = 0;
+    for (let i = 0; i < this.n; i++) { if (this.life[i] <= 0) continue; any = 1; this.life[i] -= dt; this.aA.array[i] = this.a0[i] * min(1, max(0, this.life[i] / this.max[i]) * 3); }
+    this.aA.needsUpdate = true; if (!any) this.live = 0;
+  },
+};
+
 /* ------------------------------------------------------------ assembling the world */
 const W3 = { ready: false, failed: false, lost: false, q: 1, qT: 0, fpsAcc: 0, fpsN: 0, shadowSize: 2048, pr: 1 };
 const ACT = { kids: {}, flames: [] };
@@ -1214,7 +1468,7 @@ function buildWorld(arc) {
   dom.addEventListener('webglcontextrestored', () => { W3.lost = false; }, false);
   // Shared post pass: bloom on the warm sun, the window lamps and the sparks, grade, grain. The lane has
   // its own orbit for menus and results and its own cuts, so no extra camera moves here (walls are close).
-  POST = createPost(R, { arc, soft: W3.soft, look: { bloom: 0.42, threshold: 0.76, vignette: 0.28 } });
+  POST = createPost(R, { arc, soft: W3.soft, preset: 'natural', handheld: true, dof: { results: 0.65, radius: 0.24 }, look: { bloom: 0.38, threshold: 0.77, gain: [1.03, 1.0, 0.95] } });
 
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog('#f0c394', 26, 105);
@@ -1278,6 +1532,7 @@ function buildWorld(arc) {
   const clip = new THREE.Plane(new THREE.Vector3(0, 1, 0), -(3.3 + 0.02));
   ACT.aunty = buildAunty(root, clip);
   ACT.birds = buildBirds(root, BIRDS.length);
+  buildGullyHumans(root);
   // board with the live chalk score: on the wall and standing on an easel
   FX.boardCanvas = mkCanvas(512, 256);
   FX.boardTex = canvasTex(FX.boardCanvas);
@@ -1304,9 +1559,25 @@ function buildWorld(arc) {
     dust: new PLayer(scene, 200, true, false), spark: new PLayer(scene, 120, false, true), shard: new PLayer(scene, 120, false, false),
     mote: new PLayer(scene, 90, true, true),
   };
+  STAIN.build(root);
+  try { VFX = createVFX(R, scene, camera, { quality: hq(), unit: 1, groundY: 0, soft: W3.soft, reduced: arc.reducedMotion }); VFX.warm(); }
+  catch (e) { VFX = null; try { console.warn('gully-champs: spectacle layer off', e && e.message); } catch (er) { /* ignore */ } }
+  // where the house plinths meet the lane: a band of shade and grime on the concrete so nothing stands on it like a cut-out
+  {
+    const aoC = mkCanvas(64, 8), g = aoC.getContext('2d'), gr = g.createLinearGradient(0, 0, 64, 0);
+    gr.addColorStop(0, 'rgba(30,16,8,0.62)'); gr.addColorStop(0.3, 'rgba(30,16,8,0.28)'); gr.addColorStop(1, 'rgba(30,16,8,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 8);
+    const at = canvasTex(aoC, { aniso: 1 });
+    for (const sd of [1, -1]) {
+      const geo = new THREE.PlaneGeometry(0.75, GATE_X - END_X).rotateX(-PI / 2);
+      if (sd > 0) geo.rotateY(PI);
+      const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: at, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+      m.position.set(sd * (ZW - 0.375), 0.006, -(END_X + GATE_X) / 2); m.renderOrder = 1; root.add(m);
+    }
+  }
   FX.motes = []; for (let i = 0; i < 90; i++) FX.motes.push({ x: rr(-3, 3), y: rr(0.3, 7), z: rr(-34, 14), p: rr(0, 6), s: rr(0.02, 0.05) });
   W3.stdMeshes = [];
-  scene.traverse((o) => { if ((o.isMesh) && o.material && o.material.isMeshStandardMaterial) { o.userData.std = o.material; W3.stdMeshes.push(o); } });
+  // the people library's materials are shared and skinned: never swapped for the cheap tier (userData.keepMat)
+  scene.traverse((o) => { if ((o.isMesh) && o.material && o.material.isMeshStandardMaterial && !(o.material.userData && o.material.userData.keepMat)) { o.userData.std = o.material; W3.stdMeshes.push(o); } });
   W3.ready = true;
   paintBoard(true);
   applyQuality();
@@ -1398,6 +1669,7 @@ function paintBoard(force) {
 
 /* ------------------------------------------------------------ game state */
 let arc = null;
+const HH = new THREE.Vector3();
 const CAM = { p: new THREE.Vector3(0, 2.9, 7.2), t: new THREE.Vector3(0, 0.95, -4), s: 1, fx: 3, flash: 0, sFlip: 0, ball: new THREE.Vector3(), hold: new THREE.Vector3() };
 const G = {
   mode: 'last', diff: 'serious', D: DIFF.serious, phase: 'attract', t: 0,
@@ -1492,6 +1764,11 @@ function emit(n, x, h, z, kind, o) {
     p.col = o.cols ? o.cols[(rnd() * o.cols.length) | 0] : (o.col || '#d9c3a0'); p.g = o.g == null ? 1 : o.g;
   }
 }
+// A running foot on dusty concrete: each heel strike (every half stride) lifts a little dust that hangs and drifts.
+function footfall(x, z, p0, p1, k) {
+  if (floor(p0 / PI) === floor(p1 / PI) || W3.q >= 4 || (arc && arc.reducedMotion)) return;
+  emit(1 + (rnd() < k ? 1 : 0), x, 0.04, z, 0, { speed: 0.45 * k, up: 0.6, life: 0.7, size: 4, cols: ['#d9c3a0', '#c8ad88'], g: 0.04 });
+}
 const dustPuff = (x, h, z, n, big) => emit(n || 5, x, h, z, 0, { speed: big ? 1.6 : 0.9, up: 0.9, life: 0.7, size: big ? 7 : 5, cols: ['#d9c3a0', '#c8ad88', '#e8d6b4'], g: 0.15 });
 const sparkBurst = (x, h, z, n) => emit(n || 10, x, h, z, 1, { speed: 4, up: 1, life: 0.35, size: 2.4, cols: ['#FFE08A', '#FFB736', '#ffffff'], g: 0.8 });
 const shards = (x, h, z) => emit(34, x, h, z, 2, { speed: 3.2, up: 1, vh: 1.5, life: 1.1, size: 4.5, cols: ['#bfe3f2', '#e8f6fb', '#f5d28a', '#ffffff'], g: 2.2 });
@@ -1526,7 +1803,7 @@ function syncPatches() {
   });
 }
 function setPhase(p, t) { G.phase = p; G.t = 0; if (t != null) G.phaseLen = t; }
-function breakWindow(w) { w.broken = true; setWindowBroken(w, true); }
+function breakWindow(w) { w.broken = true; setWindowBroken(w, true); vfxGlass(w); }
 function resetWindows() { WIN.forEach((w) => { if (w.broken || w.type === 'glass') { w.broken = false; setWindowBroken(w, false); } }); }
 
 /* ------------------------------------------------------------ ball physics */
@@ -1676,7 +1953,7 @@ function newMatch() {
   BAT.x = BAT_X; BAT.state = 'idle'; BAT.lastEnd = 0; BAT.out = false; BAT.z = 0;
   SW.on = false; SW.cd = 0; SW.t = 0; SW.shot = null;
   BALL.state = 'none'; BALL.hidden = true;
-  FIELDERS.forEach((f, i) => { f.x = f.x0; f.goal = f.x0; f.hasBall = false; f.tried = false; f.walk = 0; f.z = FZ[i] * G.D.zs; });
+  FIELDERS.forEach((f, i) => { f.x = f.x0; f.goal = f.x0; f.hasBall = false; f.tried = false; f.walk = 0; f.z = FZ[i] * G.D.zs; f.hands = 0.76 + rnd() * 0.24; f.form = rr(0.93, 1.06); });
   BOWLER.x = BOWL_X + 3;
   BUBBLES.length = 0; POPS.length = 0;
   setPhase('intro', 2.1);
@@ -1744,6 +2021,7 @@ function startRunup() {
   const T = DELIV[kind];
   BOWLER.runFrom = BOWL_X + T.run + 0.6; BOWLER.runT = 0; BOWLER.runDur = 0.35 + T.run / 4.6; BOWLER.x = BOWLER.runFrom;
   BOWLER.running = true; BOWLER.arm = 0;
+  vfxTrail(false);
   setPhase('runup');
 }
 function release() {
@@ -1825,6 +2103,12 @@ function endBall(kind, info) {
     setTimeout(() => { if (G.phase === 'dead' || G.phase === 'ready') sayAt(pick(LINES.aunty), AUNTY.x, AUNTY.h + 2.3, AUNTY.z, 2.4); }, 500);
   }
   if (out && !trial && G.outs === 2 && G.outs < G.maxOuts) setTimeout(() => say(pick(LINES.lastMan), BAT, 2.0, 1.9), 1200);
+  kidsReact(kind, trial);
+  vfxTrail(false);
+  if (!trial) {
+    if (kind === 'six' || kind === 'sixgate') vfxSix(BALL.x);
+    else if (kind === 'bowled' || kind === 'runout' || kind === 'caught' || kind === 'tip') vfxOut(kind, BALL.x, max(0.6, BALL.h), BALL.z);
+  }
   G.flags.lastEnd = kind;
   setPhase('dead', kind === 'glass' ? 2.6 : 1.9);
   G.deadKind = kind;
@@ -1854,6 +2138,7 @@ function prepareNextBall() {
 
 function finishMatch(won) {
   if (G.ended) return; G.ended = true;
+  if (VFX && (won || (G.mode === 'last' && G.runs >= 30))) { try { VFX.winBurst(VP.set(0, 0, -6), { colors: MARIGOLD, size: 1.1 }); } catch (e) { /* ignore */ } }
   if (arc) arc.haptic(won || (G.mode === 'last' && G.runs >= 30) ? 'success' : 'fail', 1);
   let bonus = 0;
   if (G.mode !== 'last' && won) bonus = 20 + (G.maxOuts - G.outs) * 5 + max(0, G.ballLimit - G.balls) * 2;
@@ -1961,14 +2246,22 @@ function contact(p) {
   if (lab === 'PERFECT' && rnd() < 0.5) say(pick(LINES.perfect), FIELDERS[3], 1.3, 1.9);
   setPhase('live');
   G.liveT = 0; G.lastBallRuns = 0; BAT.ran = 0;
-  FIELDERS.forEach((f) => { f.armUp = 0; f.tried = false; f.hasBall = false; });
+  FIELDERS.forEach((f) => {
+    f.armUp = 0; f.tried = false; f.hasBall = false;
+    const near = abs(f.x - b.x) < 4;
+    f.react = rr(0.15, 0.3) * (G.D === DIFF.legend ? 0.85 : G.D === DIFF.chill ? 1.15 : 1) + (near ? 0 : 0.04);
+    f.misread = rnd() < (G.D === DIFF.legend ? 0.06 : 0.13) ? rr(0.12, 0.26) : 0;
+  });
   planFielding(b);
+  if (s.loft || q > 0.8) vfxTrail(true);
   CAM.sFlip = 0; CAM.s = (b.vx >= 0 ? 1 : -1);
 }
 
 function updateBatter(dt) {
+  const bp0 = BAT.phase;
   BAT.phase += dt * 11;
   if (BAT.state === 'run') {
+    footfall(BAT.x, BAT.z || 0, bp0, BAT.phase, 1);
     BAT.x += BAT.dir * BAT.speed * dt; BAT.run = 1;
     if (BAT.dir > 0 && BAT.x >= CHALK_X) { BAT.x = CHALK_X; arriveEnd(1); }
     else if (BAT.dir < 0 && BAT.x <= BAT_X) { BAT.x = BAT_X; arriveEnd(0); }
@@ -2006,8 +2299,14 @@ function updateFielders(dt) {
   const b = BALL;
   FIELDERS.forEach((f) => {
     let goal = f.x;
-    if (f.role === 'bowler' && G.phase === 'runup') { f.phase += dt * 10; return; }
-    if (live && b.batted && b.state === 'air') {
+    if (f.role === 'bowler' && G.phase === 'runup') { const p0 = f.phase; f.phase += dt * 10; footfall(f.x, f.z, p0, f.phase, 1); return; }
+    const rt = f.react || 0;
+    if (live && b.batted && b.state === 'air' && f.role !== 'bowler' && G.liveT < rt + (f.misread || 0)) {
+      // reading it off the bat: set, and if it was misread, a step the wrong way before the turn
+      goal = G.liveT < rt || !f.misread ? f.x : f.x - (b.vx >= 0 ? 1 : -1) * 0.6;
+      f.read = 1;
+    } else if (live && b.batted && b.state === 'air') {
+      f.read = 0;
       const rolling = b.h <= BR + 0.02;
       if (rolling && !f.hasBall) {
         let nearest = null, nt = 1e9;
@@ -2018,8 +2317,8 @@ function updateFielders(dt) {
     } else if (live && (b.state === 'held' || b.state === 'thrown')) goal = f.hasBall ? f.x : f.x0;
     else if (!live) goal = f.hasBall ? f.x : (f.role === 'bowler' ? (G.phase === 'ready' || G.phase === 'intro' || G.phase === 'attract' ? BOWL_X + 3 : BOWL_X) : f.x0);
     else goal = f.x0;
-    const dx = goal - f.x, step = f.speed * dt;
-    if (abs(dx) > 0.06) { f.x += clamp(dx, -step, step); f.face = dx > 0 ? 1 : -1; f.walk = lerp(f.walk, 1, min(1, dt * 10)); f.phase += dt * (9 + f.speed); }
+    const dx = goal - f.x, step = f.speed * (f.form || 1) * dt;
+    if (abs(dx) > 0.06) { f.x += clamp(dx, -step, step); f.face = dx > 0 ? 1 : -1; f.walk = lerp(f.walk, 1, min(1, dt * 10)); const p0 = f.phase; f.phase += dt * (9 + f.speed); if (f.walk > 0.6) footfall(f.x, f.z, p0, f.phase, 0.7); }
     else { f.walk = lerp(f.walk, 0, min(1, dt * 9)); }
     if (live && b.batted && b.state === 'air' && G.D.zs < 1 && abs(b.x - f.x) < 9) { const tzz = clamp(b.z, -1.6, 1.6); f.z += clamp(tzz - f.z, -1.1 * dt, 1.1 * dt); }
     else if (f.role === 'bowler') { const tz = (G.phase === 'flight' || G.phase === 'live' || G.phase === 'dead') ? 1.6 * G.D.zs : 0; f.z += clamp(tz - f.z, -2.5 * dt, 2.5 * dt); }
@@ -2037,7 +2336,8 @@ function throwBall(f) {
   const dist = abs(f.x - tx);
   b.state = 'thrown';
   b.thrown = { x0: f.x, h0: 1.15, x1: tx, h1: th, t: 0, dur: max(0.4, dist / (9.5 + (G.D === DIFF.legend ? 3 : 0))), arc: min(2.4, 0.4 + dist * 0.07) };
-  f.hasBall = false; f.armUp = 0.4;
+  f.hasBall = false; f.armUp = 0.4; HK.lastArm[f.key] = 1;
+  kidAct(f.key, 'throw', { speed: 1.4 });
   SND.swish();
 }
 function takeBall(f, caughtKind) {
@@ -2108,6 +2408,8 @@ function updateBall(dt) {
   if (b.evBounce) {
     const v = b.evBounce; b.evBounce = 0;
     SND.bounce(v); dustPuff(b.x, 0.05, b.z, v > 5 ? 5 : 2, v > 7);
+    // the taped ball leaves a scuff of lighter dust on the concrete that fades over a few balls
+    if (v > 2.5) STAIN.add(b.z, -b.x, 0.16 + min(0.2, v * 0.02), 0.3 + min(0.3, v * 0.03), v > 6 ? 0.45 : 0.3, 12);
     if (b.evPatch === 'pot' && !b.batted) { pop('Gaddha!', b.x, 0.9, '#FF8A3D', 15, 0.8); }
     if (b.evPatch === 'pot' || b.evPatch === 'crack' || b.evPatch === 'stones') { dustPuff(b.x, 0.05, b.z, 7, true); b.evPatch = ''; if (!b.batted && rnd() < 0.5) say(pick(LINES.pot), BOWLER, 1.0, 1.9); }
   }
@@ -2319,7 +2621,7 @@ function updateParticles(dt) {
     if (p.life <= 0) { p.on = false; continue; }
     p.vh -= GRAV * p.g * dt; p.x += p.vx * dt; p.h += p.vh * dt; p.z += p.vz * dt;
     if (p.h < 0.02 && p.kind !== 0) { p.h = 0.02; p.vh *= -0.3; p.vx *= 0.7; p.vz *= 0.7; }
-    if (p.kind === 0) { p.vx *= 1 - dt * 1.5; }
+    if (p.kind === 0) { const d = 1 - dt * 1.8; p.vx *= d; p.vz *= d; p.vh *= 1 - dt * 1.1; }
   }
   for (let i = POPS.length - 1; i >= 0; i--) { const p = POPS[i]; p.t += dt; if (p.t > p.life) POPS.splice(i, 1); }
   for (let i = BUBBLES.length - 1; i >= 0; i--) { const b = BUBBLES[i]; b.t += dt; if (b.ent) { b.x = b.ent.x; b.z = b.ent.z || 0; } if (b.t > b.life) BUBBLES.splice(i, 1); }
@@ -2391,6 +2693,7 @@ function gestureBat() {
 
 function update(dt, a) {
   arc = a;
+  dt *= VFXK;
   let gdt = dt;
   if (G.slow > 0) { G.slow -= dt; gdt = dt * 0.28; }
   G.time += gdt; G.t += gdt; HINT.t += dt;
@@ -2479,6 +2782,8 @@ function updateCamera(dt) {
     homeRig(cpT, ctT); CAM.s = 1;
     if (ph === 'flight' || ph === 'runup') { const u = ph === 'flight' ? 1 : BOWLER.arm; cpT.z -= 0.35 * u; }
   }
+  // the held shot after a big hit and the interludes are handheld (the shared pass sways the menu and results)
+  CAM.hand = mode === 'hold' || ph === 'interlude' ? 1 : 0;
   if (CAM.prevS !== CAM.s) { if (CAM.prevS != null && mode === 'ball') CAM.cut = 1; CAM.prevS = CAM.s; }
   if (arc.reducedMotion) k *= 0.55;
   if (CAM.snap) { CAM.p.copy(cpT); CAM.t.copy(ctT); CAM.snap = false; }
@@ -2525,6 +2830,7 @@ function placeKid(key, x, z, yaw) {
   r.root.position.set(z, 0, -x); r.root.rotation.y = yaw; r.blob.position.set(z, 0.017, -x);
 }
 function syncScene(dt) {
+  STAIN.step(dt);
   const kids = ACT.kids, y = G.yield || 0;
   const zOf = (z) => z + y * (1.3 - z);
   // batter
@@ -2561,6 +2867,18 @@ function syncScene(dt) {
       }
     }
     poseKid(r, o);
+  }
+  if (HK.on) {
+    try { syncHumans(dt); }
+    catch (e) {
+      HK.on = false;
+      for (const k in HK.kids) HK.kids[k].group.visible = false;
+      if (HK.aunty) HK.aunty.group.visible = false;
+      HK.nb.forEach((n) => { n.h.group.visible = false; });
+      Object.keys(ACT.kids).forEach((k) => ACT.kids[k].root.traverse((o) => { if (o.isMesh) o.visible = true; }));
+      ACT.aunty.hide = false;
+      try { console.warn('gully-champs: people off', e && e.message); } catch (er) { /* ignore */ }
+    }
   }
   // the crate
   {
@@ -2624,7 +2942,7 @@ function syncScene(dt) {
   // the aunty
   {
     const a = ACT.aunty, A_ = AUNTY;
-    a.g.visible = A_.up > 0.001;
+    a.g.visible = !a.hide && A_.up > 0.001;
     if (a.g.visible) {
       const sc = A_.state === 'scold';
       a.g.position.set(A_.z + (A_.shake || 0) * 0.03, A_.h + 0.25 - (1 - A_.up) * 2.1, -A_.x);
@@ -2875,10 +3193,21 @@ function render(c, a) {
       W3.tSync = performance.now() - t0;
       camera.position.copy(CAM.p);
       if (!a.reducedMotion) { camera.position.x += (a.shakeX || 0) * 0.012; camera.position.y += (a.shakeY || 0) * 0.012; }
-      camera.lookAt(CAM.t);
+      // On menus, results and held shots the camera is handheld: a slow uneven drift of the operator's hands.
+      // During play it stays locked off so the delivery reads cleanly.
+      W3.hand = lerp(W3.hand || 0, CAM.hand && !a.reducedMotion ? 1 : 0, damp(1.5, dtR));
+      if (W3.hand > 0.01) {
+        const t = G.time, hh = W3.hand;
+        camera.position.x += hh * (sin(t * 0.37) * 0.045 + sin(t * 0.91 + 1.7) * 0.018);
+        camera.position.y += hh * (sin(t * 0.53 + 0.4) * 0.03 + sin(t * 1.3) * 0.01);
+        HH.copy(CAM.t); HH.x += hh * sin(t * 0.29 + 2.1) * 0.05; HH.y += hh * sin(t * 0.47) * 0.03;
+        camera.lookAt(HH);
+      } else camera.lookAt(CAM.t);
       if (!W3.lost) {
         const t1 = performance.now();
+        if (VFX) { try { VFX.setReduced(a.reducedMotion); VFX.setQuality(hq()); const k = VFX.update(dtR); VFXK = a.state === 'play' ? k : 1; VFX.applyShake(camera); } catch (e) { VFX = null; VFXK = 1; } }
         if (POST) { const q = W3.q; POST.setQuality(q <= 1 ? 3 : q === 2 ? 2 : q === 3 ? 1 : 0, !!W3.fixq); POST.render(scene, camera); } else R.render(scene, camera);
+        if (VFX) VFX.removeShake(camera);
         W3.tRender = performance.now() - t1; W3.calls = R.info.render.calls; W3.tris = R.info.render.triangles;
         // quality auto-scale: step down when frames run slow (a settle window skips the frames that compile shaders)
         if (W3.settle > 0) W3.settle--;
@@ -3014,7 +3343,7 @@ A.create({
     }
     resetScene();
     a.debug = dbg;
-    window.__gully = { G, BALL, BAT, SW, FIELDERS, AUNTY, DOG, AUTO, CRATE, WIN, TEST, CAM, W3, startAuto, startAuntyScold: () => { AUNTY.state = 'scold'; AUNTY.t = 0; }, scareBirds, camera: () => camera, scene: () => scene, R: () => R, THREE, step: (n, dt) => { dt = dt || 1 / 60; for (let i = 0; i < (n || 1); i++) { arc.time += dt; update(dt, arc); arc.input.endFrame(); } } };
+    window.__gully = { fxtest: () => { vfxSix(6); vfxOut('bowled', 0, 1, 0); vfxGlass(WIN[0]); vfxTrail(true); }, vfx: () => VFX, finish: () => finishMatch(false), HK, G, BALL, BAT, SW, FIELDERS, AUNTY, DOG, AUTO, CRATE, WIN, TEST, CAM, W3, startAuto, startAuntyScold: () => { AUNTY.state = 'scold'; AUNTY.t = 0; }, scareBirds, camera: () => camera, scene: () => scene, R: () => R, THREE, step: (n, dt) => { dt = dt || 1 / 60; for (let i = 0; i < (n || 1); i++) { arc.time += dt; update(dt, arc); arc.input.endFrame(); } } };
     G.autoTimer = rr(22, 34); G.dogTimer = rr(6, 12); G.auntyTimer = rr(4, 9);
     CAM.snap = true;
     menuShow(a);

@@ -118,7 +118,7 @@ function setup(a) {
   try { renderer = new THREE.WebGLRenderer({ canvas: a.canvas, antialias: true, powerPreference: 'high-performance' }); } catch (e) { return false; }
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.22;
+  renderer.toneMappingExposure = 1.1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
@@ -126,8 +126,9 @@ function setup(a) {
   scene.fog = new THREE.Fog('#0b0716', 160, 420);
   const camera = new THREE.PerspectiveCamera(38, 1, 2, 900);
   camera.position.set(0, 120, 120); camera.lookAt(0, 0, 0);
-  const hemi = new THREE.HemisphereLight('#a99cff', '#3a1830', 1.0);
-  const key = new THREE.DirectionalLight('#fff1dc', 2.7);
+  // one clear warm key, a cooler and much weaker fill: a dim arcade, not a lightbox
+  const hemi = new THREE.HemisphereLight('#9a94c4', '#2a1420', 0.72);
+  const key = new THREE.DirectionalLight('#ffe9cf', 2.55);
   key.position.set(-30, 90, 40);
   key.castShadow = true;
   const sc = key.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 62; sc.bottom = -62; sc.near = 20; sc.far = 200;
@@ -136,14 +137,17 @@ function setup(a) {
   const rim = new THREE.DirectionalLight('#ff7ad0', 0.55); rim.position.set(40, 30, -80);
   [hemi, key, rim].forEach((l) => l.layers.enable(1));
   scene.add(hemi, key, key.target, rim);
+  // a hit lights the paint and chrome round it for a moment, the way a real bumper's flash does
+  const flashL = new THREE.PointLight('#ffc27a', 0, 24, 1.8); flashL.layers.enable(1);
   let soft;
   try { const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER))); } catch (e) { soft = false; }
   R = {
-    renderer, scene, camera, hemi, key, rim, soft, aniso: Math.min(8, renderer.capabilities.getMaxAnisotropy()),
+    renderer, scene, camera, hemi, key, rim, soft, flashL, flashI: 0, aniso: Math.min(8, renderer.capabilities.getMaxAnisotropy()),
     jobs: [], jobLog: [], jobsDone: 0, ready: false, built: {}, mats: {}, quality: -1, lockQ: false, fps: 60, qT: 0, qN: 0, qWarm: 0, upT: 0, lost: false,
     lastNow: 0, t: 0, cam: { mode: 'attract', blend: 1, from: new THREE.Vector3(), fromQ: new THREE.Quaternion(), pos: new THREE.Vector3(0, 120, 120), look: new THREE.Vector3(), fov: 38, followZ: 0, push: 0, pushX: 0, pushZ: 0, moment: null, momentT: 0, dip: 0 },
     world: null, dmdVer: -1, shake: 0, tableShake: 0, blackTex: null, buildMs: 0, longest: 0,
   };
+  if (!soft) scene.add(flashL);
   a.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); R.lost = true; }, false);
   a.canvas.addEventListener('webglcontextrestored', () => { R.lost = false; }, false);
   const black = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1); black.needsUpdate = true; R.blackTex = black;
@@ -151,7 +155,7 @@ function setup(a) {
   buildBase();
   queueJobs();
   try {
-    FX = createFX(renderer, { arc: a, intro: false, results: { dist: 60, yaw: 0.22, rise: 0.1, speed: 0.2 }, target: (v) => { v.set(0, 0, WZ(46)); return true; }, look: { bloom: 0.75, bloomWide: 0.45, threshold: 0.6, knee: 0.25, vignette: 0.36, grain: 0.03, sat: 1.1, contrast: 1.06 } });
+    FX = createFX(renderer, { arc: a, intro: false, results: { dist: 60, yaw: 0.22, rise: 0.1, speed: 0.2 }, target: (v) => { v.set(0, 0, WZ(46)); return true; }, look: { bloom: 0.66, bloomWide: 0.4, threshold: 0.62, knee: 0.25, vignette: 0.34, grain: 0.032, sat: 0.97, contrast: 1.05, lift: [0.014, 0.012, 0.026], gain: [1.035, 1.0, 0.955] } });
   } catch (e) { FX = null; }
   return true;
 }
@@ -165,6 +169,9 @@ function M() {
   m.chrome = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.16, metalness: 1.0 });
   m.wood = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.0 });
   m.rubber = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0.0 });
+  // handled surfaces are never uniformly glossy: a blotchy roughness on the lacquer and the chrome
+  const smudge = canvasTex(128, 128, (g, w, h) => { const r = rngf(5); g.fillStyle = 'rgb(128,128,128)'; g.fillRect(0, 0, w, h); for (let i = 0; i < 90; i++) { const x = r() * w, y = r() * h, rr = 4 + r() * 18, v = 90 + r() * 120 | 0; const gr = g.createRadialGradient(x, y, 0, x, y, rr); gr.addColorStop(0, 'rgba(' + v + ',' + v + ',' + v + ',0.55)'); gr.addColorStop(1, 'rgba(' + v + ',' + v + ',' + v + ',0)'); g.fillStyle = gr; g.fillRect(x - rr, y - rr, rr * 2, rr * 2); } }, { data: true, repeat: [2, 2] });
+  m.wood.roughnessMap = smudge; m.wood.roughness = 0.75; m.chrome.roughnessMap = smudge; m.chrome.roughness = 0.3;
   m.plastic = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.18, metalness: 0.0, transparent: true, opacity: 0.78, emissive: '#ffffff', emissiveIntensity: 0.0 });
   m.glow = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   return m;
@@ -196,7 +203,7 @@ function buildBase() {
 /* ------------------------------------------------------------ jobs */
 function queueJobs() {
   const J = R.jobs;
-  J.push(paintPlayfield1, paintPlayfield2, paintPlayfield3, uploadPlayfield, buildWalls, buildPosts, buildFlippers, buildBumpers, buildSlings, buildTargetsSpinnerGates, buildRamp, buildLamps, buildBalls, buildFerris, buildCarousel, buildJuggler, paintBackglass, buildBackbox, buildCabinet, buildBackdrop, buildParticles, buildReflection);
+  J.push(paintPlayfield1, paintPlayfield2, paintPlayfield3, uploadPlayfield, buildWalls, buildPosts, buildFlippers, buildBumpers, buildSlings, buildTargetsSpinnerGates, buildRamp, buildLamps, buildBalls, buildFerris, buildCarousel, buildJuggler, paintBackglass, buildBackbox, buildCabinet, buildGlass, buildBackdrop, buildParticles, buildReflection);
   // the detailed look (environment reflections, shadows) and the cheap one both get compiled before play,
   // so the auto-scaler can move between them without a hitch; a software renderer only ever needs the cheap one
   if (!R.soft) J.push(buildEnv, precompileOther);
@@ -214,7 +221,7 @@ function runJobs(budget) {
     R.jobsDone++;
     if (d > budget * 0.6) break;
   }
-  if (!R.jobs.length && !R.ready) { R.ready = true; applyTier(); }
+  if (!R.jobs.length && !R.ready) { R.ready = true; applyTier(); loadVFX(); }
 }
 
 /* ------------------------------------------------------------ playfield art */
@@ -321,9 +328,66 @@ function paintPlayfield3() {
   // clear coat: a broad sheen
   const sh = g.createLinearGradient(0, 0, W, H); sh.addColorStop(0, 'rgba(255,255,255,0.05)'); sh.addColorStop(0.5, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(255,255,255,0.03)');
   g.fillStyle = sh; g.fillRect(0, 0, W, H);
+  // years of play: the ball wears pale tracks into the paint, posts chip it down to the wood,
+  // and dust settles along the walls and the apron. The same marks go into a small roughness map,
+  // so the clear coat is glossy where it is new and dull where it is worn or dirty.
+  const RW = 128, RH = 256, rc = document.createElement('canvas'); rc.width = RW; rc.height = RH;
+  const rg2 = rc.getContext('2d'); rg2.fillStyle = 'rgb(46,46,46)'; rg2.fillRect(0, 0, RW, RH);
+  const kx = RW / W, ky = RH / H;
+  const wr = rngf(23);
+  const wear = (x0, y0, x1, y1, x2, y2, wdt, a) => {
+    const p0 = P(x0, y0), p1 = P(x1, y1), p2 = P(x2, y2);
+    g.strokeStyle = 'rgba(255,236,214,' + a + ')'; g.lineWidth = wdt * sx; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(p0[0], p0[1]); g.quadraticCurveTo(p1[0], p1[1], p2[0], p2[1]); g.stroke();
+    rg2.strokeStyle = 'rgba(150,150,150,' + Math.min(1, a * 9) + ')'; rg2.lineWidth = wdt * sx * kx; rg2.lineCap = 'round';
+    rg2.beginPath(); rg2.moveTo(p0[0] * kx, p0[1] * ky); rg2.quadraticCurveTo(p1[0] * kx, p1[1] * ky, p2[0] * kx, p2[1] * ky); rg2.stroke();
+  };
+  // flipper fans: shots off both flippers run up the table along a few favourite lines
+  [-1, 1].forEach((s) => {
+    for (let i = 0; i < 9; i++) {
+      const tx = s * (1.5 + wr() * 4), ty = 12 + wr() * 2, ex = -s * (4 + wr() * 14), ey = 48 + wr() * 40;
+      wear(tx, ty, (tx + ex) / 2 + s * (wr() * 6 - 1), (ty + ey) / 2, ex, ey, 1.2 + wr() * 1.4, 0.013 + wr() * 0.012);
+    }
+    // the inlane feed onto each flipper, polished by every ball that rolls down it
+    wear(s * 17.2, 23, s * 14.5, 17.5, s * 9.0, 12.5, 1.6, 0.05);
+  });
+  // the shooter lane exit and the top arch, where every plunge runs
+  wear(23.6, 70, 22.6, 96, 12, 98, 1.8, 0.05); wear(12, 98, -2, 99.5, -14, 96, 1.6, 0.035);
+  // swirls round the pop bumpers, where a ball spends most of its life
+  TABLE.bumpers.forEach((b) => {
+    const p = P(b.x, b.y);
+    for (let k = 0; k < 3; k++) {
+      const rr = (b.r + 0.9 + k * 0.8) * sx;
+      g.strokeStyle = 'rgba(255,236,214,' + (0.03 - k * 0.007) + ')'; g.lineWidth = 1.3 * sx; g.beginPath(); g.arc(p[0], p[1], rr, 0, TAU); g.stroke();
+      rg2.strokeStyle = 'rgba(140,140,140,0.5)'; rg2.lineWidth = 1.3 * sx * kx; rg2.beginPath(); rg2.arc(p[0] * kx, p[1] * ky, rr * kx, 0, TAU); rg2.stroke();
+    }
+  });
+  // paint chipped down to the wood around posts and at the foot of the slingshots
+  TABLE.circs.forEach((c) => {
+    const p = P(c.x, c.y), n = 3 + ((wr() * 6) | 0);
+    for (let i = 0; i < n; i++) {
+      const a2 = wr() * TAU, d2 = (c.r + 0.25 + wr() * 0.9) * sx, cr2 = 1.2 + wr() * 3.2;
+      g.fillStyle = wr() < 0.6 ? 'rgba(168,128,86,0.55)' : 'rgba(232,214,190,0.4)';
+      g.beginPath(); g.ellipse(p[0] + Math.cos(a2) * d2, p[1] + Math.sin(a2) * d2, cr2, cr2 * (0.5 + wr() * 0.5), wr() * TAU, 0, TAU); g.fill();
+    }
+  });
+  // dust and grime gathered against every wall foot and down at the apron
+  g.strokeStyle = 'rgba(28,18,12,0.16)'; g.lineWidth = 14; g.lineCap = 'round';
+  rg2.strokeStyle = 'rgba(190,190,190,0.6)'; rg2.lineWidth = 14 * kx * 1.6;
+  T.segs.forEach((s) => { const a3 = P(s.ax, s.ay), b3 = P(s.bx, s.by); g.beginPath(); g.moveTo(a3[0], a3[1]); g.lineTo(b3[0], b3[1]); g.stroke(); rg2.beginPath(); rg2.moveTo(a3[0] * kx, a3[1] * ky); rg2.lineTo(b3[0] * kx, b3[1] * ky); rg2.stroke(); });
+  const ag = g.createLinearGradient(0, py(14, H), 0, H); ag.addColorStop(0, 'rgba(24,14,10,0)'); ag.addColorStop(1, 'rgba(24,14,10,0.32)');
+  g.fillStyle = ag; g.fillRect(0, py(14, H), W, H - py(14, H));
+  const ag2 = rg2.createLinearGradient(0, py(14, H) * ky, 0, RH); ag2.addColorStop(0, 'rgba(160,160,160,0)'); ag2.addColorStop(1, 'rgba(160,160,160,0.7)');
+  rg2.fillStyle = ag2; rg2.fillRect(0, py(14, H) * ky, RW, RH);
+  // a fine grain over everything: dust specks, hairline scratches in the clear coat
+  for (let i = 0; i < 2600; i++) { const v = wr(); g.fillStyle = v < 0.55 ? 'rgba(255,240,225,' + (0.03 + wr() * 0.05) + ')' : 'rgba(10,6,14,' + (0.05 + wr() * 0.08) + ')'; g.fillRect(wr() * W, wr() * H, 1 + wr() * 1.6, 1 + wr() * 1.6); }
+  g.strokeStyle = 'rgba(255,246,236,0.035)'; g.lineWidth = 1;
+  for (let i = 0; i < 70; i++) { const x = wr() * W, y = wr() * H, l = 20 + wr() * 90, a4 = wr() * TAU; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a4) * l, y + Math.sin(a4) * l); g.stroke(); }
+  for (let i = 0; i < 900; i++) { const v = 30 + wr() * 40 | 0; rg2.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',0.5)'; rg2.fillRect(wr() * RW, wr() * RH, 1, 1); }
+  const rt = new THREE.CanvasTexture(rc); rt.anisotropy = Math.min(4, R.aniso);
   const t = new THREE.CanvasTexture(R.pfCanvas);
   t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = R.aniso;
-  R.pfMat.map = t; R.pfMat.color.set('#ffffff'); R.pfMat.roughness = 0.22; R.pfMat.needsUpdate = true;
+  R.pfMat.map = t; R.pfMat.color.set('#ffffff'); R.pfMat.roughnessMap = rt; R.pfMat.roughness = 1.25; R.pfMat.needsUpdate = true;
   const cheapPf = cheapCache.get(R.pfMat); if (cheapPf) { cheapPf.map = t; cheapPf.color.set('#ffffff'); cheapPf.needsUpdate = true; }
   // the reflection is mixed into the clear coat here; strength 0 until the tier turns it on
   R.reflU = { tRefl: { value: R.blackTex }, uReflMat: { value: new THREE.Matrix4() }, uReflStr: { value: 0 }, uReflTx: { value: new THREE.Vector2(0.002, 0.002) } };
@@ -795,12 +859,12 @@ function buildCabinet() {
   // side rails, the lockdown bar, the apron with its instruction cards
   parts.push(boxG(3.4, 4.8, 114, '#3d1a36', [WX(-25.1), 1.8, WZ(48)]));
   parts.push(boxG(3.4, 4.8, 114, '#3d1a36', [WX(27.6), 1.8, WZ(48)]));
-  parts.push(boxG(3.6, 0.45, 114, '#e8c27a', [WX(-25.1), 4.4, WZ(48)]));
-  parts.push(boxG(3.6, 0.45, 114, '#e8c27a', [WX(27.6), 4.4, WZ(48)]));
+  // the side rails' top caps are brushed steel, as on a real machine
+  const caps = [boxG(3.6, 0.45, 114, '#c9cdd4', [WX(-25.1), 4.4, WZ(48)]), boxG(3.6, 0.45, 114, '#c9cdd4', [WX(27.6), 4.4, WZ(48)])];
   parts.push(boxG(56, 3.0, 4, '#3d1a36', [1.2, 1.4, WZ(-8)]));
   parts.push(boxG(55, 2.6, 6, '#3d1a36', [1.2, 1.2, WZ(105.5)]));
   R.scene.add(new THREE.Mesh(mergeG(parts), m.wood));
-  const bar = new THREE.Mesh(mergeG([boxG(55, 1.0, 2.4, '#e6e8ee', [1.2, 3.4, WZ(-8.5)])]), m.chrome);
+  const bar = new THREE.Mesh(mergeG([boxG(55, 1.0, 2.4, '#e6e8ee', [1.2, 3.4, WZ(-8.5)])].concat(caps)), m.chrome);
   R.scene.add(bar);
   const apronTex = canvasTex(512, 160, (g, w, h) => {
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#5a1450'); bg.addColorStop(1, '#2a0a30'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
@@ -823,6 +887,28 @@ function buildCabinet() {
   const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.42, 8, 6), R.lampMat || new THREE.MeshBasicMaterial({ toneMapped: false }), n);
   for (let i = 0; i < n; i++) { const side = i < n / 2 ? -1 : 1, k = (i % (n / 2)) / (n / 2 - 1); _m4.makeTranslation(side < 0 ? WX(-25.1) : WX(27.6), 4.9, WZ(-6 + k * 108)); bulbs.setMatrixAt(i, _m4); bulbs.setColorAt(i, _c.set('#ffd36a')); }
   R.scene.add(bulbs); R.railBulbs = bulbs;
+}
+function buildGlass() {
+  // the playfield glass: almost invisible, as it should be, but it carries a little dust, a smudge where
+  // hands rest at the front, and a soft streak of the room's light, so the table reads as a real machine
+  const tex = canvasTex(256, 512, (g, w, h) => {
+    const r = rngf(41);
+    g.fillStyle = 'rgb(18,18,18)'; g.fillRect(0, 0, w, h);
+    const st = g.createLinearGradient(w * 0.15, 0, w * 0.75, h);
+    st.addColorStop(0, 'rgba(70,70,70,0)'); st.addColorStop(0.38, 'rgba(70,70,70,0)'); st.addColorStop(0.46, 'rgba(70,70,70,0.9)'); st.addColorStop(0.52, 'rgba(70,70,70,0.4)'); st.addColorStop(0.6, 'rgba(70,70,70,0)'); st.addColorStop(1, 'rgba(70,70,70,0)');
+    g.fillStyle = st; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 2; i++) { const cx = w * (0.3 + i * 0.4), cy = h * 0.93, rr = 26 + r() * 10; const sm = g.createRadialGradient(cx, cy, 0, cx, cy, rr); sm.addColorStop(0, 'rgba(60,60,60,0.8)'); sm.addColorStop(1, 'rgba(60,60,60,0)'); g.fillStyle = sm; g.fillRect(cx - rr, cy - rr, rr * 2, rr * 2); }
+    for (let i = 0; i < 700; i++) { const v = 70 + r() * 110 | 0; g.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; const s2 = r() < 0.9 ? 1 : 2; g.fillRect(r() * w, r() * h, s2, s2); }
+    const eg = g.createLinearGradient(0, 0, w, 0); eg.addColorStop(0, 'rgba(90,90,90,0.7)'); eg.addColorStop(0.06, 'rgba(90,90,90,0)'); eg.addColorStop(0.94, 'rgba(90,90,90,0)'); eg.addColorStop(1, 'rgba(90,90,90,0.7)');
+    g.fillStyle = eg; g.fillRect(0, 0, w, h);
+  });
+  tex.colorSpace = THREE.NoColorSpace;
+  const mat = new THREE.MeshStandardMaterial({ color: '#c9d2de', roughness: 0.06, metalness: 0.0, transparent: true, alphaMap: tex, opacity: 0.55, depthWrite: false, envMapIntensity: 2.2 });
+  const x0 = -23.4, x1 = 25.9, y0 = -7.5, y1 = 100;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, y1 - y0), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set((x0 + x1) / 2, 5.4, WZ((y0 + y1) / 2));
+  m.renderOrder = 9; m.visible = false;
+  R.scene.add(m); R.glass = m;
 }
 function buildBackdrop() {
   // the fair beyond the cabinet: tents, a distant wheel and out of focus lights
@@ -863,6 +949,34 @@ function buildEnv() {
   R.env = env; R.scene.environment = TIERS[Math.max(0, R.quality)].cheap ? null : env;
   R.scene.environmentIntensity = 0.9;
   es.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+}
+
+/* ------------------------------------------------------------ spectacle (shared VFX, loaded after the table is built) */
+// Jackpots and multiball fire real fireworks over the table and arc lightning between the pop bumpers.
+// It is imported only once the table is ready, so the menu never waits for it; it brings no lights of its
+// own (the light count never changes, nothing recompiles) and follows the table's quality tier.
+let VFX = null;
+const _va = new THREE.Vector3(), _vb = new THREE.Vector3();
+function loadVFX() {
+  if (VFX !== null) return; VFX = false;
+  import('/games/shared/vfx.js').then((m) => {
+    try {
+      const v = m.createVFX(R.renderer, R.scene, R.camera, { quality: Math.max(0, R.quality), unit: 3, groundY: 0, lights: 0, reduced: ARC ? ARC.reducedMotion : false });
+      v.warm(); VFX = v; window.__vfxState = 'ok';
+    } catch (e) { VFX = false; window.__vfxState = 'create: ' + (e && e.message); }
+  }).catch((e) => { VFX = false; window.__vfxState = 'import: ' + (e && e.message); });
+}
+function bumperBolts(n) {
+  if (!VFX) return;
+  const B = TABLE.bumpers;
+  for (let i = 0; i < Math.min(n, B.length); i++) {
+    const a = B[i], b = B[(i + 1) % B.length];
+    VFX.lightning(_va.set(WX(a.x), 4.2, WZ(a.y)), _vb.set(WX(b.x), 4.2, WZ(b.y)), { color: '#b8d4ff', size: 1.1, duration: 0.9 });
+  }
+}
+function showFireworks(n, big) {
+  if (!VFX) return;
+  VFX.fireworks(_va.set(0, 16, WZ(52)), { count: n, size: big ? 0.6 : 0.5, launch: false, burst: 'mixed' });
 }
 
 /* ------------------------------------------------------------ particles */
@@ -980,7 +1094,9 @@ function applyTier() {
   const ms = t.shadow;
   if (r.key.shadow.mapSize.x !== ms) { r.key.shadow.mapSize.set(ms, ms); if (r.key.shadow.map) { r.key.shadow.map.dispose(); r.key.shadow.map = null; } }
   if (r.lampGlow) r.lampGlow.visible = !!t.glow;
+  if (r.glass) r.glass.visible = !t.cheap && r.quality >= 2;
   if (FX) FX.setQuality(t.fx, r.lockQ);
+  if (VFX) VFX.setQuality(r.quality);
   if (r.reflU && !t.refl) r.reflU.uReflStr.value = 0;
 }
 function setQuality(q) { if (!R) return; q = clamp(q | 0, 0, 3); if (q === R.quality) return; R.quality = q; applyTier(); }
@@ -1103,23 +1219,28 @@ function updateCamera(a, W, dt) {
 }
 
 /* ------------------------------------------------------------ events from the core */
+function flashAt(x, y, k, hex) {
+  if (!R.flashL || R.soft) return;
+  if (k >= R.flashI) { R.flashL.position.set(WX(x), 4.5, WZ(y)); R.flashL.color.copy(colorOf(hex)); }
+  R.flashI = Math.max(R.flashI, k);
+}
 function handleEvents(W) {
   const ev = W.ev;
   for (let i = 0; i < ev.length; i++) {
     const e = ev[i];
     switch (e.type) {
-      case 'bumper': burst(e.x, e.y, 14, 34, SPARK, 0, 0.6); break;
-      case 'sling': burst(e.x, e.y, 9, 26, ['#ffffff', e.a ? '#2fe0c8' : '#ff4fa0'], 0, 0.5); break;
+      case 'bumper': burst(e.x, e.y, 14, 34, SPARK, 0, 0.6); flashAt(e.x, e.y, 70, '#ffc27a'); break;
+      case 'sling': burst(e.x, e.y, 9, 26, ['#ffffff', e.a ? '#2fe0c8' : '#ff4fa0'], 0, 0.5); flashAt(e.x, e.y, 40, e.a ? '#9ff0e4' : '#ffb0d4'); break;
       case 'target': burst(e.x + 0.6, e.y, 10, 22, ['#ffcf4a', '#ff8a2a'], 0, 0.7); break;
       case 'flipball': if (e.a > 200) burst(e.x, e.y, 4, 14, ['#ffffff'], 0, 0.3); break;
       case 'post': case 'wall': if (e.a > 180) burst(e.x, e.y, 3, 12, ['#ffffff', '#ffe0b0'], 0, 0.4); break;
-      case 'jackpot': burst(e.x, e.y, 70, 40, ['#ffd36a', '#ff4fa0', '#2fe0c8', '#ffffff'], 1, 1.2); if (FX) { FX.flash(0.35, '#ffe2a0'); FX.kick(-5); } break;
-      case 'super': burst(e.x, e.y, 140, 50, ['#ffd36a', '#ff4fa0', '#2fe0c8', '#8a6bff', '#ffffff'], 1, 1.4); if (FX) { FX.flash(0.55, '#ffffff'); FX.kick(-8); FX.letterbox(1, 1.6); } break;
-      case 'multiball': burst(e.x, e.y, 90, 42, ['#ff4fa0', '#ffb02e', '#2fe0c8'], 1, 1.3); if (FX) { FX.flash(0.4, '#ff9ad0'); FX.letterbox(1, 2.0); } break;
+      case 'jackpot': burst(e.x, e.y, 70, 40, ['#ffd36a', '#ff4fa0', '#2fe0c8', '#ffffff'], 1, 1.2); flashAt(e.x, e.y, 120, '#ffe2a0'); showFireworks(2, false); bumperBolts(3); if (FX) { FX.flash(0.35, '#ffe2a0'); FX.kick(-5); } break;
+      case 'super': burst(e.x, e.y, 140, 50, ['#ffd36a', '#ff4fa0', '#2fe0c8', '#8a6bff', '#ffffff'], 1, 1.4); showFireworks(4, true); bumperBolts(3); if (FX) { FX.flash(0.55, '#ffffff'); FX.kick(-8); FX.letterbox(1, 1.6); } break;
+      case 'multiball': burst(e.x, e.y, 90, 42, ['#ff4fa0', '#ffb02e', '#2fe0c8'], 1, 1.3); showFireworks(3, true); bumperBolts(3); if (FX) { FX.flash(0.4, '#ff9ad0'); FX.letterbox(1, 2.0); } break;
       case 'skill': burst(e.x, e.y, 40, 30, ['#ffffff', '#ffd36a'], 1, 1); if (FX) FX.flash(0.25); break;
-      case 'mode': burst(e.x, e.y, 40, 30, ['#b46bff', '#ffd36a'], 1, 1); if (R.carousel) R.carousel.w = 4; break;
+      case 'mode': burst(e.x, e.y, 40, 30, ['#b46bff', '#ffd36a'], 1, 1); if (VFX) VFX.ring(_va.set(WX(e.x), 0.3, WZ(e.y)), '#c08bff', { size: 1.2 }); if (R.carousel) R.carousel.w = 4; break;
       case 'scoop': if (R.carousel) R.carousel.w = Math.max(R.carousel.w, 2.2); break;
-      case 'kick': burst(e.x, e.y, 10, 24, SPARK, 0, 0.6); break;
+      case 'kick': burst(e.x, e.y, 10, 24, SPARK, 0, 0.6); flashAt(e.x, e.y, 45, '#ffc27a'); break;
       case 'ramp': if (R.jug) R.jug.speed = 3; burst(-16.6, 32, 16, 22, ['#ff8a3a', '#ffd36a'], 0, 0.8); break;
       case 'combo': burst(e.x, e.y, 20 + e.a * 6, 28, ['#33d6ff', '#ffffff'], 1, 1); break;
       case 'launch': burst(23.65, 6, 8, 18, ['#ffffff', '#ffb02e'], 0, 0.5); break;
@@ -1135,6 +1256,7 @@ function handleEvents(W) {
 /* ------------------------------------------------------------ per frame */
 function updateWorld(W, dt) {
   const a = W.alpha;
+  if (R.flashL) { R.flashI *= Math.exp(-dt * 11); if (R.flashI < 0.5) R.flashI = 0; R.flashL.intensity = R.flashI * (ARC && ARC.reducedMotion ? 0.3 : 1); }
   if (R.flip) for (let i = 0; i < 2; i++) { const f = W.fl[i], d = f.def, th = lerp(f.pth, f.th, a); R.flip[i].rotation.y = d.side > 0 ? th : Math.PI - th; }
   updateBalls(W);
   updateBumpers(W);
@@ -1255,7 +1377,9 @@ const view = {
     // a nudge jolts the table a centimetre
     if (r.tableShake > 0) { r.tableShake = Math.max(0, r.tableShake - dt * 3); }
     if (r.ready) renderReflection();
+    if (VFX) { VFX.setReduced(a.reducedMotion); VFX.update(live ? dt : 0); VFX.applyShake(r.camera); }
     if (FX) FX.render(r.scene, r.camera); else { r.renderer.setRenderTarget(null); r.renderer.render(r.scene, r.camera); }
+    if (VFX) VFX.removeShake(r.camera);
     // letterbox the results and the big moments a touch more on landscape
     return true;
   },

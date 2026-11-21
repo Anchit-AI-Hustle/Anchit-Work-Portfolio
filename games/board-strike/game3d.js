@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Board Strike 3D: a polished carrom board on a stand in a lamplit room.
  * Same rules, modes, scoring and controls as the 2D game.js (which stays the
@@ -84,7 +86,8 @@ function pocket(p, k) {
     arc.sfx.tone(160, 0.12, { type: 'sawtooth', vol: 0.1 });
     G.flash = 0.18;
     if (!G.attract) { arc.shake = Math.max(arc.shake, 7); arc.haptic('fail', 0.6); }
-    burst(pk.x, pk.y, 'foul');
+    burst(pk.x, pk.y, 'foul'); VX.pocket(pk.x, pk.y, 'foul');
+    peopleReact('foul');
     return;
   }
   const pts = p.kind === 'queen' ? 50 : 15;
@@ -92,6 +95,7 @@ function pocket(p, k) {
   G.score += gained; G.pocketed++; G.combo++;
   if (p.kind === 'queen') G.queen = true;
   burst(pk.x, pk.y, p.kind === 'queen' ? 'queen' : 'coin');
+  peopleReact(p.kind === 'queen' ? 'queen' : 'pocket'); VX.pocket(pk.x, pk.y, p.kind);
   floatAt(pk.x * 0.82, pk.y * 0.82, '+' + Math.round(gained), p.kind === 'queen' ? WARM : GOLD, p.kind === 'queen' || G.combo > 2);
   G.flash = 0.12;
   arc.sfx.tone(p.kind === 'queen' ? 880 : 520, 0.12, { type: 'sine', vol: 0.14 });
@@ -101,6 +105,7 @@ function pocket(p, k) {
   if (p.kind === 'queen' && !G.attract && !arc.reducedMotion) { G.slow = 0.55; G.focus = pk; G.focusT = 1.1; }
   if (G.pieces.every((c) => c.kind === 'striker' || c.in)) {
     burst(0, 0, 'clear');
+    peopleReact('clear'); VX.clear();
     finish('Cleared');
   }
 }
@@ -193,7 +198,7 @@ function shoot() {
   if (!G.attract) G.shots++;
   arc.sfx.tone(240 + pwr * 40, 0.08, { type: 'triangle', vol: 0.12 });
   arc.sfx.noise(0.06, { freq: 2400, vol: 0.05 });
-  shotFx(G.striker.x, G.striker.y, c);
+  shotFx(G.striker.x, G.striker.y, c); VX.strike(G.striker.x, G.striker.y, c);
   if (!G.attract) { arc.haptic(c > 0.75 ? 'hit' : 'tap', 0.3 + c * 0.6); if (c > 0.75) { arc.shake = Math.max(arc.shake, 3); if (POST) POST.kick(-3); } }
 }
 
@@ -674,9 +679,44 @@ function burst(x, y, kind) {
   }
 }
 
+// Spectacle from the shared library, at board scale: a ribbon behind the striker, a powder puff and
+// a shock ring when it is struck, a crack of sparks on a hard hit, a gold burst at the pocket, a
+// confetti pop for the queen and a victory shower for a cleared board.
+let VFX = null, VTR = null;
+const _vp = new THREE.Vector3(), _vn = new THREE.Vector3(0, 1, 0);
+// the effects library comes in a frame after the people, once the menu is up
+function buildVFX() {
+  try { VFX = createVFX(R3.renderer, R3.scene, R3.camera, { quality: R3.q, unit: 2.7, soft: R3.soft, reduced: !!arc.reducedMotion, groundY: (x, z) => (Math.abs(x) < 1.16 && Math.abs(z) < 1.16 ? BOARD_Y : -1.95) }); VFX.warm(); } catch (e) { VFX = null; }
+}
+const VX = {
+  strike(x, y, c) {
+    if (!VFX) return;
+    _vp.set(x, BOARD_Y + 0.02, y);
+    VFX.impact(_vp, _vn, { kind: 'powder', color: '#fff6e6', size: 0.08 + c * 0.08 });
+    if (c > 0.5) VFX.ring(_vp, '#ffb736', { size: 0.1 + c * 0.12, normal: _vn, kind: 'shock' });
+  },
+  hit(x, y, v) { if (!VFX || v < 1.1) return; _vp.set(x, BOARD_Y + 0.03, y); VFX.impact(_vp, _vn, { kind: 'spark', color: '#ffd9a0', size: 0.05 + min(0.1, v * 0.025) }); },
+  pocket(x, y, kind) {
+    if (!VFX) return;
+    _vp.set(x, BOARD_Y + 0.04, y);
+    VFX.burst(_vp, { color: kind === 'queen' ? '#ff4a6a' : kind === 'foul' ? '#c84a3a' : '#ffb736', size: kind === 'queen' ? 0.15 : 0.1 });
+    if (kind === 'queen') { _vp.y += 0.3; VFX.confetti(_vp, { count: 90, size: 0.35, colors: ['#ffb736', '#ff4a6a', '#fbf5ec'] }); if (!arc.reducedMotion) VFX.timeWarp(0.4, 0.9); }
+  },
+  clear() { if (!VFX) return; _vp.set(0, BOARD_Y + 0.6, 0); VFX.winBurst(_vp, { colors: ['#ffb736', '#ff6940', '#fbf5ec'], size: 0.22 }); },
+  tick(dt) {
+    if (!VFX) return;
+    const st = G.striker, moving = !!(st && !st.in && hypot(st.vx, st.vy) > 0.4);
+    if (moving && !VTR) VTR = VFX.trail(M.striker, { color: '#ffb070', width: 0.05, life: 0.22, core: 0.7 });
+    else if (!moving && VTR) { VTR.stop(); VTR = null; }
+    VFX.setReduced(!!arc.reducedMotion);
+    VFX.update(dt);
+  },
+};
+
 let fxBudget = 0;
 function hitFx(x, y, v) {
   if (!R3.ok) return;
+  VX.hit(x, y, v);
   if (fxBudget-- > 0) {
     const n = Math.min(10, 2 + (v * 3) | 0);
     for (let i = 0; i < n; i++) { const a = rnd() * TAU, s = 0.05 + rnd() * 0.25 * v; FX.norm.add(x, 0.02, y, cos(a) * s, 0.05 + rnd() * 0.25 * v, sin(a) * s, 0.5 + rnd() * 0.5, 0.03 + rnd() * 0.04, C.powder, 0.35, 0.3, 3, 0.1, 0.005); }
@@ -891,6 +931,22 @@ function buildWorld() {
   shade.position.set(0.4, 7.6, 0.6); scene.add(shade);
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 4.8, 3.2) }));
   bulb.position.set(0.4, 7.5, 0.6); scene.add(bulb);
+  // the pendant's light seen in the air: a soft cone of warm haze from the shade down to the board,
+  // brightest near the bulb and fading where it meets the wood, so the room has depth
+  const coneG = new THREE.ConeGeometry(1.55, 7.4, 32, 1, true); coneG.translate(0, -3.7, 0);
+  M.cone = new THREE.Mesh(coneG, new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { uA: { value: 0.05 }, uTime: { value: 0 } },
+    vertexShader: 'varying float vY; varying vec3 vN; varying vec3 vV; varying vec3 vP; void main(){ vY = position.y; vP = position; vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
+    fragmentShader: 'uniform float uA; uniform float uTime; varying float vY; varying vec3 vN; varying vec3 vV; varying vec3 vP;' +
+      ' void main(){ float f = smoothstep(-7.4, -5.6, vY) * (0.35 + 0.65 * smoothstep(-7.4, 0.0, vY)); float e = pow(abs(dot(vN, vV)), 2.0);' +
+      ' float n = 0.8 + 0.2 * sin(vP.x * 3.0 + uTime * 0.3) * sin(vP.z * 2.6 - uTime * 0.25 + vY * 0.7);' +
+      ' gl_FragColor = vec4(vec3(1.0, 0.82, 0.58) * uA * f * e * n, 1.0); }',
+  }));
+  M.cone.position.set(0.4, 7.45, 0.6); M.cone.renderOrder = 6; scene.add(M.cone);
+
+  // the people sit down a frame after the menu is up, so the room paints first
+  R3.late = [() => { buildPeople(scene, FLOOR); applyQuality(); }, buildVFX];
 
   /* coins and the striker */
   const bump = colorTex(coinBump(), false);
@@ -946,6 +1002,71 @@ function buildWorld() {
   // the lamp's cone of floating dust
   M.motes = [];
   for (let i = 0; i < 40; i++) M.motes.push({ x: (rnd() - 0.5) * 2.4, y: 0.4 + rnd() * 3.6, z: (rnd() - 0.5) * 2.4, s: 0.1 + rnd() * 0.25, ph: rnd() * TAU });
+}
+
+/* --------------------------------------------------------------- the people at the board */
+// A younger cousin sits across the board on a stool, forearms on the frame, following every shot; an
+// uncle stands behind her and watches. Both come from the shared people library (bodies, faces,
+// blinks, idle weight shift); here they are seated, aimed at the action and given their reactions,
+// each a beat after the moment, as people really react.
+const MANU = 2.7; // world units per metre: the board's playing field is 0.74 m across, two units here
+const PPL = { list: [], look: new THREE.Vector3() };
+function humanQ() { return R3.soft ? 0 : R3.q >= 2 ? 3 : 2; }
+function buildPeople(scene, FLOOR) {
+  const q = humanQ();
+  const rival = createHuman({ seed: 41, quality: q, sex: 'f', build: 'average', hair: 'bun', skin: '#c98f66', height: 1.36, unit: MANU,
+    outfit: { top: '#a8324a', top2: '#e8b04a', sleeves: 'long', bottom: '#2b3a55', legs: 'trousers', shoes: '#3a2214' } });
+  rival.group.position.set(0.05, FLOOR, -2.05); rival.play('sit', { hold: true });
+  scene.add(rival.group);
+  const uncle = createHuman({ seed: 88, quality: q, sex: 'm', build: 'heavy', age: 'older', hair: 'short', unit: MANU,
+    outfit: { top: '#ece6da', sleeves: 'long', bottom: '#6a5d4d', legs: 'trousers', shoes: '#2a1d15' } });
+  uncle.group.position.set(-1.45, FLOOR, -2.85); uncle.group.rotation.y = 0.48;
+  scene.add(uncle.group);
+  // the rival's stool
+  const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.45, 0.86, 20), std({ color: '#5a2c18', roughness: 0.6 }));
+  stool.position.set(0.05, FLOOR + 0.43, -2.3); stool.castShadow = true; stool.receiveShadow = true; scene.add(stool);
+  PPL.list = [{ H: rival, lean: 0, pend: null, seated: true }, { H: uncle, lean: 0, pend: null, seated: false }];
+}
+// what just happened on the board, felt by each of them after their own reaction time
+function peopleReact(kind) {
+  PPL.list.forEach((p, i) => {
+    const d = 0.2 + rnd() * 0.25 + i * 0.15;
+    let name = null, k = 0.8;
+    if (kind === 'foul') name = rnd() < 0.5 ? 'handsOnHead' : 'shrug';
+    else if (kind === 'queen') { name = i === 0 ? 'clap' : 'fistPump'; k = 1; }
+    else if (kind === 'clear') { name = i === 0 ? 'clap' : 'cheer'; k = 1; }
+    else if (kind === 'pocket') { if (rnd() < 0.55) name = i === 0 ? (rnd() < 0.5 ? 'clap' : 'point') : 'point'; k = 0.6; }
+    if (name && !(p.seated && name === 'cheer')) p.pend = { at: R3.time + d, name, k };
+  });
+}
+function posePeople(dt) {
+  if (!PPL.list.length) return;
+  // they watch whatever is moving, else the striker on the baseline
+  let fx = 0, fz = 0, n = 0;
+  for (const q of G.pieces) if (q && !q.in && hypot(q.vx, q.vy) > 0.05) { fx += q.x; fz += q.y; n++; }
+  const s = G.striker;
+  if (s && !s.in && (hypot(s.vx, s.vy) > 0.05 || n === 0)) { fx += s.x * 2; fz += s.y * 2; n += 2; }
+  if (n) PPL.look.set(fx / n, BOARD_Y + 0.05, fz / n); else PPL.look.set(0, BOARD_Y, 0.5);
+  const tense = G.phase === 'aim' && G.charge > 0 ? 1 : G.phase === 'roll' ? 0.7 : 0;
+  PPL.list.forEach((p, i) => {
+    const H = p.H;
+    if (!H.group.visible) return;
+    if (p.pend && R3.time >= p.pend.at) { H.play(p.pend.name, { intensity: p.pend.k, speed: 1.15 }); p.pend = null; }
+    p.lean = lerp(p.lean, tense, 1 - Math.exp(-dt * 3));
+    H.setMood(clamp(G.combo / 4, 0, 0.8));
+    H.update(dt, { speed: 0, look: PPL.look });
+    const B = H.bones;
+    // leaning in over the board when a shot is lined up or running
+    B.spine.rotation.x += (i === 0 ? 0.04 : 0.06) + p.lean * (i === 0 ? 0.12 : 0.1);
+    // she keeps her face up to the board rather than looking straight down into it
+    if (i === 0) B.neck.rotation.x -= 0.08;
+    // the cousin's forearms rest on the frame, unless she is clapping or throwing up her hands
+    if (i === 0) {
+      p.w = lerp(p.w == null ? 1 : p.w, H.playing('clap') || H.playing('handsOnHead') || H.playing('shrug') || H.playing('point') || H.playing('fistPump') ? 0 : 1, 1 - Math.exp(-dt * 8));
+      const A = [[B.shoulderL, B.elbowL, 1], [B.shoulderR, B.elbowR, -1]];
+      for (const a of A) { a[0].rotation.x = lerp(a[0].rotation.x, -1.15, p.w); a[0].rotation.z = lerp(a[0].rotation.z, a[2] * 0.25, p.w); a[1].rotation.x = lerp(a[1].rotation.x, -0.75, p.w); }
+    }
+  });
 }
 
 /* --------------------------------------------------------------- camera */
@@ -1125,6 +1246,7 @@ function frame3D(dt) {
     if (!s.in && sp > 1.0) FX.add.add(s.x, BOARD_Y + 0.02, s.y, 0, 0.02, 0, 0.22, 0.05 + sp * 0.012, C.prim, clamp(sp * 0.18, 0.2, 0.6), 0, 0, -0.1);
   }
   updateAim(dt);
+  posePeople(dt);
   // rings
   for (const r of FX.rings) {
     if (r.life <= 0) continue;
@@ -1134,6 +1256,15 @@ function frame3D(dt) {
     r.mesh.material.opacity = (1 - k) * 0.85;
     if (r.life <= 0) r.mesh.visible = false;
   }
+  // powder lifts off the board behind a coin that is really moving, and settles
+  if (fxBudget > 0 && !arc.reducedMotion) {
+    for (let i = 0; i < G.pieces.length; i++) {
+      const p = G.pieces[i]; if (!p || p.in) continue;
+      const v = hypot(p.vx, p.vy);
+      if (v > 0.55 && rnd() < dt * 10 * min(1.5, v)) FX.norm.add(p.x - p.vx * 0.02, 0.012, p.y - p.vy * 0.02, (rnd() - 0.5) * 0.04, 0.03 + rnd() * 0.05, (rnd() - 0.5) * 0.04, 0.7 + rnd() * 0.6, 0.025 + rnd() * 0.03, C.powder, 0.22, -0.02, 2.2, 0.06, 0.004);
+    }
+  }
+  if (M.cone) { M.cone.visible = R3.q >= 2; M.cone.material.uniforms.uTime.value = R3.time; }
   // lamp dust and flickering diyas
   if (!arc.reducedMotion && rnd() < dt * 8) {
     const m = M.motes[(rnd() * M.motes.length) | 0];
@@ -1143,6 +1274,7 @@ function frame3D(dt) {
   for (let i = 0; i < M.flames.length; i++) { const f = M.flames[i]; f.scale.set(1, 0.85 + 0.25 * sin(R3.time * 13 + i * 2) * (arc.reducedMotion ? 0 : 1), 1); }
   M.rim.intensity = 2.2 + (arc.reducedMotion ? 0 : 0.25 * sin(R3.time * 9) * sin(R3.time * 3.7));
   FX.add.step(dt); FX.norm.step(dt);
+  VX.tick(dt);
   cameraRig(dt);
   // particle sizes follow the drawing buffer height
   const sc = R3.renderer.domElement.height / (2 * Math.tan(R3.camera.fov * PI / 360));
@@ -1168,6 +1300,9 @@ function applyQuality() {
   r.setPixelRatio(R3.soft && R3.q === 0 ? Math.max(0.3, Math.min(pr, Math.sqrt(160000 / Math.max(1, arc.w * arc.h)))) : pr); r.setSize(arc.w, arc.h, false);
   // reflections cost the most on a software renderer, so the lightest level drops them for a brighter sky light
   if (R3.scene) { R3.scene.environment = R3.q >= 1 ? R3.env : null; R3.hemi.intensity = R3.q >= 1 ? 0.55 : 1.1; }
+  // at the lightest level only the cousin across the board stays; the uncle behind her steps out
+  if (PPL.list[1]) PPL.list[1].H.group.visible = R3.q >= 1;
+  if (VFX) VFX.setQuality(R3.q);
   const key = R3.key, want = R3.q >= 3 ? 2048 : R3.q >= 1 ? 1024 : 512;
   key.castShadow = true;
   if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
@@ -1201,7 +1336,7 @@ function initRenderer() {
     R3.scene.add(R3.camera);
     R3.ok = true;
     // Shared post pass: bloom on the lamp and the queen, grade, grain; the camera swings onto the board at the start.
-    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.9, up: 0.35, back: 0.5, dur: 2.1 }, results: { yaw: 0.35 }, target: (v) => v.copy(CAM.look), look: { bloom: 0.5, threshold: 0.72 } });
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.9, up: 0.35, back: 0.5, dur: 2.1 }, results: { yaw: 0.35 }, target: (v) => v.copy(CAM.look), look: { bloom: 0.5, threshold: 0.72, vignette: 0.3, sat: 0.96, contrast: 1.05, lift: [0.012, 0.01, 0.018], gain: [1.04, 1.0, 0.94], grain: 0.03 } });
     applyQuality();
   } catch (err) {
     R3.ok = false; R3.fail = String(err && err.message || err);
@@ -1303,6 +1438,7 @@ function render(c, a) {
   const w = arc.w, h = arc.h;
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
+    if (R3.late && R3.late.length && arc.frame > 2) { try { R3.late.shift()(); } catch (e) { R3.late.length = 0; } }
     frame3D(dt);
     if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
   }

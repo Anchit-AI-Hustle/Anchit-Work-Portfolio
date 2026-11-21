@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VFX lab</title>
+<meta name="description" content="An internal test page for the visual effects in the arcade games, used to preview and tune each effect on its own before it goes into a game.">
+<link rel="canonical" href="https://anchit-tandon.com/games/shared/vfx-lab">
+<meta property="og:image" content="https://anchit-tandon.com/games/og.png">
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1e24; color: #eee; font: 13px system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+  #ui { position: fixed; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+  #ui button, #ui select { pointer-events: auto; background: rgba(20, 22, 28, 0.72); color: #f3f3f3; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 6px; padding: 6px 8px; font: inherit; min-height: 30px; }
+  #ui button:hover { background: rgba(60, 64, 80, 0.85); }
+  #stat { position: fixed; left: 8px; bottom: 8px; background: rgba(0, 0, 0, 0.5); padding: 4px 8px; border-radius: 4px; font: 12px ui-monospace, monospace; }
+  body.shot #ui, body.shot #stat { display: none; }
+</style>
+</head>
+<body>
+<div id="ui"></div>
+<div id="stat"></div>
+<script type="module">
+import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX } from '/games/shared/fx3d.js';
+import { createVFX } from '/games/shared/vfx.js';
+
+const qs = new URLSearchParams(location.search);
+const Q = qs.has('q') ? +qs.get('q') : 2;
+const night = qs.get('night') === '1';
+const manual = qs.get('manual') === '1';
+if (qs.get('shot') === '1') document.body.classList.add('shot');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = night ? 1.0 : 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
+const portrait = innerWidth < innerHeight;
+camera.position.set(0, portrait ? 7 : 5.5, portrait ? 24 : 17);
+const look = new THREE.Vector3(0, portrait ? 5 : 3.2, 0);
+camera.lookAt(look);
+
+// sky and fog
+const skyTop = night ? '#070b18' : '#5b8fd0', skyHor = night ? '#2a2236' : '#d9d4c8';
+const cv = document.createElement('canvas'); cv.width = 2; cv.height = 256;
+const g2 = cv.getContext('2d'); const gr = g2.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, skyTop); gr.addColorStop(0.62, skyHor); gr.addColorStop(1, skyHor);
+g2.fillStyle = gr; g2.fillRect(0, 0, 2, 256);
+const skyTex = new THREE.CanvasTexture(cv); skyTex.colorSpace = THREE.SRGBColorSpace;
+scene.background = skyTex;
+scene.fog = new THREE.Fog(night ? '#1d1a28' : '#cfcabd', 40, 160);
+
+const hemi = new THREE.HemisphereLight(night ? 0x405070 : 0xbcd2ff, night ? 0x141016 : 0x5a4a38, night ? 0.35 : 1.1);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(night ? 0x8aa0ff : 0xfff1dc, night ? 0.35 : 2.6);
+sun.position.set(-12, 18, 8); scene.add(sun); scene.add(sun.target);
+
+// ground: a grainy asphalt with painted lines
+const gc = document.createElement('canvas'); gc.width = gc.height = 512;
+const gx = gc.getContext('2d'); gx.fillStyle = night ? '#2a2a2c' : '#55524d'; gx.fillRect(0, 0, 512, 512);
+for (let i = 0; i < 9000; i++) { const v = (Math.random() * 40 - 20) | 0; gx.fillStyle = `rgba(${128 + v},${126 + v},${122 + v},0.18)`; gx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
+gx.fillStyle = 'rgba(235,230,215,0.8)'; gx.fillRect(250, 0, 12, 512);
+const gtex = new THREE.CanvasTexture(gc); gtex.colorSpace = THREE.SRGBColorSpace; gtex.wrapS = gtex.wrapT = THREE.RepeatWrapping; gtex.repeat.set(10, 10); gtex.anisotropy = 4;
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ map: gtex, roughness: 0.95 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+
+// props: crates, a wall, stumps, a car, a ball
+const crateMat = new THREE.MeshStandardMaterial({ color: 0x8a6a45, roughness: 0.8 });
+for (const [x, z] of [[-8, -4], [-9.2, -3], [8.5, -5], [9, -2.5]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), crateMat); b.position.set(x, 0.6, z); scene.add(b); }
+const wall = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 0.5), new THREE.MeshStandardMaterial({ color: night ? 0x3b3640 : 0xb9a58a, roughness: 0.9 }));
+wall.position.set(0, 2, -12); scene.add(wall);
+const stumpMat = new THREE.MeshStandardMaterial({ color: 0xd9b77a, roughness: 0.6 });
+const stumps = [];
+for (let i = 0; i < 3; i++) { const s = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.72, 10), stumpMat); s.position.set(3.6 + i * 0.13, 0.36, 2); scene.add(s); stumps.push(s); }
+const glassPane = new THREE.Mesh(new THREE.BoxGeometry(2, 1.6, 0.05), new THREE.MeshStandardMaterial({ color: 0x9fd0e8, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.6 }));
+glassPane.position.set(-4, 1.6, 1); scene.add(glassPane);
+
+const car = new THREE.Group();
+const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.6, 3.8), new THREE.MeshStandardMaterial({ color: 0xc8202a, roughness: 0.35, metalness: 0.4 }));
+body.position.y = 0.55; car.add(body);
+const cab = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.45, 1.8), new THREE.MeshStandardMaterial({ color: 0x1b1d22, roughness: 0.2, metalness: 0.5 }));
+cab.position.set(0, 1.05, -0.2); car.add(cab);
+for (const [x, z] of [[-0.85, 1.2], [0.85, 1.2], [-0.85, -1.2], [0.85, -1.2]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.26, 14), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })); w.rotation.z = Math.PI / 2; w.position.set(x, 0.34, z); car.add(w); }
+scene.add(car); car.visible = false;
+
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.18, 18, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 }));
+scene.add(ball); ball.visible = false;
+
+const fx = createFX(renderer, { preset: night ? 'night' : 'natural', soft: false, quality: 3 });
+fx.setQuality(3, true);
+const vfx = createVFX(renderer, scene, camera, { quality: Q, force: qs.get('force') === '1', unit: 1, groundY: 0, reduced: qs.get('reduced') === '1' });
+await vfx.warm();
+
+let nitroH = null, trailH = null, ballTrail = null, mode = '', time = 0;
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const presets = {
+  explosion: () => vfx.explosion(V(0, 0.4, 0), { size: 1 }),
+  'explosion big': () => vfx.explosion(V(0, 0.5, -2), { size: 1.8 }),
+  'impact spark': () => vfx.impact(V(0, 2, -11.7), V(0, 0, 1), { kind: 'spark', size: 1.6 }),
+  'impact dust': () => vfx.impact(V(0, 0.02, 0), V(0, 1, 0), { kind: 'dust', size: 1.5 }),
+  'impact paint': () => vfx.impact(V(0, 2.2, -11.7), V(0, 0, 1), { kind: 'paint', color: '#ff2f8e', size: 2.2 }),
+  'impact water': () => vfx.impact(V(0, 0.02, 0), V(0, 1, 0), { kind: 'water', size: 1.6 }),
+  'impact glass': () => { vfx.impact(V(-4, 1.6, 1.05), V(0, 0, 1), { kind: 'glass', size: 1.4 }); vfx.shatter(glassPane, { kind: 'glass', pieces: 22, origin: V(-4, 1.6, 0.6) }); },
+  'impact powder': () => vfx.impact(V(0, 0.4, 0), V(0, 1, 0.3), { kind: 'powder', size: 1.8 }),
+  muzzle: () => { for (let i = 0; i < 3; i++) vfx.muzzle(V(-3 + i * 3, 1.4, 2), V(0, 0.05, -1), { color: ['#ffb000', '#00b3a4', '#ff2f8e'][i], size: 1.5 }); },
+  splat: () => { const c = ['#ff2f8e', '#ffb000', '#00b3a4', '#8a4dff', '#35c94f']; for (let i = 0; i < 5; i++) vfx.splat(V(-4.5 + i * 2.2, 1.2 + (i % 2) * 1.3, -11.7), V(0, 0, 1), { color: c[i], size: 1.8 }); },
+  confetti: () => vfx.confetti(V(0, 1, 0), { size: 1.4 }),
+  fireworks: () => { vfx.fireworks(V(0, 10, -14), { count: 3, size: 1.2 }); },
+  'fw peony': () => vfx.fireworks(V(0, 10, -12), { burst: 'peony', launch: false, size: 1.3 }),
+  'fw chrysanthemum': () => vfx.fireworks(V(0, 10, -12), { burst: 'chrysanthemum', launch: false, size: 1.3 }),
+  'fw willow': () => vfx.fireworks(V(0, 11, -12), { burst: 'willow', launch: false, size: 1.3 }),
+  'fw ring': () => vfx.fireworks(V(0, 10, -12), { burst: 'ring', launch: false, size: 1.3 }),
+  'fw palm': () => vfx.fireworks(V(0, 10, -12), { burst: 'palm', launch: false, size: 1.3 }),
+  'fw crackle': () => vfx.fireworks(V(0, 10, -12), { burst: 'crackle', launch: false, size: 1.3 }),
+  goalBurst: () => vfx.goalBurst(V(0, 0, -2), { color: '#1e88ff', color2: '#ffffff' }),
+  winBurst: () => vfx.winBurst(V(0, 0, -2)),
+  ring: () => { vfx.ring(V(-3, 1.2, 0), '#38e1ff', { size: 1.4, normal: V(0, 0, 1) }); vfx.ring(V(3, 0.05, 0), '#ffb000', { size: 1.6 }); },
+  'ring shock': () => vfx.ring(V(0, 0.05, 0), '#ffffff', { kind: 'shock', size: 4 }),
+  burst: () => vfx.burst(V(0, 2, 0), { color: '#c061ff', size: 1.6 }),
+  dust: () => { for (let i = 0; i < 4; i++) vfx.dust(V(-3 + i * 2, 0.05, 0), { size: 1.6, vel: V(2, 0, 0) }); },
+  smokePlume: () => vfx.smokePlume(V(0, 0.2, -3), { size: 1.2, duration: 6, fire: true }),
+  splash: () => vfx.splash(V(0, 0.02, 0), { size: 1.5 }),
+  lightning: () => vfx.lightning(V(-5, 9, -6), V(1, 0.05, 0), { duration: 0.8, size: 1.4 }),
+  shatter: () => { for (const s of stumps) s.visible = true; for (const s of stumps) vfx.shatter(s, { pieces: 8, force: 1.4, origin: V(3.7, 0.3, 2.6) }); vfx.impact(V(3.73, 0.4, 2.05), V(0, 0.3, 1), { kind: 'dust', size: 0.8 }); },
+  nitro: () => {
+    car.visible = true; mode = 'car';
+    if (!nitroH || !nitroH.active) { nitroH = vfx.nitro(car, { offset: [0, 0.5, -1.95], dir: [0, 0, -1], size: 1 }); trailH = vfx.trail(car, { offset: [0.7, 0.85, -1.9], color: '#ff4040', width: 0.12, life: 0.35 }); }
+    vfx.speedLines(camera, 0.9);
+  },
+  'nitro stop': () => { if (nitroH) nitroH.stop(); if (trailH) trailH.stop(); vfx.speedLines(camera, 0); },
+  trail: () => { ball.visible = true; mode = 'ball'; if (!ballTrail || !ballTrail.active) ballTrail = vfx.trail(ball, { color: '#ffd27a', width: 0.35, life: 0.5 }); },
+  speedLines: () => vfx.speedLines(camera, 1),
+  godRays: () => vfx.godRays(V(-30, 28, -60), { strength: 0.6 }),
+  lensFlare: () => vfx.lensFlare(V(-30, 28, -60), { strength: 0.8 }),
+  timeWarp: () => { vfx.timeWarp(0.2, 2.5); vfx.explosion(V(0, 0.4, 0)); },
+  reset: () => { vfx.clear(); for (const s of stumps) s.visible = true; glassPane.visible = true; car.visible = false; ball.visible = false; mode = ''; nitroH = trailH = ballTrail = null; },
+};
+const ui = document.getElementById('ui');
+for (const k of Object.keys(presets)) { const b = document.createElement('button'); b.textContent = k; b.onclick = () => presets[k](); ui.appendChild(b); }
+const sel = document.createElement('select');
+for (let i = 0; i <= 3; i++) { const o = document.createElement('option'); o.value = i; o.textContent = 'tier ' + i; if (i === Q) o.selected = true; sel.appendChild(o); }
+sel.onchange = () => vfx.setQuality(+sel.value); ui.appendChild(sel);
+
+function animate(dt) {
+  time += dt;
+  if (mode === 'car') { const a = time * 0.55; car.position.set(Math.sin(a) * 9, 0, Math.cos(a) * 6 - 2); car.rotation.y = a + Math.PI / 2; }
+  if (mode === 'ball') { const a = time * 1.6; ball.position.set(Math.sin(a) * 6, 1.4 + Math.abs(Math.sin(a * 2)) * 2.5, Math.cos(a) * 2.5); }
+}
+const stat = document.getElementById('stat');
+function frame(dt) {
+  const k = vfx.update(dt);
+  animate(dt * k);
+  vfx.applyShake(camera); fx.render(scene, camera); vfx.removeShake(camera);
+}
+let last = performance.now(), acc = 0, fc = 0;
+if (!manual) {
+  const loop = (t) => {
+    const dt = Math.min(0.05, (t - last) / 1000); last = t;
+    frame(dt);
+    acc += dt; fc++;
+    if (acc > 0.5) { const s = vfx.stats(); stat.textContent = `${(acc / fc * 1000).toFixed(1)} ms  add ${s.add} alpha ${s.alpha} conf ${s.confetti} tier ${s.tier}`; acc = 0; fc = 0; }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+// scripting for screenshots and timing
+window.__lab = {
+  vfx, presets,
+  fire(name) { presets[name](); },
+  step(sec, dt = 1 / 60) { const n = Math.round(sec / dt); for (let i = 0; i < n; i++) { const k = vfx.update(dt); animate(dt * k); } },
+  render() { vfx.applyShake(camera); fx.render(scene, camera); vfx.removeShake(camera); renderer.getContext().finish(); },
+  // frame cost of a full explosion + fireworks + winBurst at a tier: CPU update ms and full frame ms
+  bench(tier, frames = 90) {
+    presets.reset(); vfx.setQuality(tier);
+    const gl = renderer.getContext();
+    vfx.explosion(V(0, 0.4, 0)); vfx.fireworks(V(0, 14, -14), { count: 3, launch: false }); vfx.winBurst(V(0, 0, -2));
+    const up = [], fr = []; let peak = null;
+    for (let i = 0; i < frames; i++) {
+      const t0 = performance.now(); vfx.update(1 / 60); const t1 = performance.now();
+      fx.render(scene, camera); gl.finish(); const t2 = performance.now();
+      up.push(t1 - t0); fr.push(t2 - t0);
+      const s = vfx.stats(); if (!peak || s.add + s.alpha + s.confetti > peak.add + peak.alpha + peak.confetti) peak = s;
+    }
+    presets.reset();
+    const pct = (a, p) => { const b = a.slice().sort((x, y) => x - y); return +b[Math.min(b.length - 1, Math.floor(p * b.length))].toFixed(2); };
+    return { tier, updP50: pct(up, 0.5), updP95: pct(up, 0.95), frameP50: pct(fr, 0.5), frameP95: pct(fr, 0.95), peak };
+  },
+  baseline(frames = 60) {
+    presets.reset(); const gl = renderer.getContext(); const fr = [];
+    for (let i = 0; i < frames; i++) { const t0 = performance.now(); vfx.update(1 / 60); fx.render(scene, camera); gl.finish(); fr.push(performance.now() - t0); }
+    fr.sort((a, b) => a - b); return { frameP50: +fr[frames >> 1].toFixed(2) };
+  },
+};
+window.__labReady = true;
+</script>
+</body>
+</html>

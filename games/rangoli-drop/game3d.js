@@ -378,7 +378,12 @@ function buildTiles() {
 }
 function buildFrame() {
   const sc = R.scene;
-  R.brass = new THREE.MeshStandardMaterial({ color: '#d4a552', metalness: 0.9, roughness: 0.3, bumpMap: R.powder, bumpScale: 0.6 });
+  // old brass is never one even shine: handled spots stay bright, the rest tarnishes dull and a little darker
+  const tarnish = R.soft ? null : canvasTex(128, 128, (g, w, h) => {
+    const r = rng(31); g.fillStyle = 'rgb(150,150,150)'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { const x = r() * w, y = r() * h, rr = 5 + r() * 20, v = 70 + r() * 150 | 0; const gr = g.createRadialGradient(x, y, 0, x, y, rr); gr.addColorStop(0, 'rgba(' + v + ',' + v + ',' + v + ',0.6)'); gr.addColorStop(1, 'rgba(' + v + ',' + v + ',' + v + ',0)'); g.fillStyle = gr; g.fillRect(x - rr, y - rr, rr * 2, rr * 2); }
+  }, { data: true, repeat: [0.35, 0.35] });
+  R.brass = new THREE.MeshStandardMaterial({ color: '#d4a552', metalness: 0.9, roughness: tarnish ? 0.52 : 0.3, roughnessMap: tarnish, bumpMap: R.powder, bumpScale: tarnish ? 0.28 : 0.6 });
   R.plateMat = new THREE.MeshStandardMaterial({ color: '#ffffff', map: R.plate, roughness: 0.4, metalness: 0.12, emissive: '#ffb04a', emissiveMap: R.plateGlow, emissiveIntensity: 0.22 });
   R.panelMat = new THREE.MeshStandardMaterial({ color: '#221c2c', roughness: 0.45, metalness: 0.15, bumpMap: R.powder, bumpScale: 0.3 });
   // the light tier: the same look with lighting baked or cheaper, for weak or software graphics
@@ -488,7 +493,7 @@ function buildPost(a) {
     R.post = createPost(R.renderer, {
       arc: a, soft: R.soft, intro: { dist: 46, back: 0.55, up: 0.3, yaw: 0.5, dur: 1.9 }, results: { yaw: 0.14, rise: 0.05, speed: 0.22 },
       target: (v) => v.copy(R.base.tgt),
-      look: { bloom: 0.6, bloomWide: 0.42, threshold: 0.6, knee: 0.24, vignette: 0.38, grain: 0.03, sat: 1.08, contrast: 1.05, lift: [0.01, 0.006, 0.02], gain: [1.02, 0.99, 0.98] },
+      look: { bloom: 0.55, bloomWide: 0.38, threshold: 0.62, knee: 0.24, vignette: 0.38, grain: 0.032, sat: 0.97, contrast: 1.05, lift: [0.013, 0.012, 0.024], gain: [1.04, 1.0, 0.96] },
     });
   } catch (e) { R.post = null; }
 }
@@ -524,11 +529,12 @@ function applyTier() {
   R.bg.material = lo ? R.bgMatLo : R.bgMat;
   R.scene.environment = t.env && R.env ? R.env : null;
   const env = !!R.scene.environment;
-  R.brass.metalness = env ? 0.9 : 0.55; R.brass.roughness = env ? 0.3 : 0.42; R.brass.color.set(env ? '#d4a552' : '#c99a4a');
+  R.brass.metalness = env ? 0.9 : 0.55; R.brass.roughness = env ? (R.brass.roughnessMap ? 0.52 : 0.3) : 0.42; R.brass.color.set(env ? '#d4a552' : '#c99a4a');
   R.hemi.intensity = env ? 0.5 : 0.95;
   R.diyas.geometry.setDrawRange(0, t.diyas);
   R.density = t.fx;
   if (R.post) R.post.setQuality(R.q, R.lock);
+  if (VFX) VFX.setQuality(R.q);
   resize3D(ARC);
 }
 function setQuality(q) {
@@ -605,7 +611,18 @@ function miniPiece(type, cx, cy, s, glow, rz) {
 }
 const _col = { r: 0, g: 0, b: 0 };
 const SLOT = { x: 0, y: 0, s: 1 };
+/* ------------------------------------------------------------ spectacle (shared VFX, loaded once the board is ready) */
+// A cleared row blows its colour powder out across the courtyard air; four rows at once, or an all clear,
+// fire fireworks over the frame. Loaded after the board is ready, no lights of its own.
+let VFX = null, _vv = null, _vn = null;
+function loadVFX() {
+  if (VFX !== null || !R) return; VFX = false;
+  import('/games/shared/vfx.js').then((m) => {
+    try { _vv = new THREE.Vector3(); _vn = new THREE.Vector3(0, 0, 1); const v = m.createVFX(R.renderer, R.scene, R.camera, { quality: Math.max(0, R.q), unit: 0.8, groundY: -10.4, lights: 0, reduced: ARC ? ARC.reducedMotion : false }); v.warm(); VFX = v; window.__vfxState = 'ok'; } catch (e) { VFX = false; window.__vfxState = 'create: ' + (e && e.message); }
+  }).catch((e) => { VFX = false; window.__vfxState = 'import: ' + (e && e.message); });
+}
 function burst(x, y, type, n, big) {
+  if (VFX && Math.random() < (big ? 0.8 : 0.55)) VFX.impact(_vv.set(x, y, 0.5), _vn, { kind: 'powder', color: R.TCOL[type], size: big ? 1.25 : 0.85 });
   const c = R.TCOL[type];
   for (let i = 0; i < n; i++) {
     const an = Math.random() * TAU, sp = (big ? 3.5 : 2) + Math.random() * (big ? 7 : 4.5);
@@ -773,12 +790,13 @@ const view = {
         R.post.flash(0.26, '#ffe8c0'); R.post.kick(-4.5);
         if (!rm && ARC) ARC.shake = Math.max(ARC.shake || 0, 7);
         petals(0, d.rows[0] - 8, 90, 9);
+        if (VFX) { VFX.fireworks(_vv.set(0, 8, -2), { count: 3, size: 0.45, launch: false }); VFX.ring(_vv.set(0, d.rows[0] - 9.5, 0.6), '#ffd48a', { size: 2.2, normal: _vn, kind: 'shock' }); }
       } else if (d.n > 0) { R.post.kick(-0.8 - d.n * 0.6); }
       if (d.tw) { R.post.flash(0.14, '#c48bff'); petals(0, d.n ? d.rows[0] - 9 : 0, 24, 6); }
     } else if (type === 'level') {
       if (!d.snap && R.post) R.post.flash(0.1, '#fff0d0');
     } else if (type === 'end') {
-      if (d.kind !== 'topout') { petals(-3, 2, 120, 11); petals(3, 2, 120, 11); }
+      if (d.kind !== 'topout') { petals(-3, 2, 120, 11); petals(3, 2, 120, 11); if (VFX) VFX.fireworks(_vv.set(0, 9, -3), { count: 5, size: 0.5, launch: false }); }
       else if (R.post) R.post.kick(2);
     } else if (type === 'hold') {
       const U = R.U; _col.r = 1.6; _col.g = 1.4; _col.b = 1.1;
@@ -805,7 +823,9 @@ const view = {
     const j0 = performance.now();
     frame3D(a, G, dt);
     const j1 = performance.now();
+    if (VFX) { VFX.setReduced(a.reducedMotion); VFX.update(dt); VFX.applyShake(R.camera); }
     if (R.post) R.post.render(R.scene, R.camera); else R.renderer.render(R.scene, R.camera);
+    if (VFX) VFX.removeShake(R.camera);
     const j2 = performance.now();
     R.tJs = R.tJs * 0.9 + (j1 - j0) * 0.1; R.tGl = R.tGl * 0.9 + (j2 - j1) * 0.1;
     return true;
@@ -872,7 +892,7 @@ function compile(a, t0) {
   const done = () => {
     hidden.forEach((o) => { o.visible = false; });
     if (!R) return;
-    READY = true; MARK('ready');
+    READY = true; MARK('ready'); loadVFX();
     readyWaiters.forEach((f) => f()); readyWaiters = [];
     R.warm = 0; R.last = 0;
     if (LAST_G) { animEvent(A, 'level', { level: LAST_G.level, snap: true }, LAST_G); }

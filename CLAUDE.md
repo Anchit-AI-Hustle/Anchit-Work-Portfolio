@@ -92,6 +92,35 @@ recognises the shape rather than rediscovering it.
   a page wrapper.** Size-guard anything that hides before it plays.
 - **`overflow-x: hidden` on `body` makes it a scroll container** and silently
   breaks `position: sticky` and every pinned ScrollTrigger. Use `clip`.
+- **A custom property on ANY container is the `:root` trap, scoped.** The Xazina
+  film wrote `--zoom` and `--lens-x` on `#film` every frame and restyled
+  everything inside it: 228 ms of style work a second, idle. Write per-frame
+  values to the elements that use them.
+- **A scrubbed pinned story looks broken mid-scroll.** Interpolating every layer
+  on every scroll frame leaves most positions showing two half-faded scenes and
+  no caption. Step between whole scenes (see DESIGN.md, Runtime budget), and
+  check the last pose shows what its caption names: the first stepped Gram walk
+  ended on the layer in front of the bar it was meant to reveal.
+- **A headless frame timer does not see GPU cost.** Backdrop blurs and canvas
+  redraws looked fine at 17ms a frame headless and were what a laptop felt as
+  lag. Measure idle main-thread work per second, and count WebGL `drawArrays`
+  calls to tell whether a shader is drawing: reading a WebGL canvas back
+  returns blank without `preserveDrawingBuffer`.
+- **Rebuilding `www/` while a suite is crawling it fails that suite.** Four Xazina
+  product pages "404'd" because the build was rewriting them. Let suites finish
+  first.
+- **A user's screenshot may be an old tab.** Compare its copy with the live HTML
+  before debugging it: a Deli report still showed nav items removed a day
+  earlier.
+- **A longer label can push a header off-screen at one width only.** "Ambient
+  audio" overflowed Gram's header by 15px at 1200-1279px and nowhere else.
+  After changing header copy, measure every width from the nav breakpoint to
+  1440.
+- **`node scripts/seo-inject.mjs` rewrites every page in the manifest.** Run it,
+  then revert pages you did not mean to change: the manifest lags hand edits.
+- **Match hosts exactly.** CodeQL rates `/openrouter\.ai/.test(url)` high; parse
+  the URL and compare `hostname`. Wrap `decodeURIComponent(location.hash)` in
+  try/catch: `#%E0` throws and takes the module down with it.
 - **Native smooth scrolling fights Lenis.** `html { scroll-behavior: smooth }`
   turns every one of Lenis's per-frame `scrollTo` calls into a new animated
   scroll; the page then barely moves. The guard is in the stylesheet and needs
@@ -129,3 +158,38 @@ The rule, concretely:
 - When porting a component, replace its copy with wording drawn from Anchit's
   own vocabulary, the file already contains it. "Product Management" appears
   28 times, "D2C Growth" 21, "US, UK & global markets" 16.
+
+## Website & 3D Development Workflow
+
+- **Brief & plan first**: Start new pages/sections with a one-paragraph brief (who, goal, 3-word feel) and plan multi-file changes before editing. Make one change at a time and keep everything else the same.
+- **Skills & prompt pack**: Use `.claude/skills/new-section/SKILL.md` when adding/rebuilding sections, `.claude/skills/web-3d-section/SKILL.md` for Three.js/WebGL2/scroll-video work, `.claude/skills/concept-storefront/SKILL.md` for a concept site built on a real brand, `prompts.md` for reusable templates, and `docs/LAUNCH-CHECKLIST.md` before shipping.
+- **Runtime budget**: Follow DESIGN.md, Motion, Runtime budget (idle is idle, effects move while the visitor does, pinned stories step between whole scenes, no blur over moving content). `npm run test:storefront-motion` enforces it on the storefronts and runs in CI.
+- **Mobile, copy & keys**: Mobile-first at `390px`, `768px`, and `1440px` (no horizontal overflow, thumb-sized controls). Never use `lorem ipsum` or placeholder copy. Secret keys stay in `.env.local` (never in code, commits, or screenshots); public forms use RLS (insert-only, no public read).
+- **Media & cinematic restraint**: Images in WebP (`<= 300 KB` hero `<= 1920px`, `<= 150 KB` cards `<= 1000px`, descriptive `alt`, `loading="lazy"` below hero); hero video `< 4 MB`, `<= 1080p`, no audio, `muted loop playsinline` + WebP poster. Use at most a slow hero visual + 1–2 cinematic moves, keep UI transitions `< 500ms` once, lazy-load 3D near viewport (`DPR <= 2`), and fall back to still images/plain stacked layouts on small phones, `prefers-reduced-motion`, or WebGL failure.
+
+## Concept work on real brands
+
+Xazina, Deli Chic and Gram Street are redesigns of real businesses, not client
+work. A hiring panel read the first versions as the brands' own sites: indexed
+under the brand name, with the cafe's JSON-LD claiming to be the cafe, static
+"live" statuses and unsourced founder copy. Every concept site on a real brand
+ships with:
+
+- **Credit at y=0.** The shared concept bar (`class="concept-bar"`): "Concept
+  storefront by Anchit Tandon, not affiliated with <brand>", plus Portfolio,
+  Design notes, Resume and Email Anchit links. It is neutral chrome, not the
+  brand's palette. The footer repeats the credit.
+- **Out of search.** `robots` `noindex,follow` through `seo.config.json`, out of
+  `sitemapExtraUrls`, a title and `og:title` that say "concept by Anchit
+  Tandon", and no LocalBusiness / CafeOrCoffeeShop / Store JSON-LD.
+- **A `#design-notes` section.** Problem, what I kept, what I changed,
+  hypothesis, intended metrics labelled "Intended, not measured", what is real
+  and what is a demo, and how checkout works there. Facts come from the build or
+  the brand's public catalogue; anything else is labelled design hypothesis.
+- **Honest labels.** A static status says "Sample status". A form that stores
+  nothing says "Demo only". Copy about real people or plans the repo cannot
+  source says "Illustrative copy, not confirmed by <brand>", or goes.
+- **Shopper words, not build words.** No frame counters, hex codes, "telemetry",
+  gain percentages or 3D/4D/5D labels on screen. One primary call to action per
+  hero. The consent banner is neutral and asks after the first scroll there.
+

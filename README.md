@@ -24,6 +24,7 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── scripts/build-www.mjs              # Production build, route assembly and universal UI injection
 ├── scripts/motionfix.js               # Motion regression suite, each check paired with a mutation
 ├── scripts/turn-by-turn.js            # Asserts blocks arrive one at a time with distinct entrances
+├── scripts/view-turn.js               # One entrance per route change, page turn on every page (MUT=stack, MUT=blend)
 ├── docs/APP_SKILL_MAP.md              # App-level architecture and extension guide
 ├── docs/PROJECT_SKILLTREE_GUIDES.md   # Project-level architecture and guide contracts
 ├── tts-server/                        # Self-hosted XTTS/FastAPI cloned-voice service
@@ -230,6 +231,7 @@ built site and assert on what a visitor would actually see. Serve `www/` first
 ```bash
 node scripts/motionfix.js        # motion regressions, 8 checks
 node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
+node scripts/view-turn.js        # a route change is one motion; every page opts into the page turn
 npm run test:providers           # LLM cascade survives a retired model id, 6 checks
 npm run test:cascade             # the REAL handlers, driven end-to-end, 9 checks
 npm run test:cards               # cards equal + the page explains itself, 12 checks
