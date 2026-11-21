@@ -66,7 +66,7 @@ for r in content["roles"] as! [[String:Any]]{
  y+=2
 }
 print("Page 1 content ends:",y)
-precondition(y <= H-38, "Page 1 content overflows the footer")
+precondition(y <= H-38, "Page 1 content overflows the footer: \(y) > \(H-38)")
 finish(1)
 
 start();y=29
