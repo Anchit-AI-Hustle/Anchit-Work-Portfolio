@@ -787,21 +787,29 @@ export function createResScale(o) {
   o = o || {};
   const min = o.min != null ? o.min : 0.6, max = o.max != null ? o.max : 1;
   const target = o.target || 1 / 57;        // seconds per frame we hold to
-  let scale = max, avg = target, cool = 1.5, roomT = 0;
+  // A refresh-capped loop never runs faster than its display, so 'room to grow' means holding the target
+  // (within 2%), not beating it. A raise that the frame rate then pushes back down doubles the wait before
+  // the next raise (up to a minute), so a scene that sits on the edge settles instead of bouncing every few seconds.
+  let scale = max, avg = target, cool = 1.5, roomT = 0, need = 3, raisedAt = -1, clock = 0;
   return {
     get scale() { return scale; },
     atFloor() { return scale <= min + 1e-3; },
     atCeiling() { return scale >= max - 1e-3; },
-    reset() { scale = max; avg = target; cool = 1.5; roomT = 0; },
+    reset() { scale = max; avg = target; cool = 1.5; roomT = 0; need = 3; raisedAt = -1; },
     tick(dt) {
       if (!(dt > 0) || dt > 0.25) return false;
+      clock += dt;
       avg += (dt - avg) * 0.06;
       cool -= dt;
-      if (avg < target * 0.82) roomT += dt; else roomT = 0;
+      if (avg <= target * 1.02) roomT += dt; else roomT = 0;
       if (cool > 0) return false;
       let next = scale;
-      if (avg > target * 1.12) next = Math.max(min, scale * (avg > target * 1.6 ? 0.85 : 0.93));
-      else if (roomT > 3) { next = Math.min(max, scale * 1.06); roomT = 0; }
+      if (avg > target * 1.12) {
+        next = Math.max(min, scale * (avg > target * 1.6 ? 0.85 : 0.93));
+        if (raisedAt >= 0 && clock - raisedAt < 4) need = Math.min(60, need * 2);
+        raisedAt = -1;
+      } else if (roomT > need) { next = Math.min(max, scale * 1.06); roomT = 0; raisedAt = clock; }
+      else if (raisedAt >= 0 && clock - raisedAt > 30) { need = Math.max(3, need / 2); raisedAt = -1; }
       if (Math.abs(next - scale) < 0.01) return false;
       scale = next; cool = 1; return true;
     },
