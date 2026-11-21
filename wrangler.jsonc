@@ -3,8 +3,16 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "anchit-work-portfolio",
   "compatibility_date": "2026-11-04",
+  // worker.js handles only the paths below (API to Vercel, external rewrites); all else is static.
+  "main": "worker.js",
   "assets": {
     "directory": "./www",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*", "/how-to/api/*", "/teleprompter", "/teleprompter/",
+      "/linkedin-auto-pilot", "/linkedin-auto-pilot/*", "/money-minter", "/money-minter/*",
+      "/markets-pro", "/markets-pro/*"
+    ],
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
