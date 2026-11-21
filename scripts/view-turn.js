@@ -31,8 +31,9 @@ const BASE = process.env.BASE || 'http://localhost:8099';
 const WWW = path.join(__dirname, '..', 'www');
 const MUT = process.env.MUT || '';
 let failed = 0;
+const failures = [];
 const check = (ok, label, detail) => {
-  if (!ok) failed++;
+  if (!ok) { failed++; failures.push(label + (detail ? '  ' + detail : '')); }
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  ' + detail : ''}`);
 };
 
@@ -207,8 +208,14 @@ const check = (ok, label, detail) => {
     await pg.goto(BASE + '/', { waitUntil: 'load' });
     await pg.waitForTimeout(6500);
     const orbit = await pg.evaluate(() => {
-      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2) }; });
-      return { n: ns.length, spread: new Set(ns.map(n => n.x)).size, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
+      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; });
+      // "Different places" means different points, not different columns. The
+      // orbit turns on its own now, and at some moments the label passing in
+      // front and the one passing behind share an x. Comparing x alone made
+      // this check fail on a correct page, whenever it happened to sample then.
+      const apart = (a, b) => Math.abs(a.x - b.x) > 6 || Math.abs(a.y - b.y) > 6;
+      const distinct = ns.filter((a, i) => ns.every((b, j) => i === j || apart(a, b))).length;
+      return { n: ns.length, spread: distinct, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
         clean: ns.every(n => n.t.length < 14), overflow: document.documentElement.scrollWidth - innerWidth };
     });
     check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
@@ -504,6 +511,10 @@ const check = (ok, label, detail) => {
   }
   await browser.close();
 
+  // Name the failures again at the end. This suite prints well over a hundred
+  // lines, and a CI log tail showed "1 check(s) failed" with the failing line
+  // long since scrolled out of it.
+  if (failed) failures.forEach(f => console.log('FAILED  ' + f));
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
   process.exit(failed ? 1 : 0);
 })();
