@@ -61,7 +61,7 @@ section("PROFESSIONAL EXPERIENCE",&y)
 for r in content["roles"] as! [[String:Any]]{
  heading(r["title"] as! String,r["dates"] as! String,&y)
  y+=text(r["sub"] as! String,M,y,CW,8.4,false,muted)+4
- if let previous=r["previous_roles"] as? String { y+=text(previous,M,y,CW,8.0,false,muted)+4 }
+ if let previous=r["previous_roles"] as? String { y+=text(previous,M,y,CW,8.6,true,teal)+4 }
  for b in r["bullets"] as! [String]{bullet(b,&y,9.8)}
  y+=2
 }
