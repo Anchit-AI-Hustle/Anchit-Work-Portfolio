@@ -98,14 +98,14 @@ y=bandH+12
 
 // signature wins
 let wins=content["wins"] as! [[String:String]]
-let gap:CGFloat=12, cardW=(CW-gap*2)/3, cardH:CGFloat=66
+let gap:CGFloat=12, cardW=(CW-gap*2)/3, cardH:CGFloat=63
 for (i,w) in wins.enumerated(){
  let x=M+CGFloat(i)*(cardW+gap)
  fill(paper,CGRect(x:x,y:y,width:cardW,height:cardH))
  fill(orange,CGRect(x:x,y:y,width:cardW,height:2.2))
- text(w["value"]!,x+10,y+8,cardW-20,.serifBold,21,orange)
- text(w["title"]!.uppercased(),x+10,y+33,cardW-20,.monoBold,6.6,ink,nil,0.6)
- text(w["text"]!,x+10,y+43,cardW-14,.sans,7.4,dim)
+ text(w["value"]!,x+10,y+6,cardW-20,.serifBold,20,orange)
+ text(w["title"]!.uppercased(),x+10,y+30,cardW-20,.monoBold,6.6,ink,nil,0.6)
+ text(w["text"]!,x+10,y+39.5,cardW-14,.sans,7.4,dim)
 }
 y+=cardH+8
 // secondary metrics line
