@@ -15037,28 +15037,6 @@
   .fd-rail-depth { top: 0; color: var(--ink); writing-mode: horizontal-tb; transform: none; right: 22px; margin-top: -6px; }
   body.sidebar-open .fd-rail, body.view-chat .fd-rail, body.chat-guide-open .fd-rail { visibility: hidden; }
 
-  /* ── reticle: the block you are reading is the one in the brackets ── */
-  .fd-reticle {
-    position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 3;
-    pointer-events: none; opacity: 0; transition: opacity .3s ease;
-  }
-  .fd-reticle.is-on { opacity: 1; }
-  .fd-reticle > i {
-    position: absolute; left: 0; top: 0; width: 16px; height: 16px;
-    border: 0 solid var(--accent-warm);
-    transition: transform .34s cubic-bezier(.22,1,.36,1);
-  }
-  .fd-reticle > i:nth-child(1) { border-top-width: 2px; border-left-width: 2px; }
-  .fd-reticle > i:nth-child(2) { border-top-width: 2px; border-right-width: 2px; }
-  .fd-reticle > i:nth-child(3) { border-bottom-width: 2px; border-left-width: 2px; }
-  .fd-reticle > i:nth-child(4) { border-bottom-width: 2px; border-right-width: 2px; }
-  .fd-reticle > span {
-    position: absolute; left: 0; top: 0; white-space: nowrap;
-    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em; color: var(--accent-warm);
-    transition: transform .34s cubic-bezier(.22,1,.36,1);
-  }
-  html[data-motion="off"] .fd-reticle { display: none; }
-
   /* ── deck ── */
   .fd-k {
     font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase;
@@ -15363,64 +15341,6 @@
     setSector(active ? active.id.replace('view-', '') : 'home');
     measure(); clock();
     setInterval(clock, 30000);
-  })();
-
-  /* ── reticle: brackets lock onto the block being read ─────────────────── */
-  (function reticle() {
-    var main = document.querySelector('main');
-    if (!main) return;
-    // Content blocks across the views. Projects is left out: its book has its
-    // own frame. The home stage is left out: nothing there is a block.
-    var SEL = '.work-item, .study-card, .contact-card, .project-hero, .project-section, ' +
-      '.now-role-card, .now-focus-item, .now-metrics-card, .now-stack-card, ' +
-      '.about-prose, .about-value-item, .meta-block, .nav-card, .device-card, .home-tl-item, .cw-panel';
-    var el = document.createElement('div');
-    el.className = 'fd-reticle'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = '<i></i><i></i><i></i><i></i><span></span>';
-    main.appendChild(el);
-    var c = el.children, tag = c[4], target = null, raf = 0, settle = 0;
-    function candidates() {
-      var view = document.querySelector('.view.active');
-      if (!view || view.id === 'view-projects') return [];
-      return [].filter.call(view.querySelectorAll(SEL), function (n) { return n.offsetParent !== null && n.offsetHeight >= 64; });
-    }
-    function lock() {
-      if (!target || !target.isConnected) { el.classList.remove('is-on'); return; }
-      var r = target.getBoundingClientRect(), m = main.getBoundingClientRect(), pad = 6;
-      var x0 = r.left - m.left - pad, y0 = r.top - m.top - pad, x1 = r.right - m.left + pad - 16, y1 = r.bottom - m.top + pad - 16;
-      var t = function (x, y) { return 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)'; };
-      c[0].style.transform = t(x0, y0); c[1].style.transform = t(x1, y0);
-      c[2].style.transform = t(x0, y1); c[3].style.transform = t(x1, y1);
-      tag.style.transform = t(x0 + 22, y0 - 16);
-      el.classList.add('is-on');
-    }
-    function pick() {
-      raf = 0;
-      var list = candidates(), fy = window.innerHeight * 0.42, best = null, bestScore = Infinity;
-      for (var i = 0; i < list.length; i++) {
-        var r = list[i].getBoundingClientRect();
-        if (r.bottom < 0 || r.top > window.innerHeight) continue;
-        // Inside the focus line beats near it; among those inside, the smallest
-        // block wins, so a card is chosen over the section that contains it.
-        var inside = r.top <= fy && r.bottom >= fy;
-        var score = inside ? r.height / 100000 : 1 + Math.abs((r.top + r.bottom) / 2 - fy);
-        if (score < bestScore) { bestScore = score; best = list[i]; }
-      }
-      if (best && bestScore > 1 + window.innerHeight * 0.5) best = null;
-      if (best !== target) {
-        target = best;
-        if (target) tag.textContent = ('0' + (list.indexOf(target) + 1)).slice(-2) + ' / ' + ('0' + list.length).slice(-2);
-        clearTimeout(settle);
-        // Blocks arrive on a transform; measure again once they have landed.
-        settle = setTimeout(lock, 760);
-      }
-      lock();
-    }
-    function ask() { if (!raf) raf = requestAnimationFrame(pick); }
-    addEventListener('scroll', ask, { passive: true });
-    addEventListener('resize', ask, { passive: true });
-    document.addEventListener('viewChanged', function () { target = null; el.classList.remove('is-on'); setTimeout(ask, 520); });
-    setTimeout(ask, 1200);
   })();
 
   /* ── deck: jump anywhere ──────────────────────────────────────────────── */
