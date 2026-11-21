@@ -494,6 +494,25 @@ const check = (ok, label, detail) => {
       const n = await p2.evaluate(() => [...document.querySelectorAll('.is-live > .lv-beam > i')].filter(i => i.getAnimations().some(a => a.playState === 'running')).length);
       if (want) check(n >= 1, `${href}: cards on screen have live edges`, String(n));
       else check(n === 0 && !(await p2.evaluate(() => !!document.querySelector('.lv-beam'))), `${href}: a storefront gets no live edges`);
+      if (href === '/growth-school') {
+        // The course replaces a chapter's cards on every turn. Cards that have
+        // left the page must give their place back, or a long session stops
+        // getting edges on new ones.
+        const fresh = await p2.evaluate(() => {
+          const host = document.querySelector('main') || document.body;
+          let last = false;
+          for (let k = 0; k < 90; k++) {
+            const d = document.createElement('div');
+            d.style.cssText = 'width:320px;height:160px;border:1px solid rgba(255,255,255,.3)';
+            host.appendChild(d);
+            window.__roomScan();
+            last = !!d.querySelector(':scope > .lv-beam');
+            d.remove();
+          }
+          return last;
+        });
+        check(fresh, `${href}: a card added after ninety others came and went still gets an edge`);
+      }
       await p2.close();
     }
   }
