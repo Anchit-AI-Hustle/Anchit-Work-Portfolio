@@ -18,7 +18,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'ring-rajas', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
+const GAMES = ['sultan-bay', 'last-ridge', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'ring-rajas', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -26,7 +26,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PLAY = {
   // The 3D games pick their own quality, and a machine with no GPU makes them choose the lowest. A poster is
   // one still, so each is pinned to full detail: a query flag where the game reads one, or its own test hook.
-  'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400, query: '?q=2&lod=1' },
+  'sultan-bay': { ms: 5000, keys: ['ArrowUp'], taps: [], query: '?q=2&lod=1', setup: () => window.__arcade.dev && window.__arcade.dev.poster(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(2) },
+  'last-ridge': { ms: 3500, keys: [], taps: [], setup: () => { const d = window.__arcade.dev; d.quality(3); d.skipIntro(); d.vista(4); }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'ghat-riders': { ms: 6000, keys: ['ArrowUp'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skipIntro(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0', setup: () => window.__arcade.dev && window.__arcade.dev.skip() },

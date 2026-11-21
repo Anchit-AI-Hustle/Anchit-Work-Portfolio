@@ -1,20 +1,34 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import * as SB from './sb-story.js';
 
 /*
- * Saffron City, in 3D: an original open-world city sandbox at dusk.
- * Invented coastal megacity, family friendly: no weapons, trouble comes from
- * reckless driving and borrowing cars. The city, the jobs, the heat and the
- * traffic are the same simulation as the top-down game; what you see is a
- * three.js world: extruded buildings with lit windows, painted roads, lamp
- * light pools, a sunset sea, cars with working lights and a chase camera.
+ * Sultan Bay: an original open-world crime caper in a rain-and-neon bay city.
+ * Family friendly: nobody is hurt. A twelve-job story with scenes and replays
+ * (sb-story.js holds the words, the radio and the save), side jobs, a wanted
+ * level that escalates to roadblocks and a helicopter, cars, bikes and boats,
+ * fists that knock people down (they get up and walk off), stunt ramps, moon
+ * shells, property, shops, five radio stations and changing weather.
  * Everything is built in code from primitives and procedural textures.
  *
- * Quality adapts by itself (pixel ratio, shadow size, draw distance). A browser
- * that renders in software gets a lighter world. For testing, ?q=0|1|2 pins
- * the quality tier and ?lod=0|1 pins the mesh detail.
+ * Quality adapts by itself (dynamic resolution first, then a tier; shadows on
+ * or off waits for a menu or pause). A browser that renders in software gets
+ * a lighter world. For testing, ?q=0|1|2 pins the quality tier and ?lod=0|1
+ * pins the mesh detail.
  */
 'use strict';
+
+/* Saved progress from before the city's rename lives under its old name: copy it across once, never overwrite. */
+(function migrateOldSave() {
+  try {
+    const ls = window.localStorage, OLD = 'saffron' + '-city', NEW = 'sultan-bay';
+    if (!ls || ls.getItem('sultan-bay.migrated')) return;
+    const keys = [];
+    for (let i = 0; i < ls.length; i++) keys.push(ls.key(i));
+    for (const k of keys) { if (!k || k.indexOf(OLD) < 0) continue; const nk = k.split(OLD).join(NEW); if (ls.getItem(nk) == null) ls.setItem(nk, ls.getItem(k)); }
+    ls.setItem('sultan-bay.migrated', '1');
+  } catch (e) { /* private mode: nothing to move */ }
+})();
 
 const TAU = Math.PI * 2, PI = Math.PI;
 const W = 5120, CELL = 16, GW = 320, TILE = 512, TN = 10;
@@ -52,7 +66,13 @@ const VT = {
   van:    { name: 'Delivery van', L: 58, Wd: 27, vmax: 290, acc: 170, brake: 430, grip: 6.2, steer: 2.0, mass: 1.7, hp: 140, circ: [-18, 0, 18], r: 13.5, cols: ['#f2f0ea', '#2f6fb0', '#c0392b', '#e8e2d4'] },
   bike:   { name: 'Scooter', L: 24, Wd: 10, vmax: 370, acc: 310, brake: 560, grip: 8.5, steer: 3.8, mass: 0.35, hp: 50, circ: [-5, 5], r: 5.5, cols: ['#d9772b', '#2e8ea8', '#c0392b', '#e8e2d4'] },
   police: { name: 'Police cruiser', L: 48, Wd: 24, vmax: 430, acc: 340, brake: 600, grip: 6.6, steer: 2.8, mass: 1.1, hp: 120, circ: [-14, 0, 14], r: 12, cols: ['#f2f2f2'] },
+  // the cars the story adds: a supercar on the coupe body, a taxi on the hatch, a sport bike on the scooter frame, and a boat
+  super:  { name: 'Vesper GT', model: 'coupe', L: 48, Wd: 22, vmax: 560, acc: 480, brake: 700, grip: 7.2, steer: 3.0, mass: 0.95, hp: 110, circ: [-14, 0, 14], r: 11, cols: ['#c9a227', '#e8e2d4', '#1c1c1f'] },
+  taxi:   { name: 'Bay Runner taxi', model: 'hatch', L: 44, Wd: 23, vmax: 340, acc: 260, brake: 540, grip: 7.5, steer: 2.7, mass: 1, hp: 110, circ: [-12, 0, 12], r: 11.5, cols: ['#f2c21b'] },
+  moto:   { name: 'Kestrel sport bike', model: 'bike', L: 24, Wd: 10, vmax: 500, acc: 440, brake: 620, grip: 9, steer: 3.9, mass: 0.4, hp: 60, circ: [-5, 5], r: 5.5, cols: ['#ff3b5c', '#1f6dd4', '#f0f0ea'] },
+  boat:   { name: 'Bay Runner boat', model: 'boat', boat: true, L: 54, Wd: 20, vmax: 430, acc: 250, brake: 220, grip: 1.5, steer: 2.1, mass: 1.3, hp: 150, circ: [-16, 0, 16], r: 10, cols: ['#f4f1ea', '#e8452c', '#2f6fe0'] },
 };
+for (const k in VT) { VT[k].bike = (VT[k].model || k) === 'bike'; VT[k].model = VT[k].model || k; }
 
 /* ---------------------------------------------------------------- road network */
 // Left-hand traffic, as in the city this is invented from.
@@ -67,13 +87,13 @@ const shore = (y) => 500 + 36 * Math.sin(y / 330) + 24 * Math.sin(y / 110 + 1.3)
 const SAND = 54;
 
 const DISTRICTS = [
-  { id: 'docks', name: 'Bandar Docks', test: (x, y) => y > 3700 && x < 2300 },
-  { id: 'marine', name: 'Marine Parade', test: (x) => x < 1010 },
-  { id: 'fort', name: 'Qila Quarter', test: (x, y) => x > 1420 && x < 2420 && y > 380 && y < 1560 },
-  { id: 'bazaar', name: 'Chowk Bazaar', test: (x, y) => x > 2250 && x < 3600 && y > 1500 && y < 2950 },
-  { id: 'heights', name: 'Malabar Heights', test: (x, y) => x > 3500 && y < 2500 },
-  { id: 'biz', name: 'Navi Business Park', test: (x, y) => x > 3300 && y > 2950 },
-  { id: 'res', name: 'Lakshmi Nagar', test: () => true },
+  { id: 'docks', name: 'Anchor Port', test: (x, y) => y > 3700 && x < 2300 },
+  { id: 'marine', name: 'Corniche Beach', test: (x) => x < 1010 },
+  { id: 'fort', name: 'Old Qila', test: (x, y) => x > 1420 && x < 2420 && y > 380 && y < 1560 },
+  { id: 'bazaar', name: 'Lantern Bazaar', test: (x, y) => x > 2250 && x < 3600 && y > 1500 && y < 2950 },
+  { id: 'heights', name: 'Cedar Hills', test: (x, y) => x > 3500 && y < 2500 },
+  { id: 'biz', name: 'Crescent Towers', test: (x, y) => x > 3300 && y > 2950 },
+  { id: 'res', name: 'Palm Gardens', test: () => true },
 ];
 const districtAt = (x, y) => { for (let i = 0; i < DISTRICTS.length; i++) if (DISTRICTS[i].test(x, y)) return DISTRICTS[i]; return DISTRICTS[DISTRICTS.length - 1]; };
 
@@ -417,13 +437,30 @@ function buildCity() {
   // cranes: decor
   for (const cy of [4090, 4390]) put('b', { k: 'crane', x: 452, y: cy, w: 200, d: 10, h: 40, H: 190, solid: false, seed: cy }, 452, cy, 652, cy + 10);
   for (let y = 3990; y < 4500; y += 64) prop({ t: 'bollard', x: 452, y });
+  // the Corniche jetty: a concrete finger out into the bay where a boat waits
+  const jy = JETTY.y, js = shore(jy), jr = [js - 132, jy - 13, js + SAND + 4, jy + 13];
+  clearRect(jr[0], jr[1], jr[2], jr[3]); pier(jr);
+  for (let x = jr[0] + 10; x < js; x += 40) { prop({ t: 'bollard', x, y: jy - 10 }); prop({ t: 'bollard', x, y: jy + 10 }); }
+  JETTY.x0 = jr[0]; JETTY.x1 = js;
   for (const b of BLD) put('b', b, b.x, b.y, b.x + b.w, b.y + b.d);
 }
+const JETTY = { y: 2172, x0: 0, x1: 0 };
 buildCity();
+// The sea, cell by cell, for boats: open water west of the shore, but not the piers, the jetty or the moored ship.
+const WATER = new Uint8Array(GW * GW);
+(function buildWater() {
+  for (let j = 2; j < GW - 2; j++) for (let i = 2; i < GW - 2; i++) {
+    const cx = (i + 0.5) * CELL, cy = (j + 0.5) * CELL;
+    if (cx < shore(cy) - 6 && SOLID[j * GW + i] === 1) WATER[j * GW + i] = 1;
+  }
+  const dry = (x0, y0, x1, y1) => { for (let j = Math.floor(y0 / CELL); j <= Math.floor(y1 / CELL); j++) for (let i = Math.floor(x0 / CELL); i <= Math.floor(x1 / CELL); i++) if (i >= 0 && j >= 0 && i < GW && j < GW) WATER[j * GW + i] = 0; };
+  dry(226, 4140, 440, 4345); dry(110, 450, 175, 510);
+})();
+const waterAt = (x, y) => { const i = (x / CELL) | 0, j = (y / CELL) | 0; return i >= 0 && j >= 0 && i < GW && j < GW && WATER[j * GW + i] === 1; };
 
 /* safehouses sit on sidewalk corners */
 const corner = (i, j, sx, sy) => ({ x: XC[i] + (sx ? 1 : -1) * (XR[i].hw + 9), y: YC[j] + (sy ? 1 : -1) * (YR[j].hw + 9) });
-const SAFE_DEFS = [[0, 5, 1, 1, 'Marine Parade flat'], [5, 6, 0, 1, 'Bazaar loft'], [10, 3, 1, 1, 'Hilltop villa'], [2, 12, 1, 0, 'Dockside shed'], [9, 10, 0, 1, 'Tower suite']];
+const SAFE_DEFS = [[0, 5, 1, 1, 'Corniche flat'], [5, 6, 0, 1, 'Bazaar loft'], [10, 3, 1, 1, 'Cedar Hills villa'], [2, 12, 1, 0, 'Anchor Port shed'], [9, 10, 0, 1, 'Crescent Tower suite']];
 SAFE_DEFS.forEach((s) => { const p = corner(s[0], s[1], s[2], s[3]); SAFE.push({ x: p.x, y: p.y, i: s[0], j: s[1], sx: s[2], sy: s[3], name: s[4] }); });
 
 const newCv = (w, h) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; return cv; };
@@ -458,7 +495,7 @@ const mixc = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a
 
 // Shared uniforms: every custom material reads the same time-of-day values.
 const UN = {
-  uNight: { value: 0 }, uWin: { value: 0 }, uTime: { value: 0 },
+  uNight: { value: 0 }, uWin: { value: 0 }, uTime: { value: 0 }, uWet: { value: 0 },
 };
 
 /* ---- a tiny indexed geometry builder, all in plain arrays */
@@ -593,12 +630,12 @@ function cityMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.0 });
   if (!LOD) m.defines = { LITE: 1 };
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime;
+    sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime; sh.uniforms.uWet = UN.uWet;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 wd; attribute vec2 wuv; varying vec4 vWd; varying vec2 vWuv; varying vec3 vWp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWd = wd; vWuv = wuv; vWp = position;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec4 vWd; varying vec2 vWuv; varying vec3 vWp; uniform float uNight; uniform float uWin; uniform float uTime;\n' + GLSL_COMMON)
+      .replace('#include <common>', '#include <common>\nvarying vec4 vWd; varying vec2 vWuv; varying vec3 vWp; uniform float uNight; uniform float uWin; uniform float uTime; uniform float uWet;\n' + GLSL_COMMON)
       .replace('#include <color_fragment>', '#include <color_fragment>\n' + `
 vec3 wEm = vec3(0.0); float wR = -1.0; float wM = -1.0;
 float kind = vWd.x;
@@ -740,7 +777,7 @@ if (kind < 0.5) {
   wR = 0.5; wM = 0.45;
 }
 `)
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nif (wR >= 0.0) roughnessFactor = wR;')
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nif (wR >= 0.0) roughnessFactor = wR;\nfloat wetK = uWet * ((kind > 3.5 && kind < 4.5) ? 1.0 : 0.3);\nroughnessFactor = mix(roughnessFactor, 0.1, wetK); diffuseColor.rgb *= 1.0 - 0.3 * wetK;')
       .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nif (wM >= 0.0) metalnessFactor = wM;')
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += wEm;');
   };
@@ -1181,10 +1218,10 @@ function buildChunkGeo(tx, ty) {
       treeG(g, t);
     }
   }
-  for (const b of bk.b) bldGeo(g, b, lampsOut);
-  for (const t of bk.t) treeG(g, t);
-  for (const l of bk.l) lampG(g, l, lampsOut);
-  for (const p of bk.f) propG(g, p);
+  for (const b of bk.b) MODELS.building(g, b, lampsOut);
+  for (const t of bk.t) MODELS.tree(g, t);
+  for (const l of bk.l) MODELS.lamp(g, l, lampsOut);
+  for (const p of bk.f) MODELS.prop(g, p);
   const geo = g.geometry();
   return { geo, lights: lampsOut };
 }
@@ -1326,7 +1363,7 @@ void main() {
 
 /* ================================================================ 3D scene: renderer, lights, sky, sea, chunks */
 const GL = {
-  renderer: null, scene: null, camera: null, fail: '', lost: false, q: 2, qMul: 1, fpsT: 0, fpsN: 0, fps: 60, lowRuns: 0, pinned: false, shadowSize: 2048,
+  renderer: null, scene: null, camera: null, fail: '', lost: false, q: 2, qMul: 1, fpsT: 0, fpsN: 0, fps: 60, lowRuns: 0, pinned: false, shadowSize: 2048, rs: 1, progPending: false, warmed: false,
   buildMs: 0, buildN: 0, hemi: null, key: null, spot: null, spotT: null, sky: null, sea: null, shore: null, far: null, chunks: new Map(), buildQ: [], clock: 0,
   frustum: new THREE.Frustum(), pv: new THREE.Matrix4(), env: null, w: 1, h: 1, lastFov: 0, cityMat: null, vehMat: null,
 };
@@ -1440,6 +1477,22 @@ function modelBike() {
   boxG(g, -10, 3.6, 3.4, -3, 4.8, 4.6, [0.5, 0.52, 0.55], VD(5));
   return { g, wheels: [[8.6, 0, 1, 4.3, 2.4], [-8.4, 0, 0, 4.3, 2.4]], rider: true };
 }
+// The Bay Runner: a planing hull, a wooden deck, a raked windscreen, a bench and a big outboard.
+function modelBoat() {
+  const g = new GB(), wood = [0.42, 0.26, 0.13], cush = [0.78, 0.74, 0.66], dark = [0.05, 0.055, 0.065], stripe = [0.05, 0.16, 0.42];
+  extG(g, [-27, -3, -27, 8, 14, 8.4, 23, 7, 28.5, 4.6, 24, 0, 12, -3.4, -18, -3.6], 20, 1.6, PAINT, VD(0));
+  for (const z of [-10.05, 10.05]) boxG(g, -26.5, 4.2, z - 0.12, 22, 5.6, z + 0.12, stripe, VD(5));
+  boxG(g, -25, 8.0, -8.4, 13, 8.7, 8.4, wood, VD(5));
+  extG(g, [3, 8.4, 3, 13.5, 6.4, 13.5, 11, 8.4], 15.4, 0.5, GLASS, VD(1));
+  boxG(g, -1.5, 8.6, -2.6, 2.6, 12.4, 2.6, dark, VD(4));
+  boxG(g, -12, 8.6, -7.2, -4.5, 11.0, 7.2, cush, VD(5));
+  boxG(g, -13.4, 8.6, -7.2, -11.6, 15.0, 7.2, cush, VD(5));
+  boxG(g, -32, -2.5, -3.4, -26.2, 12.5, 3.4, dark, VD(4));
+  boxG(g, -32.6, 9.5, -3.8, -25.8, 13.5, 3.8, PAINT, VD(0));
+  boxG(g, 25.5, 6.2, -1.1, 27.6, 7.6, 1.1, HEADC, VD(2));
+  for (const s of [-1, 1]) boxG(g, -27.6, 6.4, s * 8.6 - 1, -26.8, 8.0, s * 8.6 + 1, TAILC, VD(3));
+  return { g, wheels: [] };
+}
 function modelRider() {
   const g = new GB(), shirt = lin('#2f5fa8'), jeans = lin('#1d2a4a'), skin = lin('#d5a77a');
   boxG(g, -4.6, 12.4, -3.3, 0.8, 23.4, 3.3, shirt);
@@ -1487,6 +1540,23 @@ function vehGeo(g, cap, lampCap) {
   return geo;
 }
 
+// Every model in the city is made by exactly one function, listed here. A library model (a city kit, a car kit, an
+// animated character) replaces an entry without touching the game: vehicles return { g, wheels, bars }, buildings,
+// trees, lamps and props write into the chunk's geometry builder, pedestrian parts write one part each.
+const MODELS = {
+  vehicle: { hatch: () => modelSedan(false), police: () => modelSedan(true), coupe: modelCoupe, auto: modelAuto, van: modelVan, bike: modelBike, boat: modelBoat },
+  rider: modelRider,
+  building: bldGeo, tree: treeG, lamp: lampG, prop: propG,
+  ped: {
+    legs: (g, wh) => { boxG(g, -1.1, -8.3, -1.0, 1.1, 0, 1.0, wh); boxG(g, -1.2, -8.9, -1.0, 1.8, -8.3, 1.0, [0.07, 0.065, 0.06]); },
+    torso: (g, wh) => { boxG(g, -1.7, 8.2, -2.7, 1.7, 15, 2.7, wh); },
+    arms: (g, wh) => { boxG(g, -0.8, -6.6, -0.8, 0.8, 0.6, 0.8, wh); },
+    head: (g, wh) => { blobG(g, 0, 16.9, 0, 1.9, 2.1, 1.8, LOD ? 7 : 5, LOD ? 3 : 2, wh, wh); },
+    hair: (g, wh) => { blobG(g, -0.25, 17.4, 0, 2.05, 1.9, 1.95, LOD ? 7 : 5, 2, wh, wh, D0, { half: true }); },
+    bag: (g, wh) => { boxG(g, -0.6, 8.6, 2.4, 1.4, 12.2, 5.4, wh); },
+  },
+  rig: (i) => makeRig(i),
+};
 const VCAP = 90;
 const VM = {};
 const PEDS = {};
@@ -1495,12 +1565,12 @@ const FX = {};
 function buildDynamics(scene) {
   const vmat = GL.vehMat = vehicleMaterial();
   const wmat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.15 });
-  const defs = { hatch: modelSedan(false), police: modelSedan(true), coupe: modelCoupe(), auto: modelAuto(), van: modelVan(), bike: modelBike() };
+  const defs = {}; for (const t in MODELS.vehicle) defs[t] = MODELS.vehicle[t]();
   for (const type of Object.keys(defs)) {
     const d = defs[type], geo = vehGeo(d.g, VCAP);
     const body = new THREE.InstancedMesh(geo, vmat, VCAP); body.frustumCulled = false; body.castShadow = true; body.count = 0;
-    const wg = wheelG(d.wheels[0][3], d.wheels[0][4]);
-    const wheels = new THREE.InstancedMesh(vehGeo(wg, 0), wmat, VCAP * d.wheels.length);
+    const wg = d.wheels.length ? wheelG(d.wheels[0][3], d.wheels[0][4]) : wheelG(3, 2);
+    const wheels = new THREE.InstancedMesh(vehGeo(wg, 0), wmat, Math.max(1, VCAP * d.wheels.length));
     wheels.frustumCulled = false; wheels.castShadow = true; wheels.count = 0;
     scene.add(body, wheels);
     VM[type] = { type, body, wheels, defs: d.wheels, n: 0, nw: 0, bars: !!d.bars, geo };
@@ -1509,18 +1579,13 @@ function buildDynamics(scene) {
   const barGeo = new THREE.BoxGeometry(3.2, 1.5, 4.8);
   FX.bars = new THREE.InstancedMesh(barGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), VCAP * 2);
   FX.bars.frustumCulled = false; FX.bars.count = 0; FX.bars.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(VCAP * 6), 3); scene.add(FX.bars);
-  FX.rider = new THREE.InstancedMesh(vehGeo(modelRider(), 0), wmat, VCAP); FX.rider.frustumCulled = false; FX.rider.castShadow = true; FX.rider.count = 0; scene.add(FX.rider);
+  FX.rider = new THREE.InstancedMesh(vehGeo(MODELS.rider(), 0), wmat, VCAP); FX.rider.frustumCulled = false; FX.rider.castShadow = true; FX.rider.count = 0; scene.add(FX.rider);
 
   // pedestrians: five instanced parts
   const pm = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0 });
   const part = (build, n) => { const g = new GB(); build(g); const geo = g.geometry(); const m = new THREE.InstancedMesh(geo, pm, n); m.frustumCulled = false; m.castShadow = true; m.count = 0; m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(n * 3).fill(1), 3); scene.add(m); return m; };
   const wh = [1, 1, 1];
-  PEDS.legs = part((g) => { boxG(g, -1.1, -8.3, -1.0, 1.1, 0, 1.0, wh); boxG(g, -1.2, -8.9, -1.0, 1.8, -8.3, 1.0, [0.07, 0.065, 0.06]); }, 160);
-  PEDS.torso = part((g) => { boxG(g, -1.7, 8.2, -2.7, 1.7, 15, 2.7, wh); }, 90);
-  PEDS.arms = part((g) => { boxG(g, -0.8, -6.6, -0.8, 0.8, 0.6, 0.8, wh); }, 160);
-  PEDS.head = part((g) => { blobG(g, 0, 16.9, 0, 1.9, 2.1, 1.8, LOD ? 7 : 5, LOD ? 3 : 2, wh, wh); }, 90);
-  PEDS.hair = part((g) => { blobG(g, -0.25, 17.4, 0, 2.05, 1.9, 1.95, LOD ? 7 : 5, 2, wh, wh, D0, { half: true }); }, 90);
-  PEDS.bag = part((g) => { boxG(g, -0.6, 8.6, 2.4, 1.4, 12.2, 5.4, wh); }, 90);
+  for (const [k, n] of [['legs', 160], ['torso', 90], ['arms', 160], ['head', 90], ['hair', 90], ['bag', 90]]) PEDS[k] = part((g) => MODELS.ped[k](g, wh), n);
 
   // textures for light pools, cones, rings and beams
   const radialTex = (size, stops) => { const cv = newCv(size, size), c = cv.getContext('2d'), gr = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2); stops.forEach((s) => gr.addColorStop(s[0], s[1])); c.fillStyle = gr; c.fillRect(0, 0, size, size); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; };
@@ -1583,6 +1648,7 @@ function buildDynamics(scene) {
   FX.skid = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false }));
   FX.skid.frustumCulled = false; FX.skid.renderOrder = 2; FX.skidSeen = -1; FX.skidT = 0; scene.add(FX.skid);
   FX.mats = { m1: new THREE.Matrix4(), m2: new THREE.Matrix4(), m3: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), s1: new THREE.Vector3(1, 1, 1), col: new THREE.Color(), d: new THREE.Object3D(), v1: new THREE.Vector3(), v2: new THREE.Vector3() };
+  buildExtras(scene, wmat);
 }
 
 /* ---- time of day */
@@ -1622,6 +1688,14 @@ function computeTOD(h) {
 function applyTOD(h) {
   computeTOD(h);
   const T = TOD, sc = GL.scene;
+  const cl = WX.cloud;
+  if (cl > 0.01) {
+    for (const col of [T.hor, T.opp, T.zen, T.fog]) { const l = (col.r + col.g + col.b) / 3; col.r = lerp(col.r, l * 0.85, cl * 0.75); col.g = lerp(col.g, l * 0.88, cl * 0.75); col.b = lerp(col.b, l * 0.98, cl * 0.75); col.multiplyScalar(1 - 0.32 * cl); }
+    T.glow.multiplyScalar(1 - 0.85 * cl); T.sunCol.multiplyScalar(1 - 0.7 * cl); T.keyI *= 1 - 0.62 * cl; T.hemiI *= 1 - 0.1 * cl;
+    T.win = Math.max(T.win, 0.45 * cl); T.lamp = Math.max(T.lamp, 0.5 * WX.rain);
+  }
+  if (WX.flash > 0) T.keyI += 7 * WX.flash / 0.18;
+  sc.fog.near = 240 * (1 - 0.45 * WX.rain); sc.fog.far = 1350 * (1 - 0.38 * WX.rain);
   UN.uNight.value = T.night; UN.uWin.value = T.win;
   GL.hemi.color.setRGB(T.hemiSky[0], T.hemiSky[1], T.hemiSky[2]); GL.hemi.groundColor.setRGB(T.hemiGnd[0], T.hemiGnd[1], T.hemiGnd[2]); GL.hemi.intensity = T.hemiI;
   GL.key.color.setRGB(T.keyCol[0], T.keyCol[1], T.keyCol[2]); GL.key.intensity = T.keyI;
@@ -1707,22 +1781,27 @@ function resizeGL(arc) {
   if (!GL.renderer) return;
   GL.w = arc.w; GL.h = arc.h;
   // software rendering pays for every pixel, so it gets a small fixed budget; a GPU gets the full device ratio
-  GL.renderer.setPixelRatio(GL.soft ? clamp(Math.sqrt(56000 / (arc.w * arc.h)), 0.2, arc.dpr) : arc.dpr * GL.qMul);
+  GL.renderer.setPixelRatio(GL.soft ? clamp(Math.sqrt(56000 / (arc.w * arc.h)), 0.2, arc.dpr) : arc.dpr * GL.qMul * (GL.rs || 1));
   GL.renderer.setSize(arc.w, arc.h, false);
   GL.camera.aspect = arc.w / arc.h;
   GL.camera.updateProjectionMatrix();
   GL.lastFov = 0;
 }
 
-function applyQuality() {
+// Shadows on or off changes every material's shader, so during play that part waits for the next menu or pause;
+// only the resolution and the shadow map size change mid-round.
+function applyQuality(force) {
   const r = GL.renderer; if (!r) return;
   const q = GL.q;
   GL.qMul = q >= 2 ? 1 : q === 1 ? 0.8 : (GL.soft ? 0.5 : 0.62);
   const size = q >= 2 ? (arcRef && Math.min(arcRef.w, arcRef.h) < 600 ? 1024 : 2048) : q === 1 ? 1024 : 512;
-  r.shadowMap.enabled = q > 0;
+  const wantSh = q > 0;
+  if (r.shadowMap.enabled !== wantSh) {
+    if (force || !arcRef || arcRef.state !== 'play') { r.shadowMap.enabled = wantSh; GL.key.castShadow = wantSh; GL.progPending = false; }
+    else GL.progPending = true;
+  }
   const sh = GL.key.shadow;
   if (sh.mapSize.x !== size) { sh.mapSize.set(size, size); if (sh.map) { sh.map.dispose(); sh.map = null; } }
-  GL.key.castShadow = q > 0;
   if (arcRef) resizeGL(arcRef);
 }
 
@@ -1876,7 +1955,7 @@ function syncVehicles(dt) {
   let nb = 0, nr = 0;
   nCs = 0;
   for (let vi = 0; vi < V.length; vi++) {
-    const v = V[vi], vm = VM[v.type]; if (!vm || vm.n >= VCAP) continue;
+    const v = V[vi], vm = VM[v.T.model]; if (!vm || vm.n >= VCAP) continue;
     const dxc = v.x - CAM.x, dzc = v.y - CAM.z, d2 = dxc * dxc + dzc * dzc;
     v.wd = (v.wd || 0) + v.f * dt;
     if (d2 > 1500 * 1500) continue;
@@ -1887,9 +1966,12 @@ function syncVehicles(dt) {
     const accel = (v.f - (v.pf == null ? v.f : v.pf)) / Math.max(dt, 0.004); v.pf = v.f;
     v.pitch = lerp(v.pitch || 0, clamp(accel * 0.00016, -0.045, 0.045), Math.min(1, dt * 8));
     const driven = v.player || !v.parked;
-    const lean = v.type === 'bike' ? clamp(v.c.str * v.f * 0.0011, -0.3, 0.3) : clamp(-v.c.str * v.f * 0.00032, -0.07, 0.07);
+    const lean = v.T.bike ? clamp(v.c.str * v.f * 0.0011, -0.3, 0.3) : clamp(-v.c.str * v.f * 0.00032, -0.07, 0.07);
     v.roll = lerp(v.roll || 0, driven && !v.wreck ? lean : (v.wreck ? 0.09 : 0), Math.min(1, dt * 7));
-    M.e.set(v.roll, -v.a, v.wreck ? v.pitch + 0.03 : v.pitch, 'YZX'); M.q.setFromEuler(M.e); M.p.set(v.x, v.wreck ? -0.8 : 0, v.y); M.m1.compose(M.p, M.q, M.s1);
+    let vy0 = v.wreck ? -0.8 : 0, pit = v.wreck ? v.pitch + 0.03 : v.pitch;
+    if (T.boat) { const bob = arcRef.reducedMotion ? 0 : Math.sin(GL.clock * 1.7 + v.id) * 0.9; vy0 = -1.4 + bob - (v.wreck ? 7 : 0); pit = clamp(Math.abs(v.f) / T.vmax, 0, 1) * 0.07 + (arcRef.reducedMotion ? 0 : Math.sin(GL.clock * 1.3 + v.id * 2) * 0.012); v.roll *= 0.6; }
+    else { vy0 += v.z || 0; pit += v.airPitch || 0; if (v.z > 0 && !v.air) pit += 0.22; }
+    M.e.set(v.roll, -v.a, pit, 'YZX'); M.q.setFromEuler(M.e); M.p.set(v.x, vy0, v.y); M.m1.compose(M.p, M.q, M.s1);
     vm.body.setMatrixAt(i, M.m1);
     const bc = v.type === 'police' ? [0.92, 0.92, 0.94] : lin(v.col), dmg = 1 - v.hp / v.maxhp;
     const k = v.burnt ? 0.1 : 1 - 0.55 * clamp((dmg - 0.3) / 0.7, 0, 1);
@@ -1902,7 +1984,7 @@ function syncVehicles(dt) {
       M.e.set(0, wd[2] ? -v.steerVis * 0.55 : 0, -(v.wd / r), 'YZX'); M.q.setFromEuler(M.e); M.p.set(wd[0], r, wd[1]); M.m2.compose(M.p, M.q, M.s1);
       M.m3.multiplyMatrices(M.m1, M.m2); vm.wheels.setMatrixAt(vm.nw++, M.m3);
     }
-    if (v.type === 'bike' && (v.driver || v.player) && !v.wreck && nr < VCAP) FX.rider.setMatrixAt(nr++, M.m1);
+    if (v.T.bike && (v.driver || v.player) && !v.wreck && nr < VCAP) FX.rider.setMatrixAt(nr++, M.m1);
     const ca = Math.cos(v.a), sa = Math.sin(v.a), near = d2 < 800 * 800;
     if (v.type === 'police' && nb < VCAP * 2 - 1) {
       const ph = v.siren && !reduced ? (Math.floor(GL.clock * 7 + v.id) % 2) : 0, lit = v.siren;
@@ -1920,18 +2002,18 @@ function syncVehicles(dt) {
     }
     if (near) {
       const hx = v.x + ca * T.L * 0.5, hz = v.y + sa * T.L * 0.5, zl = T.Wd * 0.3, bx = v.x - ca * T.L * 0.5, bz = v.y - sa * T.L * 0.5;
-      const hh = v.type === 'bike' ? 13 : 9.5;
+      const hh = v.T.bike ? 13 : 9.5;
       if (on && lampK > 0.03) {
         if (nCone < 90 && d2 < 650 * 650) {
-          M.p.set(hx, 2.5, hz); M.e.set(0, -v.a, 0); M.q.setFromEuler(M.e); const len = v.type === 'bike' ? 170 : 250; M.v1.set(len, 1, v.type === 'bike' ? 80 : 140);
+          M.p.set(hx, 2.5, hz); M.e.set(0, -v.a, 0); M.q.setFromEuler(M.e); const len = v.T.bike ? 170 : 250; M.v1.set(len, 1, v.T.bike ? 80 : 140);
           M.m2.compose(M.p, M.q, M.v1); FX.cones.setMatrixAt(nCone, M.m2); setCol(FX.cones, nCone, [1.0, 0.9, 0.66], 0.55 * lampK); nCone++;
         }
-        if (v.type === 'bike') FX.glow.add(hx, hh, hz, 1, 0.92, 0.7, 0.9 * lampK, 17);
+        if (v.T.bike) FX.glow.add(hx, hh, hz, 1, 0.92, 0.7, 0.9 * lampK, 17);
         else { FX.glow.add(hx - sa * zl, hh, hz + ca * zl, 1, 0.92, 0.7, 0.9 * lampK, 17); FX.glow.add(hx + sa * zl, hh, hz - ca * zl, 1, 0.92, 0.7, 0.9 * lampK, 17); }
       }
       if (!v.wreck && (on || v.brakeL)) {
         const a = (on ? 0.55 : 0.2) + (v.brakeL ? 0.45 : 0);
-        if (v.type === 'bike') FX.glow.add(bx, 9, bz, 1, 0.08, 0.04, a, v.brakeL ? 15 : 9);
+        if (v.T.bike) FX.glow.add(bx, 9, bz, 1, 0.08, 0.04, a, v.brakeL ? 15 : 9);
         else { FX.glow.add(bx - sa * zl, 9, bz + ca * zl, 1, 0.08, 0.04, a, v.brakeL ? 16 : 9); FX.glow.add(bx + sa * zl, 9, bz - ca * zl, 1, 0.08, 0.04, a, v.brakeL ? 16 : 9); }
         if (v.brakeL && d2 < 500 * 500) addPool(bx - ca * 18, 2.4, bz - sa * 18, 60, [1, 0.12, 0.06], 0.5);
       }
@@ -1941,7 +2023,7 @@ function syncVehicles(dt) {
       GL.spot.intensity = 1100 * lampK;
       GL.spot.position.set(v.x + ca * T.L * 0.4, 9, v.y + sa * T.L * 0.4); GL.spot.target.position.set(v.x + ca * 220, 0, v.y + sa * 220); GL.spot.target.updateMatrixWorld();
     }
-    if (!GL.soft && d2 < 900 * 900) addCs(v.x, v.y, T.L * 1.12, T.Wd * (v.type === 'bike' ? 1.7 : 1.32), v.a, onRoad(v.x, v.y) ? 0.5 : 1.7);
+    if (!GL.soft && d2 < 900 * 900 && !T.boat && !(v.z > 6)) addCs(v.x, v.y, T.L * 1.12, T.Wd * (v.T.bike ? 1.7 : 1.32), v.a, onRoad(v.x, v.y) ? 0.5 : 1.7);
   }
   if (!pl.veh || lampK <= 0.02) GL.spot.intensity = 0;
   for (const t in VM) {
@@ -1972,7 +2054,7 @@ function loadVfx() {
 const vxQ = () => (GL.q >= 2 ? 3 : GL.q === 1 ? 2 : GL.soft ? 0 : 1);
 const vxOn = () => VX.state === 2 && VX.fx;
 function vxTick(dt) {
-  if (VX.state === 0 && GL.clock > 2.5) loadVfx();
+  if (VX.state === 0 && GL.clock > 1.4 && arcRef.state !== 'play') loadVfx();
   if (!vxOn()) return;
   const q = vxQ(); if (q !== VX.q) { VX.q = q; VX.fx.setQuality(q); }
   const red = !!arcRef.reducedMotion; if (red !== VX.red) { VX.red = red; VX.fx.setReduced(red); }
@@ -1991,6 +2073,8 @@ function vxTick(dt) {
   VX.fx.update(dt);
 }
 const vxAt = (x, y, z) => VX.v.set(x, y, z);
+// a second point, for the calls that take two (one shared vector passed twice is a zero-length bolt)
+const _vx2 = new THREE.Vector3(), vxAt2 = (x, y, z) => _vx2.set(x, y, z);
 // payday: a Holi burst of coloured powder around you and a shell going up over the street
 function vxPayday() {
   if (!vxOn()) return;
@@ -2018,17 +2102,33 @@ function makeRig(i) {
   h.group.visible = false; GL.scene.add(h.group);
   return { h, p: null, act: '', idleAct: '' };
 }
+// a place the lens cannot see but the sun's shadow box still covers: just behind the camera, on the ground, so a
+// warm-up frame compiles the shadow programs too
+const _wd = new THREE.Vector3();
+function warmSpot(o) { const c = GL.camera; c.getWorldDirection(_wd); _wd.y = 0; _wd.normalize(); o.position.set(c.position.x - _wd.x * 40, 0.3, c.position.z - _wd.z * 40); }
 function syncHumans(dt) {
-  if (HUM.state === 0 && GL.clock > 2) loadHumans();
+  if (HUM.state === 0 && GL.clock > 0.9 && arcRef.state !== 'play') loadHumans();
   if (HUM.state !== 2) return;
+  // the rigs are built and compiled behind a menu or a pause, never in the middle of a round
+  if (!HUM.warm && arcRef.state === 'play') return;
   const want = rigCount();
   if (!HUM.v) HUM.v = new THREE.Vector3();
   // build the pool a rig a frame, so nothing stalls; the shaders were warmed with the first one
   if (HUM.rigs.length < want) {
-    const r = makeRig(HUM.rigs.length); HUM.rigs.push(r);
-    if (HUM.rigs.length === 1) { r.h.group.visible = true; r.h.group.position.set(CAM.x, -200, CAM.z); try { GL.renderer.compile(GL.scene, GL.camera); } catch (e) { /* lost */ } r.h.group.visible = false; }
+    const r = MODELS.rig(HUM.rigs.length); HUM.rigs.push(r);
   }
-  if (!HUM.me && want) { HUM.me = makeRig(99); HUM.me.h.setOutfit({ top: '#FF6940', bottom: '#14161f', sleeves: 'short' }); }
+  if (!HUM.me && want) { HUM.me = MODELS.rig(99); HUM.me.h.setOutfit({ top: '#FF6940', bottom: '#14161f', sleeves: 'short' }); }
+  // once the whole pool exists (it is built behind the menu), compile every rig at once, in both sleeve lengths, out of
+  // sight under the street: a full rig and a mid one are different programs, and none may compile in the first seconds of a round
+  if (!HUM.warm && HUM.me && HUM.rigs.length >= want) {
+    HUM.warm = true;
+    const all = HUM.rigs.concat([HUM.me]);
+    for (const r of all) { r.h.group.visible = true; warmSpot(r.h.group); }
+    try { for (const sl of ['long', 'short']) { for (const r of all) r.h.setOutfit({ top: '#3a6ea5', bottom: '#2b2b2e', sleeves: sl }); GL.renderer.compile(GL.scene, GL.camera); } } catch (e) { /* lost */ }
+    HUM.me.h.setOutfit({ top: '#FF6940', bottom: '#14161f', sleeves: 'short' });
+    for (const r of all) r.h.group.visible = false;
+    HUM.warmFrames = 2;
+  }
   // who gets a rig: the nearest people in view, holding on to a rig a little past the distance it was given at
   HUM.t -= dt;
   if (HUM.t <= 0) {
@@ -2051,6 +2151,7 @@ function syncHumans(dt) {
     }
   }
   const v = HUM.v;
+  if (HUM.warmFrames > 0) { HUM.warmFrames--; for (const r of HUM.rigs.concat([HUM.me])) { r.h.group.visible = true; warmSpot(r.h.group); r.h.update(dt, { speed: 0 }); } if (!HUM.warmFrames) for (const r of HUM.rigs.concat([HUM.me])) r.h.group.visible = false; return; }
   for (const r of HUM.rigs) {
     const h = r.h, p = r.p;
     if (!p) { h.group.visible = false; continue; }
@@ -2109,7 +2210,7 @@ function syncPeds(dt) {
     // a person carried by a full rig only needs the soft shadow at their feet
     if (isPlayer ? HUM.me && HUM.me.h.group.visible : p.rig) { addCs(p.x, p.y, 12, 11, p.a, onRoad(p.x, p.y) ? 0.5 : 1.7); return; }
     const near = !GL.soft && dx * dx + dz * dz < 520 * 520;
-    const dive = p.state === 'dive', run = p.state === 'flee' || dive || (isPlayer && pl.sprint);
+    const dive = p.state === 'dive' || p.state === 'down', run = p.state === 'flee' || dive || (isPlayer && pl.sprint) || p.state === 'fight';
     const speed = isPlayer ? (pl.moving ? (pl.sprint ? 60 : 30) : 0) : p.mv;
     const phase = isPlayer ? pl.step : p.anim, moving = isPlayer ? pl.moving : speed > 0.5;
     const ph = isPlayer ? 0 : p.ph, hs = isPlayer ? 1 : p.hs, bw = isPlayer ? 1 : p.bw;
@@ -2193,11 +2294,11 @@ function syncFx(dt) {
       if (L.length === 3) {
         if (lampK < 0.02 || d2 > 760 * 760) continue;
         _sph.center.set(L[0], 2, L[2]); _sph.radius = 80; if (!GL.frustum.intersectsSphere(_sph)) continue;
-        addPool(L[0], 2.4, L[2], 165, WARM, 0.62 * lampK);
+        addPool(L[0], 2.4, L[2], 165 * (1 + 0.45 * WX.wet), WARM, 0.62 * lampK * (1 + 0.8 * WX.wet));
         FX.glow.add(L[0], L[1], L[2], 1, 0.84, 0.58, 0.95 * lampK, 28);
       } else if (L[3] === 1) { if (Math.floor(GL.clock * 1.4 + L[0]) % 2 === 0 || lampK > 0.5) FX.glow.add(L[0], L[1], L[2], 1, 0.12, 0.08, 0.9, 20); }
       else if (L[3] === 2) FX.glow.add(L[0], L[1], L[2], 1, 0.95, 0.8, 0.8 * (0.3 + lampK), 16);
-      else if (L[3] === 3 && lampK > 0.02) { const c2 = lin(L[4]); FX.glow.add(L[0], L[1], L[2], Math.min(1, c2[0] * 1.6), Math.min(1, c2[1] * 1.6), Math.min(1, c2[2] * 1.6), 0.45 * lampK, 54); addPool(L[0], 2.4, L[2], 90, c2, 0.5 * lampK); }
+      else if (L[3] === 3 && lampK > 0.02) { const c2 = lin(L[4]); FX.glow.add(L[0], L[1], L[2], Math.min(1, c2[0] * 1.6), Math.min(1, c2[1] * 1.6), Math.min(1, c2[2] * 1.6), 0.45 * lampK, 54); addPool(L[0], 2.4, L[2], 90 * (1 + 0.8 * WX.wet), c2, 0.5 * lampK * (1 + 1.1 * WX.wet)); }
     }
   }
   // traffic signals near the camera
@@ -2230,6 +2331,7 @@ function syncFx(dt) {
       if (j.type === 'race' && j.cps) { for (let k = j.cps.length - 1; k >= j.cp; k--) mark(j.cps[k].x, j.cps[k].y, k === j.cp ? 36 : 24, k === j.cp ? 240 : 100, k === j.cp ? '#FF5EA8' : '#b4446f', 1); }
       else if (j.tx != null) mark(j.tx, j.ty, 36, 240, j.col, 1);
     }
+    extraMarks(mark);
     if (!pl.veh && G.nearVeh) { const nv = G.nearVeh, a = nv.a, ca = Math.cos(a), sa = Math.sin(a); const r = nv.T.L * 0.72; addRing(nv.x, nv.y, r, [1, 0.72, 0.21], 0.5 + 0.4 * Math.sin(t * 6)); void ca; void sa; }
   } else {
     for (const s of SAFE) mark(s.x, s.y, 15, 70, '#38D6B8', 0.5);
@@ -2288,12 +2390,28 @@ function render3D(arc) {
   GL.clock += dt;
   UN.uTime.value = GL.clock;
   if (GL.needEnv) { GL.needEnv = false; makeEnv(); }
+  if (GL.progPending && arcRef.state !== 'play') applyQuality(true);
+  // behind the menu, once: compile everything a round can show (the helicopter, its light, the rain, the ramps)
+  // (if Play comes first, the same pass runs on the round's first frame, under the opening camera move)
+  if (!GL.warmed && ((GL.clock > 2.4 && arcRef.state === 'menu' && VX.state !== 1) || arcRef.state === 'play')) {
+    GL.warmed = true; GL.warmFrames = 3;
+    // the effects a round can call on, set off once out of sight under the street so their shaders are ready
+    if (vxOn()) { const x = CAM.lx, z = CAM.lz; try { VX.fx.lightning(vxAt(x, -40, z), vxAt2(x + 30, -300, z)); VX.fx.impact(vxAt(x, -60, z), VX.n, { kind: 'water', size: 0.5 }); VX.fx.impact(vxAt(x, -60, z), VX.n, { kind: 'powder', size: 0.5 }); VX.fx.impact(vxAt(x, -60, z), VX.n, { kind: 'dust', size: 0.5 }); VX.fx.splash(vxAt(x, -60, z)); VX.fx.ring(vxAt(x, -60, z), '#FFB736'); VX.fx.burst(vxAt(x, -80, z), { size: 0.6 }); VX.fx.fireworks(vxAt(x, -120, z), { size: 2, launch: false }); VX.fx.fireworks(vxAt(x, -140, z), { size: 2, launch: true }); VX.fx.winBurst(vxAt(x, -80, z)); VX.fx.explosion(vxAt(x, -90, z), { size: 0.4 }); VX.fx.confetti(vxAt(x, -80, z), { count: 8 }); } catch (e) { /* the menu must open */ } }
+    const vis = [EX.heli.visible, EX.beam.visible, EX.rain.visible];
+    EX.heli.visible = EX.beam.visible = EX.rain.visible = true; EX.heli.position.set(CAM.lx, 60, CAM.lz); EX.beam.position.set(CAM.lx, 1, CAM.lz);
+    try { const pr = r.compileAsync ? r.compileAsync(GL.scene, GL.camera) : (r.compile(GL.scene, GL.camera), null); if (pr && pr.catch) pr.catch(() => {}); } catch (e) { /* lost context */ }
+    EX.heli.visible = vis[0]; EX.beam.visible = vis[1]; EX.rain.visible = vis[2];
+  }
   // quality: if the first seconds run slow, shed pixels and shadow cost
   GL.fpsT += dt; GL.fpsN++;
   if (GL.fpsT >= 1.6) {
     GL.fps = GL.fpsN / GL.fpsT; GL.fpsT = 0; GL.fpsN = 0;
     // Two slow windows in a row step down; under 22 fps one is enough, so a phone that cannot hold the city is not left stuttering for 6 s.
-    if (!GL.pinned && GL.q > 0 && GL.fps < 34) { GL.lowRuns++; if (GL.lowRuns >= 2 || GL.fps < 22) { GL.q--; GL.lowRuns = 0; applyQuality(); } } else GL.lowRuns = 0;
+    // dynamic resolution first: shed pixels a step at a time, and only drop a whole tier at the floor
+    if (!GL.pinned && GL.fps < 34) {
+      if (GL.rs > 0.71) { GL.rs = Math.max(0.7, GL.rs - 0.1); resizeGL(arcRef); GL.lowRuns = 0; }
+      else if (GL.q > 0) { GL.lowRuns++; if (GL.lowRuns >= 2 || GL.fps < 22) { GL.q--; GL.lowRuns = 0; GL.rs = 0.85; applyQuality(); } }
+    } else { GL.lowRuns = 0; if (!GL.pinned && GL.fps > 52 && GL.rs < 1) { GL.rs = Math.min(1, GL.rs + 0.05); resizeGL(arcRef); } }
   }
   const tc0 = performance.now();
   applyTOD(G.hour);
@@ -2321,6 +2439,7 @@ function render3D(arc) {
   syncPeds(dt);
   vxTick(dt);
   syncFx(dt);
+  syncExtras(dt);
   const tc1 = performance.now();
   if (vxOn()) VX.fx.applyShake(cam);
   try { if (POST) { POST.setQuality(GL.q >= 2 ? 3 : GL.q === 1 ? 2 : 0, GL.pinned); POST.render(GL.scene, cam); } else r.render(GL.scene, cam); }
@@ -2398,7 +2517,7 @@ function mkVeh(type, x, y, a, o) {
     c: { thr: 0, brk: 0, str: 0, hb: false }, ai: null, parked: !!o.parked, player: false, police: type === 'police',
     siren: false, wreck: false, wreckT: 0, burnt: false, smoke: 0, sk: [0, 0, 0, 0, 0], skid: false, horn: 0,
     brakeL: false, stuck: 0, blocked: 0, f: 0, l: 0, age: 0, crashCd: 0, fireT: 0, vmul: 1, accMul: 1, driver: !o.parked, lastHit: 0, fleeT: 0, rev: 0, role: 0,
-    hum: null, steerVis: 0, mine: false, race: false,
+    hum: null, steerVis: 0, mine: false, race: false, z: 0, vz: 0, air: null,
   };
   V.push(v);
   return v;
@@ -2407,6 +2526,8 @@ const heading = (v) => ({ x: Math.cos(v.a), y: Math.sin(v.a) });
 const vSpeed = (v) => hyp(v.vx, v.vy);
 
 function stepVeh(v, dt) {
+  if (v.T.boat) { stepBoat(v, dt); return; }
+  if (v.air) { airStep(v, dt); return; }
   const T = v.T, c = v.c, ca = Math.cos(v.a), sa = Math.sin(v.a);
   let f = v.vx * ca + v.vy * sa, l = -v.vx * sa + v.vy * ca;
   const hpf = v.hp / v.maxhp;
@@ -2420,7 +2541,7 @@ function stepVeh(v, dt) {
       if (f < -5) { f += T.brake * c.thr * dt; v.brakeL = true; }
     }
     if (c.brk > 0) {
-      if (f > 12) { f = Math.max(0, f - T.brake * c.brk * dt); v.brakeL = true; }
+      if (f > 12) { f = Math.max(0, f - T.brake * (v.brkMul || 1) * c.brk * dt); v.brakeL = true; }
       else { f = Math.max(-vmax * 0.32, f - T.acc * 0.7 * c.brk * dt); v.brakeL = f > -8; }
     }
   }
@@ -2430,7 +2551,7 @@ function stepVeh(v, dt) {
   } else f -= f * 0.1 * dt;
   if (c.hb) { f -= Math.sign(f) * Math.min(Math.abs(f), 240 * dt); v.brakeL = true; }
   const spd = Math.abs(f);
-  let grip = T.grip;
+  let grip = T.grip * (v.gripMul || 1) * (1 - 0.22 * WX.wet);
   if (c.hb && spd > 55) grip = 1.1;
   else if (spd > vmax * 0.8 && Math.abs(c.str) > 0.7) grip *= 0.7;
   const l0 = l;
@@ -2455,7 +2576,7 @@ function stepVeh(v, dt) {
     if (v.player && rr() < dt * 3) arcRef.sfx.noise(0.18, { freq: 2600, filter: 'bandpass', vol: 0.07 });
   } else v.sk[4] = 0;
   // a fast car lifts a thin haze of dust off its rear tyres; much more off the road, on sand and earth
-  if (!GL.soft && spd > 110 && !dead && v.type !== 'bike' && rr() < dt * 9 && vDist(v) < 650) {
+  if (!GL.soft && spd > 110 && !dead && !v.T.bike && rr() < dt * 9 && vDist(v) < 650) {
     const off = !onRoad(v.x, v.y);
     if (off || rr() < 0.22) { const sd = rr() < 0.5 ? 1 : -1; emit('dust', bx + px * sd, by + py * sd, -v.vx * 0.12 + (rr() - 0.5) * 10, -v.vy * 0.12 + (rr() - 0.5) * 10, off ? 1.3 : 0.8, off ? 7 + rr() * 5 : 4 + rr() * 3, off ? 'rgba(206,182,140,.42)' : 'rgba(190,178,160,.18)'); }
   }
@@ -2485,14 +2606,15 @@ function circleSolid(cx, cy, r) {
 
 function damage(v, amt) {
   if (amt <= 0 || v.wreck) return;
-  v.hp -= amt;
+  v.hp -= amt * (v.armor || 1);
+  if (v.noWreck && v.hp < 12) { v.hp = 12; v.vmul = Math.min(v.vmul || 1, 0.85); return; }
   if (v.hp <= 0) wreckVeh(v);
 }
 function wreckVeh(v) {
   v.hp = 0; v.wreck = true; v.wreckT = 0; v.ai = null; v.c.thr = v.c.brk = v.c.str = 0; v.siren = false;
   if (v.player) { arcRef.haptic('fail', 0.9); banner('Car wrecked', 'Get out before it burns. Press F', 3000, '#FF8A3D'); arcRef.sfx.tone(120, 0.6, { type: 'sawtooth', slide: 50, vol: 0.2 }); }
   // the car goes up in a fireball: flash, rolling smoke, sparks, debris and a shockwave across the tarmac
-  if (vxOn() && vDist(v) < 1100) VX.fx.explosion(vxAt(v.x, 8, v.y), { size: v.type === 'bike' ? 0.9 : 1.5 });
+  if (vxOn() && vDist(v) < 1100) VX.fx.explosion(vxAt(v.x, 8, v.y), { size: v.T.bike ? 0.9 : 1.5 });
   for (let i = 0; i < 12; i++) emit('smoke', v.x, v.y, (rr() - 0.5) * 60, (rr() - 0.5) * 60, 1.4, 10 + rr() * 8, 'rgba(60,60,60,.55)');
 }
 
@@ -2539,7 +2661,7 @@ function collideWorld(v) {
       const sp = -vn;
       if (sp > 45) {
         if (v.crashCd <= 0) { crashFx(v, sp, hx, hy); v.crashCd = 0.12; }
-        damage(v, Math.max(0, sp - 52) * 0.16 / Math.sqrt(T.mass));
+        damage(v, Math.max(0, sp - 52) * 0.16 / Math.sqrt(T.mass) * (v.wallK || 1));
         if (v.ai && v.ai.kind === 'traffic' && sp > 70) v.ai.bump = 1.5;
       }
     }
@@ -2619,6 +2741,10 @@ function pedPick(p) {
 function pedLook(p, x, y, t) { p.lx = x; p.ly = y; p.lookT = Math.max(p.lookT, t); }
 const PED_FLEE = 62;
 function updatePed(p, dt) {
+  if (p.guard) { updateGuard(p, dt); return; }
+  if (p.foe) { updateFoe(p, dt); return; }
+  if (p.state === 'down') { updateDown(p, dt); return; }
+  if (p.guest) { p.mv = 0; return; }
   if (p.cool > 0) p.cool -= dt;
   if (p.lookT > 0) p.lookT -= dt;
   if (p.reactT > 0) { p.reactT -= dt; if (p.reactT <= 0) p.react = ''; }
@@ -2649,7 +2775,7 @@ function updatePed(p, dt) {
   }
   if (p.state === 'dive') {
     p.t -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(0.04, dt); p.vy *= Math.pow(0.04, dt);
-    if (p.t <= 0) { p.state = 'flee'; p.t = 1.2; }
+    if (p.t <= 0) { p.state = 'down'; p.t = 0.8 + rr() * 0.6; p.vx *= 0.2; p.vy *= 0.2; }
     return;
   }
   if (p.state === 'flee') {
@@ -2689,7 +2815,7 @@ function updatePed(p, dt) {
     }
     pedPick(p); return;
   }
-  const sp = p.sp * (p.scared > 0 ? 1.6 : 1);
+  const sp = p.sp * (p.scared > 0 ? 1.6 : 1) * (1 + 0.35 * WX.rain);
   if (p.scared > 0) p.scared -= dt;
   p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; p.a = Math.atan2(dy, dx); p.mv = sp;
   // the legs keep pace with the ground: one step per 0.7 m or so, scaled by height
@@ -2829,8 +2955,9 @@ function aiTraffic(v, dt) {
 
 /* ---- pursuit AI (police) and the street race rival */
 function aiChase(v, dt) {
-  const ai = v.ai, c = v.c, f = v.f;
-  const pv = pl.veh, px = pl.x, py = pl.y, pvx = pv ? pv.vx : pl.vx, pvy = pv ? pv.vy : pl.vy, pspd = hyp(pvx, pvy);
+  const ai = v.ai, c = v.c, f = v.f, tg = ai.tgt;
+  if (tg && (tg.wreck || V.indexOf(tg) < 0)) { v.ai = null; v.removeLater = true; return; }
+  const pv = tg || pl.veh, px = tg ? tg.x : pl.x, py = tg ? tg.y : pl.y, pvx = pv ? pv.vx : pl.vx, pvy = pv ? pv.vy : pl.vy, pspd = hyp(pvx, pvy);
   const dx = px - v.x, dy = py - v.y, d = hyp(dx, dy);
   let tx = px + pvx * 0.45, ty = py + pvy * 0.45;
   if (ai.role === 1 && pspd > 70 && d > 110) { tx = px + pvx / pspd * 120; ty = py + pvy / pspd * 120; }
@@ -2844,6 +2971,7 @@ function aiChase(v, dt) {
       const ni = n0.i + q[0], nj = n0.j + q[1]; if (ni < 0 || nj < 0 || ni >= NX || nj >= NY) continue;
       const dd = G.bfs[ni + nj * NX]; if (dd < bd) { bd = dd; bi = ni; bj = nj; }
     }
+    if (tg) { const tn = nearestNode(tg.x, tg.y); bi = n0.i + Math.sign(tn.i - n0.i); bj = n0.j; if (bi === n0.i) bj = n0.j + Math.sign(tn.j - n0.j); bd = 1; }
     if (bd === 0 && bi === n0.i && bj === n0.j && G.bfs[bi + bj * NX] === 0) direct = true;
     else { tx = XC[bi]; ty = YC[bj]; }
   }
@@ -2874,6 +3002,9 @@ function aiRival(v, dt) {
   c.hb = false;
   if (ai.k >= ai.route.length) { c.thr = 0; c.brk = 0.5; ai.done = true; return; }
   let wp = ai.route[ai.k];
+  // a driver who has not reached the next corner for ten seconds is stuck on something: put them back on the road
+  if (ai.lastK !== ai.k) { ai.lastK = ai.k; ai.kT = 0; } else ai.kT = (ai.kT || 0) + dt;
+  if (ai.kT > 10 && !(hyp(v.x - pl.x, v.y - pl.y) < 260 && inView(v.x, v.y, 0))) { const pw = ai.route[Math.max(0, ai.k - 1)]; v.x = pw.x; v.y = pw.y; v.a = Math.atan2(wp.y - pw.y, wp.x - pw.x); v.vx = v.vy = 0; v.f = 0; ai.kT = 0; ai.rev = 0; v.stuck = 0; }
   if (hyp(wp.x - v.x, wp.y - v.y) < 64) {
     if (wp.cp != null) ai.cp = wp.cp + 1;
     ai.k++;
@@ -2886,9 +3017,9 @@ function aiRival(v, dt) {
   const wl = whisker(v, -0.6, 62), wr = whisker(v, 0.6, 62);
   if (wr) str -= 0.9; if (wl) str += 0.9;
   str = clamp(str, -1, 1);
-  const job = G.job;
+  const job = ai.rc ? ai.rc : (G.job && G.job.type === 'race' ? G.job : null);
   let mul = ai.mul;
-  if (job && job.type === 'race') { const ahead = ai.cp - job.cp; if (ahead >= 2) mul *= 0.78; else if (ahead <= -2) mul *= 1.1; }
+  if (job) { const ahead = ai.cp - job.cp; if (ahead >= 2) mul *= 0.78; else if (ahead <= -2) mul *= 1.1; }
   let target = v.T.vmax * mul;
   const nxt = ai.route[ai.k + 1];
   if (nxt) {
@@ -3060,13 +3191,15 @@ function onCarCrash(a, b, sp) {
 }
 
 /* ---- arrest and respawn */
-function nearestSafe(x, y) { let b = SAFE[0], bd = 1e9; for (const s of SAFE) { const d = hyp(s.x - x, s.y - y); if (d < bd) { bd = d; b = s; } } return b; }
+function nearestSafe(x, y) { const career = G.mode === 'story' || G.mode === 'free'; let b = SAFE[0], bd = 1e9; for (const s of SAFE) { if (career && !owns(s.prop)) continue; const d = hyp(s.x - x, s.y - y); if (d < bd) { bd = d; b = s; } } return b; }
 function startCaught(reason) {
   if (G.caught || G.phase !== 'play') return;
   const lose = reason === 'ko' ? Math.min(G.cash, Math.round(G.cash * 0.1)) : Math.min(G.cash, Math.max(40, Math.round(G.cash * 0.2)));
   G.cash -= lose;
   G.caught = { t: 0, reason, lose };
+  if (reason === 'busted') SAVE.stats.busted++;
   if (G.job) failJob(reason === 'ko' ? 'Knocked out' : 'Caught by the police', true);
+  if (MS.m) failMission(reason === 'ko' ? 'Knocked out' : 'Caught by the police');
   arcRef.sfx.tone(300, 0.5, { type: 'sawtooth', slide: 90, vol: 0.2 });
   if (pl.veh) leaveCar(true);
 }
@@ -3074,9 +3207,9 @@ function respawnAtSafe() {
   const s = nearestSafe(pl.x, pl.y);
   pl.x = s.x; pl.y = s.y; pl.vx = pl.vy = 0; pl.hp = 100; CAM.cdist = 120; pl.inv = 2; G.heat = 0; G.arrest = 0; G.unseen = 0;
   for (const v of V) if (v.ai && v.ai.kind === 'chase') releaseCop(v);
-  let have = false;
-  for (const v of V) if (hyp(v.x - s.x, v.y - s.y) < 170 && !v.wreck && v.type !== 'police') have = true;
-  if (!have) starterCar(s);
+  HELI.on = false; for (const v of V) if (v.rb) v.remove = true;
+  if (G.mode === 'story' || G.mode === 'free') { parkGarageCars(s); saveNow(); }
+  else { let have = false; for (const v of V) if (hyp(v.x - s.x, v.y - s.y) < 170 && !v.wreck && v.type !== 'police') have = true; if (!have) starterCar(s); }
   G.camX = pl.x; G.camY = pl.y;
   banner('Safehouse', s.name, 2000, '#38D6B8');
 }
@@ -3091,7 +3224,7 @@ function starterCar(s) {
 /* ---- vehicles in and out */
 function startHum(v) {
   stopHum();
-  pl.hum = arcRef.sfx.hum(v.type === 'coupe' ? 'sawtooth' : v.type === 'bike' || v.type === 'auto' ? 'square' : 'sawtooth');
+  pl.hum = arcRef.sfx.hum(v.type === 'coupe' ? 'sawtooth' : v.T.bike || v.type === 'auto' ? 'square' : 'sawtooth');
 }
 function stopHum() { if (pl.hum) { pl.hum.stop(); pl.hum = null; } }
 function spawnRunner(v) {
@@ -3115,7 +3248,9 @@ function tryEnter(pref) {
     addHeat(v.police ? 2 : 1.25, 'jack');
     popText(v.police ? 'Police car taken!' : 'Carjacked!', v.x, v.y - 20, '#FF8A3D');
   } else if (G.copDist < 330 && !v.mine) addHeat(0.4, 'borrow');
-  pl.veh = v; v.player = true; v.parked = false; v.driver = true; v.ai = null; v.mine = true; v.c.hb = false; v.siren = false; v.c.thr = v.c.brk = v.c.str = 0;
+  pl.veh = v; v.player = true; v.parked = false; v.driver = true; v.ai = null; v.mine = true; v.c.hb = false; v.siren = false; v.c.thr = v.c.brk = v.c.str = 0; v.rb = false; v.moored = false;
+  if (v.up) applyUpgrades(v);
+  if (RADIO.st < stationsOpen().length) { const S = stationsOpen()[RADIO.st]; RADIO.name = S.name; RADIO.show = 2.2; RADIO.nextDj = 3 + rr() * 4; }
   pl.x = v.x; pl.y = v.y;
   startHum(v);
   arcRef.sfx.tone(260, 0.08, { type: 'square', vol: 0.1 }); arcRef.sfx.tone(200, 0.1, { type: 'square', vol: 0.1, delay: 0.07 });
@@ -3125,7 +3260,13 @@ function leaveCar(force) {
   const v = pl.veh; if (!v) return;
   const ca = Math.cos(v.a), sa = Math.sin(v.a);
   let ok = false;
-  for (const s of [-1, 1]) {
+  if (v.T.boat) {
+    for (const d of [18, 26, 36, 48]) for (const o of [[sa, -ca], [-sa, ca], [ca, sa], [-ca, -sa]]) { const x = v.x + o[0] * d, y = v.y + o[1] * d; if (!ok && !solidAt(x, y) && !waterAt(x, y)) { pl.x = x; pl.y = y; ok = true; } }
+    if (!ok && !force) { arcRef.toast('Steer alongside a pier or the beach', 'to step off', 1400); return; }
+    if (!ok) { pl.x = v.x; pl.y = v.y; }
+    ok = true;
+  }
+  if (!ok) for (const s of [-1, 1]) {
     const d = v.T.Wd / 2 + 11;
     const x = v.x + sa * d * s, y = v.y - ca * d * s;
     if (!solidAt(x, y)) { pl.x = x; pl.y = y; ok = true; break; }
@@ -3135,6 +3276,7 @@ function leaveCar(force) {
   pl.vx = v.vx * 0.25; pl.vy = v.vy * 0.25;
   if (sp > 150 && !force) { pl.hp = Math.max(1, pl.hp - Math.min(25, (sp - 140) * 0.1)); pl.inv = 0.8; popText('Rolled out', pl.x, pl.y - 14, '#FF8A3D'); }
   v.player = false; v.c.thr = v.c.brk = 0; v.c.str = 0; v.c.hb = true; v.driver = false; v.parked = true; v.race = false;
+  if (!v.air) v.z = 0;
   pl.veh = null; stopHum();
   arcRef.sfx.tone(200, 0.08, { type: 'square', vol: 0.09 });
 }
@@ -3173,7 +3315,7 @@ const jobMult = () => 1 + 0.2 * Math.min(G.chain, 5);
 function startJob(o) {
   if (G.job || G.caught) return;
   const type = o.type, need = type !== 'courier';
-  const ok = pl.veh && !pl.veh.wreck && (type !== 'fare' || pl.veh.type !== 'bike');
+  const ok = pl.veh && !pl.veh.wreck && (type !== 'fare' || !pl.veh.T.bike);
   if (need && !ok) {
     if (G.time - (G.needCarT || -9) > 2.5) { G.needCarT = G.time; banner(type === 'fare' ? 'Fares need a car' : 'Get a vehicle first', type === 'fare' ? 'A scooter will not do. Take a car or rickshaw.' : 'Press F beside a car, then drive into the marker', 2200, JT[type].col); }
     return;
@@ -3350,6 +3492,7 @@ function updateHeat(dt) {
   }
   G.arrest = cond ? G.arrest + dt / 1.15 : Math.max(0, G.arrest - dt * 1.6);
   if (G.arrest >= 1) startCaught('busted');
+  updateEscalation(dt);
 }
 
 /* ---- the player */
@@ -3359,12 +3502,15 @@ function updatePlayer(dt) {
   if (G.caught) return;
   const arc = arcRef, gmode = arc.touchMode && arc.touchStyle !== 'pads', tiltM = arc.touchMode && arc.touchStyle === 'tilt';
   const tap = inp.tap(), swipe = inp.swipe();
+  if (pl.punchT > 0) pl.punchT -= dt;
   if (inp.hit('KeyF')) { if (pl.veh) leaveCar(false); else tryEnter(); }
   else if (tap && gmode && !G.mapOpen) {
     if (pl.veh) { if (vSpeed(pl.veh) < 40 || pl.veh.wreck) leaveCar(false); else G.brakeUntil = G.time + 0.6; }
-    else tapEnter(tap);
+    else if (!tapEnter(tap)) punch();
   }
-  if (swipe && gmode) { if (pl.veh) { if (swipe.dir === 'up') G.hornReq = 0.3; } else G.dashT = 1.2; }
+  if (inp.hit('KeyJ') || (inp.pointer.pressed && inp.pointer.type === 'mouse' && !arc.touchMode)) { if (pl.veh) { if (inp.hit('KeyJ')) radioSwitch(1); } else punch(); }
+  if (inp.hit('KeyR') && pl.veh) radioSwitch(1);
+  if (swipe && gmode) { if (pl.veh) { if (swipe.dir === 'up') G.hornReq = 0.3; else if (swipe.dir === 'left' || swipe.dir === 'right') radioSwitch(swipe.dir === 'right' ? 1 : -1); } else G.dashT = 1.2; }
   G.hornReq -= dt; G.dashT -= dt;
   const horn = inp.down('KeyH') || G.hornReq > 0;
   G.hornCd -= dt;
@@ -3395,7 +3541,7 @@ function updatePlayer(dt) {
     c.hb = inp.down('Space') || (gmode && G.stopHold && c.brk < 0.3);
     pl.x = v.x; pl.y = v.y; pl.a = v.a;
     if (pl.hum) {
-      const sp = vSpeed(v), base = v.type === 'bike' ? 70 : v.type === 'coupe' ? 62 : v.type === 'van' ? 42 : v.type === 'auto' ? 52 : 50;
+      const sp = vSpeed(v), base = v.T.bike ? 70 : v.type === 'coupe' ? 62 : v.type === 'van' ? 42 : v.type === 'auto' ? 52 : 50;
       pl.hum.set(base + sp * (v.type === 'coupe' ? 0.28 : 0.2) + c.thr * 14, v.wreck ? 0 : 0.045 + 0.05 * Math.max(c.thr, sp / v.T.vmax * 0.6));
     }
     if (v.wreck && v.wreckT > 5.4) { leaveCar(true); pl.hp = Math.max(1, pl.hp - 25); }
@@ -3456,8 +3602,12 @@ function updatePlayer(dt) {
   for (const o of G.offers) {
     if (o.hidden) continue;
     if (o.cd > 0) { o.cd -= dt; continue; }
-    if (hyp(pl.x - o.x, pl.y - o.y) < 34) startJob(o);
+    if (hyp(pl.x - o.x, pl.y - o.y) < 34 && !MS.m) startJob(o);
   }
+  // a story marker starts its job when you step or drive into it, not when it appears under your feet
+  const nm = nextMission(), np = nm ? placeOf(nm.at) : null, inMk = !!np && hyp(pl.x - np.x, pl.y - np.y) < 30;
+  if (inMk && !G.inMk && !G.job && missionMarker()) startMission(nm);
+  G.inMk = inMk;
   // near car prompt
   G.nearVeh = null;
   if (!pl.veh) {
@@ -3493,7 +3643,7 @@ function manageSpawns() {
   let nT = 0, nP = 0, nPol = 0;
   for (let i = V.length - 1; i >= 0; i--) {
     const v = V[i], d = hyp(v.x - G.fx, v.y - G.fy), vis = inView(v.x, v.y, 80);
-    if (v.player || (G.job && G.job.rival === v)) { continue; }
+    if (v.player || v.mission || (G.job && G.job.rival === v)) { continue; }
     let rm = false;
     if (v.remove) rm = true;
     else if (v.removeLater) rm = !vis;
@@ -3505,11 +3655,12 @@ function manageSpawns() {
     if (rm) { V.splice(i, 1); continue; }
     if (v.ai && v.ai.kind === 'traffic') { if (v.police) nPol++; else nT++; } else if (v.parked && !v.mine) nP++;
   }
-  for (let i = PD.length - 1; i >= 0; i--) { const p = PD[i], d = hyp(p.x - G.fx, p.y - G.fy); if (d > 1250 || (d > 800 && !inView(p.x, p.y, 40) && rr() < 0.1)) PD.splice(i, 1); }
+  for (let i = PD.length - 1; i >= 0; i--) { const p = PD[i], d = hyp(p.x - G.fx, p.y - G.fy); if (p.guard || p.foe || p.guest) continue; if (d > 1250 || (d > 800 && !inView(p.x, p.y, 40) && rr() < 0.1)) PD.splice(i, 1); }
   if (nT < tTraffic) spawnTraffic(pickTrafficType(), 560, 1050);
   if (nP < tParked) spawnParked(pickParkedType(), 300, 1050);
   if (nPol < 2 && G.phase === 'play' && stars() === 0 && rr() < 0.2) spawnTraffic('police', 700, 1100);
-  if (PD.length < tPed) { spawnPedAt(330, 950); }
+  // fewer people out late at night and in the rain; the ones who are hurry
+  if (PD.length < tPed * (1 - 0.35 * TOD.night) * (1 - 0.3 * WX.rain)) { spawnPedAt(330, 950); }
   managePickups();
 }
 function populate() {
@@ -3526,12 +3677,12 @@ function populate() {
 const nightOf = (h) => { const s = Math.sin(PI * (h - 6) / 12); return clamp((0.18 - s) / 0.5, 0, 1); };
 const duskOf = (h) => { const s = Math.sin(PI * (h - 6) / 12); return Math.max(0, 1 - Math.abs(s - 0.03) / 0.3); };
 const hourText = (h) => { const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60), ap = hh >= 12 ? 'PM' : 'AM', h12 = hh % 12 === 0 ? 12 : hh % 12; return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap; };
-const RANKS = [[0, 'Pavement Rookie'], [500, 'Rickshaw Runner'], [1500, 'Street Hustler'], [3000, 'Saffron Boss'], [6000, 'City Legend']];
+const RANKS = [[0, 'Pavement Rookie'], [500, 'Rickshaw Runner'], [1500, 'Street Hustler'], [3000, 'Bay Boss'], [6000, 'City Legend']];
 const rankOf = (cash) => { let r = RANKS[0]; for (const k of RANKS) if (cash >= k[0]) r = k; return r[1]; };
 const nextRank = (cash) => { for (const k of RANKS) if (cash < k[0]) return k; return null; };
 
 function updateWorld(dt, playing) {
-  G.time += dt; G.hour = (G.hour + dt / 15) % 24;
+  G.time += dt; G.hour = (G.hour + dt / 15) % 24; G.dayClock = (G.dayClock || 0) + dt / 15;
   if (playing) { G.fx = pl.x; G.fy = pl.y; } else {
     G.attractT += dt;
     const L = 3300, t = (G.attractT * 62) % (L * 2), u = t < L ? t : L * 2 - t;
@@ -3546,7 +3697,8 @@ function updateWorld(dt, playing) {
     const moving = v.player || !v.parked || v.vx * v.vx + v.vy * v.vy > 0.25;
     if (!moving) { v.f = 0; v.l = 0; updateVehFx(v, dt); continue; }
     stepVeh(v, dt);
-    collideWorld(v);
+    if (v.T.boat) collideBoat(v); else collideWorld(v);
+    if (v.player) rampCheck(v, dt);
     v.x = clamp(v.x, 24, W - 24); v.y = clamp(v.y, 24, W - 24);
     updateVehFx(v, dt);
   }
@@ -3556,6 +3708,7 @@ function updateWorld(dt, playing) {
       const b = V[j];
       if (Math.abs(a.x - b.x) > 80 || Math.abs(a.y - b.y) > 80) continue;
       if (!a.player && !b.player && a.parked && b.parked && a.vx * a.vx + a.vy * a.vy < 1 && b.vx * b.vx + b.vy * b.vy < 1) continue;
+      if (Math.abs((a.z || 0) - (b.z || 0)) > 14) continue;
       collideVeh(a, b);
     }
   }
@@ -3565,10 +3718,28 @@ function updateWorld(dt, playing) {
   if (G.banner) { G.banner.t += dt; if (G.banner.t > G.banner.max) G.banner = null; }
 }
 
+function mapTap(arc) {
+  const inp = arc.input, p = inp.pointer; if (!p.pressed) return false;
+  const w = arc.w, h = arc.h, top = 56, bottom = w < 520 ? 92 : 70, size = Math.min(w - 24, h - top - bottom), ox = (w - size) / 2, oy = top + (h - top - bottom - size) / 2;
+  const mx = (p.x - ox) / size * W, my = (p.y - oy) / size * W;
+  if (mx < 0 || my < 0 || mx > W || my > W) return false;
+  if (G.wp && hyp(G.wp.x - mx, G.wp.y - my) < 120) { G.wp = null; arc.toast('Waypoint cleared', '', 900); }
+  else { G.wp = { x: mx, y: my }; arc.toast('Waypoint set', Math.round(hyp(mx - pl.x, my - pl.y) / 10) + ' m away', 1100); }
+  arc.sfx.tone(660, 0.06, { type: 'triangle', vol: 0.1 });
+  return true;
+}
 function updatePlay(dt) {
   const arc = arcRef;
+  if (G.panel) { updateCamera(dt, true); return; }
+  if (G.replay) { updateReplay(dt); updateCamera(dt, true); return; }
+  if (G.cut) { updateCut(dt); if (G.cut) { if (pl.veh) { const c0 = pl.veh.c; c0.thr = 0; c0.brk = 0.6; c0.str = 0; } updateWorld(dt, true); if (pl.veh) { pl.x = pl.veh.x; pl.y = pl.veh.y; } updateWeather(dt); updateCamera(dt, true); return; } }
   if (arc.input.hit('KeyM')) { G.mapOpen = !G.mapOpen; arc.sfx.tone(G.mapOpen ? 520 : 400, 0.06, { type: 'triangle', vol: 0.1 }); }
-  if (G.mapOpen) { if (arc.input.tap()) { G.mapOpen = false; } updateCamera(dt, true); return; }
+  if (G.mapOpen) { mapTap(arc); arc.input.tap(); updateCamera(dt, true); return; }
+  if (G.finaleT > 0) { G.finaleT -= dt; if (G.finaleT <= 0 && !G.cut) { storyOver(); return; } }
+  if (MS.cd > 0) MS.cd -= dt;
+  if (G.mode === 'school' && !MS.m && !G.cut && MS.cd <= 0 && !G.schoolDone) startMission(SB.LESSONS[0]);
+  if (G.mode === 'school' && G.schoolDone && !MS.m && !G.cut && !G.overT) { G.overT = 1.5; }
+  if (G.overT > 0) { G.overT -= dt; if (G.overT <= 0) { schoolOver(); return; } }
   if (G.caught) {
     G.caught.t += dt;
     if (G.caught.t > 2.6 && !G.caught.done) { G.caught.done = true; respawnAtSafe(); }
@@ -3576,7 +3747,14 @@ function updatePlay(dt) {
   }
   updatePlayer(dt);
   updateWorld(dt, true);
-  if (!G.caught) { updateJob(dt); updateHeat(dt); }
+  if (!G.caught) { updateJob(dt); updateHeat(dt); updateMission(dt); }
+  updateWeather(dt); updateRadio(dt); recordFrame(dt);
+  if (!G.caught && !MS.m && !G.cut) updatePickupsAndPlaces(dt);
+  if (G.mode === 'story' || G.mode === 'free') { payday(); G.saveT = (G.saveT || 0) + dt; if (G.saveT > 45) { G.saveT = 0; saveNow(); } }
+  G.boatT = (G.boatT || 0) - dt; if (G.boatT <= 0) { G.boatT = 2; if (G.mode !== 'hustle') keepBoats(); }
+  // a stunt in the air: the camera swings out to the side and holds it
+  if (G.stunt && pl.veh && pl.veh.air && !arc.reducedMotion) { const v = pl.veh, sa = v.a + PI / 2 + 0.35; CAM.ov = [v.x + Math.cos(sa) * 120, 30 + v.z * 0.6, v.y + Math.sin(sa) * 120, v.x, v.z + 8, v.y, 50]; G.stuntCam = true; }
+  else if (G.stuntCam) { G.stuntCam = false; CAM.ov = null; }
   G.hintT += dt; if (G.tipT > 0) G.tipT -= dt;
   if (G.chainT > 0) { G.chainT -= dt; if (G.chainT <= 0) G.chain = 0; }
   if (G.mode === 'hustle') {
@@ -3600,7 +3778,7 @@ function updatePlay(dt) {
   const t = arc.touchMode, key = t ? (arc.touchStyle === 'pads' ? 'Tap Car' : 'Tap') : 'Press F';
   G.prompt = '';
   if (!G.caught) {
-    if (!pl.veh && G.nearVeh) { const nv = G.nearVeh; G.prompt = key + ': ' + (nv.driver && !nv.parked ? 'carjack the ' : 'take the ') + nv.T.name.toLowerCase(); }
+    if (!pl.veh && G.nearVeh) { const nv = G.nearVeh; G.prompt = key + ': ' + (nv.driver && !nv.parked ? 'carjack the ' : nv.T.boat ? 'board the ' : 'take the ') + nv.T.name.toLowerCase(); }
     else if (pl.veh && vSpeed(pl.veh) < 40 && !pl.veh.wreck) G.prompt = key + ': get out';
     else if (pl.veh && pl.veh.wreck) G.prompt = key + ': get out now';
   }
@@ -3610,7 +3788,7 @@ function updatePlay(dt) {
 function endHustle() {
   if (G.phase !== 'play') return;
   G.phase = 'over'; G.active = false;
-  stopHum();
+  stopHum(); cleanMission();
   if (vxOn()) {
     const fx = Math.cos(CAM.yaw), fz = Math.sin(CAM.yaw);
     VX.fx.winBurst(vxAt(pl.x + fx * 120, 4, pl.y + fz * 120), { size: 4 });
@@ -3625,6 +3803,24 @@ function endHustle() {
     again: 'Hustle again',
   });
 }
+// The end of the story: a results card over the fireworks.
+function storyOver() {
+  if (G.phase !== 'play') return;
+  saveNow();
+  G.phase = 'over'; G.active = false; stopHum();
+  const S = SAVE.stats, pct = SB.percentOf(SAVE, RAMPS.length, SHELLS.length);
+  arcRef.haptic('success');
+  arcRef.over({
+    score: Math.round(G.cash), scoreLabel: 'Cash', eyebrow: 'The story is done', title: 'Lantern Bazaar <em>is saved</em>',
+    html: '<p>Silas Crane is in a cell, the charter is back on the bazaar wall and Auntie Zarina has a new chai stall. ' + pct + '% of the city done: ' + SAVE.jumps.length + ' stunt jumps, ' + SAVE.shells.length + ' moon shells, ' + (SAVE.props.length) + ' places owned, ' + S.escapes + ' escapes, busted ' + S.busted + (S.busted === 1 ? ' time' : ' times') + '. Keep playing: the city stays open.</p>',
+    again: 'Back to the city',
+  });
+}
+function schoolOver() {
+  if (G.phase !== 'play') return;
+  G.phase = 'over'; G.active = false; stopHum(); saveNow();
+  arcRef.over({ score: Math.round(G.cash), scoreLabel: 'Cash', eyebrow: 'Driving school', title: 'Passed, <em>with style</em>', html: '<p>Walking, driving, braking, losing the police and a fair fist fight: you know it all. Try the story next.</p>', again: 'Take the lesson again' });
+}
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function resetGame() {
@@ -3635,14 +3831,29 @@ function resetGame() {
   pl.hp = 100; pl.inv = 0; pl.veh = null; pl.vx = pl.vy = 0; pl.a = 0.3;
   const s = SAFE[0]; pl.x = s.x + 30; pl.y = s.y + 6;
   G.fx = pl.x; G.fy = pl.y; G.camX = pl.x; G.camY = pl.y; G.lookX = G.lookY = 0; CAM.yaw = START_YAW; CAM.cdist = 120; G.hintT = 0; G.tip = ''; G.tipT = 0; G.brakeUntil = 0; G.hornReq = 0; G.dashT = 0;
-  const sc0 = starterCar(s);
+  const career = G.mode === 'story' || G.mode === 'free';
+  MS.m = null; MS.st = null; MS.cd = G.mode === 'school' ? 1.2 : 0; MS.ents.length = 0; MS.spoke = null;
+  if (G.cut) cutControls(); G.cut = null; G.replay = null; G.panel = false; G.stunt = null; G.finaleCam = false; G.stuntCam = false; G.wp = null; G.say = null; G.carry = false; G.finaleT = 0; G.overT = 0; G.schoolDone = false; G.mrace = null; CAM.ov = null;
+  HELI.on = false; REC.n = 0; REC.head = 0; G.rbCd = 0; G.saveT = 0; G.boatT = 0; G.dayClock = 0;
+  SAVE = SB.loadSave();
+  if (career) { G.cash = SAVE.cash; G.cash0 = SAVE.cash; }
+  RADIO.st = clamp(SAVE.radio | 0, 0, SB.STATIONS.length); RADIO.show = 0; RADIO.djT = 0;
+  const wpin = arcRef.choices.weather || 'auto'; WX.pin = wpin; setWeather(wpin === 'auto' ? 'clear' : wpin); WX.rain = WX_STATES[WX.state].rain; WX.cloud = WX_STATES[WX.state].cloud; WX.wet = WX.rain;
+  let sc0;
+  if (career) { parkGarageCars(s); sc0 = V.find((o) => o.own === 0) || starterCar(s); }
+  else sc0 = starterCar(s);
   pl.x = sc0.x + 58; pl.y = sc0.y + 9; pl.a = PI; G.fx = pl.x; G.fy = pl.y; G.camX = pl.x; G.camY = pl.y;
   populate();
-  const types = ['courier', 'courier', 'courier', 'fare', 'fare', 'race', 'race', 'getaway', 'getaway'];
-  types.forEach((t, i) => { const o = { type: t, x: 0, y: 0, cd: 0, hidden: false }; G.offers.push(o); placeOffer(o, pl.x, pl.y, i < 4 ? 260 : 500, i < 4 ? 1100 : 2400); });
+  if (G.mode !== 'school') {
+    const types = ['courier', 'courier', 'courier', 'fare', 'fare', 'race', 'race', 'getaway', 'getaway'];
+    types.forEach((t, i) => { const o = { type: t, x: 0, y: 0, cd: 0, hidden: false }; G.offers.push(o); placeOffer(o, pl.x, pl.y, i < 4 ? 260 : 500, i < 4 ? 1100 : 2400); });
+  }
   for (let i = 0; i < 6; i++) managePickups();
-  banner('Saffron City', arcRef.touchMode ? (arcRef.touchStyle === 'pads' ? 'Walk to the car and tap Car. Drive into a glowing marker for a job.' : 'Drag to walk to the yellow car, then tap it to get in. Drive into a glowing marker for a job.') : 'Walk to the yellow car and press F. Drive into a glowing marker for a job.', 5200, '#FFB736');
-  arcRef.toast('Marine Parade', 'Entering', 1800);
+  const gm = arcRef.touchMode && arcRef.touchStyle !== 'pads';
+  const how = arcRef.touchMode ? (gm ? 'Drag to walk, tap a car to get in.' : 'Stick to walk, tap Car to get in.') : 'WASD to walk, F to get in a car.';
+  const nm = nextMission();
+  banner('Sultan Bay', G.mode === 'story' ? (nm ? how + ' Walk into the gold S to start ' + nm.title + '.' : 'The story is done. The city is yours.') : G.mode === 'school' ? 'Driving school with Coach Bina' : G.mode === 'hustle' ? how + ' Ten minutes: cash in every job you can.' : how + ' Glowing markers are jobs, green $ is property for sale.', 5200, '#FFB736');
+  arcRef.toast('Corniche Beach', 'Entering', 1800);
   G.district = districtAt(pl.x, pl.y);
 }
 
@@ -3657,8 +3868,1235 @@ function tapEnter(tap) {
     const d = hyp(v.x - _tapG.x, v.y - _tapG.y);
     if (d < bd) { bd = d; best = v; }
   }
+  if (!best) return false;
   tryEnter(best);
+  return true;
 }
+
+/* ================================================================ SULTAN BAY: the story, the city's systems */
+// Everything the crime caper adds on top of the sandbox: places with names, a mission runner with scenes,
+// police that escalate to roadblocks and a helicopter, boats, stunt ramps, moon shells, property and shops,
+// the radio, the weather, a replay of the big moments and the save file. All of it in sim units (10 cm).
+
+let SAVE = SB.loadSave();
+const saveNow = () => { if (G.mode === 'story' || G.mode === 'free') { SAVE.cash = Math.max(0, Math.round(G.cash)); SB.writeSave(SAVE); } };
+const isDone = (id) => SAVE.done.indexOf(id) >= 0;
+const owns = (id) => SAVE.props.indexOf(id) >= 0;
+
+/* ---- named places */
+// A spot a person can stand on: the nearest open cell to where we asked.
+function walkSpot(x, y) {
+  if (!solidAt(x, y)) return { x, y };
+  for (let r = 8; r < 160; r += 8) for (let k = 0; k < 16; k++) { const a = k / 16 * TAU, px = x + Math.cos(a) * r, py = y + Math.sin(a) * r; if (!solidAt(px, py) && !waterAt(px, py)) return { x: px, y: py }; }
+  return { x, y };
+}
+const cw = (i, j, sx, sy) => { const q = corner(i, j, sx, sy); return walkSpot(q.x, q.y); };
+const PL = {};
+function buildPlaces() {
+  const s0 = SAFE[0];
+  PL.home = walkSpot(s0.x + 34, s0.y + 4);
+  PL.bazaar = cw(6, 7, 0, 0); PL.plaza = cw(10, 10, 1, 1); PL.garage = cw(4, 8, 1, 0); PL.port = cw(2, 13, 0, 1);
+  PL.dock = { x: 372, y: 4004, a: PI, water: true }; PL.dockWalk = { x: 404, y: 4056 }; PL.dockside = walkSpot(560, 4056);
+  PL.buoy = { x: 205, y: 3150, water: true }; PL.jetty = { x: JETTY.x0 - 24, y: JETTY.y + 26, water: true }; PL.jettyWalk = { x: JETTY.x0 + 12, y: JETTY.y };
+  PL.warehouse = cw(4, 14, 0, 0); PL.towers = cw(10, 11, 1, 1); PL.vault = cw(11, 11, 0, 1); PL.exit = cw(10, 12, 0, 1); PL.charter = PL.towers;
+  PL.apron = walkSpot(575, 4250); PL.bank = cw(11, 10, 0, 1); PL.hills = cw(11, 2, 1, 1); PL.parade = cw(1, 6, 0, 1);
+  PL.lighthouse = { x: 205, y: 540, water: true };
+  PL.school1 = cw(1, 5, 0, 1); PL.school2 = cw(1, 3, 0, 1); PL.school3 = walkSpot(s0.x + 6, s0.y + 40);
+  PL.spray1 = cw(8, 5, 0, 0); PL.spray2 = cw(2, 10, 1, 1);
+  PL.stall = PL.bazaar;
+  let bd = 1e9;
+  for (let k = 0; k < BK.length; k++) for (const b of BK[k].b) if (b.k === 'stall') { const d = hyp(b.x - PL.bazaar.x, b.y - PL.bazaar.y); if (d < bd) { bd = d; PL.stall = walkSpot(b.x + 11, b.y + 18); } }
+  // property: the safehouses are homes; businesses have their own doors
+  PL.loft = { x: SAFE[1].x, y: SAFE[1].y }; PL.villa = { x: SAFE[2].x, y: SAFE[2].y }; PL.shed = { x: SAFE[3].x, y: SAFE[3].y }; PL.suite = { x: SAFE[4].x, y: SAFE[4].y };
+  PL.taxi = cw(5, 9, 0, 0); PL.wash = cw(8, 3, 1, 1); PL.juice = cw(0, 9, 1, 0); PL.cinema = cw(3, 3, 0, 0);
+  SAFE.forEach((s, i) => { s.prop = ['home', 'loft', 'villa', 'shed', 'suite'][i]; });
+}
+buildPlaces();
+const SHOPS = [{ k: 'spray', at: 'spray1', name: 'Spray and Shine' }, { k: 'spray', at: 'spray2', name: 'Spray and Shine' }, { k: 'tune', at: 'garage', name: 'Torque Bros garage' }];
+
+/* ---- stunt ramps and moon shells, placed once from a fixed seed so every player finds the same ones */
+const RAMPS = [], SHELLS = [];
+(function placeRamps() {
+  const rg = Arcade.rng(77011);
+  const clear = (x, y, a, len) => { const c = Math.cos(a), s = Math.sin(a); for (let t = -160; t <= len; t += 10) { const px = x + c * t, py = y + s * t; if (solidAt(px, py) || waterAt(px, py) || solidAt(px - s * 20, py + c * 20) || solidAt(px + s * 20, py - c * 20)) return false; } return true; };
+  const tryAt = (x, y, a) => { if (onRoad(x, y)) return false; if (RAMPS.some((r) => hyp(r.x - x, r.y - y) < 500)) return false; if (!clear(x, y, a, 300)) return false; RAMPS.push({ x, y, a, id: 'j' + RAMPS.length }); return true; };
+  // the beach and the promenade, both ways
+  for (let y = 600; y < 4600 && RAMPS.length < 4; y += 700) { const px = shore(y) + SAND + 40; tryAt(px, y, (RAMPS.length % 2) ? PI / 2 : -PI / 2); }
+  tryAt(560, 4440, -PI / 2); tryAt(620, 3990, PI / 2);
+  // parks and open yards
+  for (let t = 0; t < 900 && RAMPS.length < 12; t++) {
+    const P = PARKS[(rg() * PARKS.length) | 0]; if (!P) break;
+    const x = P[0] + 30 + rg() * Math.max(1, P[2] - 60), y = P[1] + 30 + rg() * Math.max(1, P[3] - 60);
+    tryAt(x, y, ((rg() * 4) | 0) * PI / 2);
+  }
+  for (let t = 0; t < 4000 && RAMPS.length < 12; t++) { const x = 800 + rg() * 4000, y = 300 + rg() * 4400; tryAt(x, y, ((rg() * 4) | 0) * PI / 2); }
+})();
+(function placeShells() {
+  const rg = Arcade.rng(55021);
+  const ok = (x, y) => !solidAt(x, y) && !waterAt(x, y) && !SHELLS.some((s) => hyp(s.x - x, s.y - y) < 260);
+  for (let t = 0; t < 4000 && SHELLS.length < 30; t++) {
+    let x, y;
+    const r = rg();
+    if (r < 0.2) { y = 300 + rg() * 4500; x = shore(y) + 10 + rg() * 40; }
+    else if (r < 0.4 && PARKS.length) { const P = PARKS[(rg() * PARKS.length) | 0]; x = P[0] + rg() * P[2]; y = P[1] + rg() * P[3]; }
+    else { const q = corner((rg() * NX) | 0, (rg() * NY) | 0, rg() < 0.5 ? 1 : 0, rg() < 0.5 ? 1 : 0); x = q.x + (rg() - 0.5) * 30; y = q.y + (rg() - 0.5) * 30; }
+    if (ok(x, y)) SHELLS.push({ x, y, id: 's' + SHELLS.length });
+  }
+})();
+
+/* ---- the mission runner */
+const MS = { m: null, i: -1, st: null, cd: 0, list: 'story', ents: [], spoke: null };
+const missionList = () => (G.mode === 'school' ? SB.LESSONS : SB.MISSIONS);
+function nextMission() {
+  if (G.mode === 'school') return SAVE.lessons.indexOf('t1') >= 0 && G.schoolDone ? null : SB.LESSONS[0];
+  if (G.mode !== 'story') return null;
+  return SB.MISSIONS[SAVE.story] || null;
+}
+const placeOf = (name) => PL[name] || PL.home;
+function missionMarker() { const m = nextMission(); if (!m || MS.m || MS.cd > 0) return null; return { m, p: placeOf(m.at) }; }
+
+// A scene: letterbox, the camera on the speaker, one line at a time. The giver stands beside you while they talk.
+function playCut(lines, then) {
+  if (!lines || !lines.length) { if (then) then(); return; }
+  G.cut = { lines, i: 0, t: 0, then, yaw: CAM.yaw + 0.9 };
+  if (POST) POST.letterbox(1, 0.5);
+  // a scene is watched, not played: the on-screen controls step aside until it ends
+  if (arcRef.setPads) arcRef.setPads([]); if (arcRef.showStick) arcRef.showStick(false);
+  cutGuest(lines);
+  arcRef.sfx.tone(392, 0.12, { type: 'triangle', vol: 0.08 });
+}
+function cutGuest(lines) {
+  const who = lines.map((l) => l[0]).find((w) => w !== 'kiran');
+  if (!who || MS.spoke) return;
+  const a = (pl.veh ? pl.veh.a : pl.a) + PI / 2, gx = pl.x + Math.cos(a) * (pl.veh ? 38 : 22), gy = pl.y + Math.sin(a) * (pl.veh ? 38 : 22);
+  if (solidAt(gx, gy) || waterAt(gx, gy)) return;
+  const n = nearestNode(gx, gy), p = mkPed({ i: n.i, j: n.j, sx: 0, sy: 0 });
+  p.x = gx; p.y = gy; p.pause = 999; p.idle = 'chat'; p.guest = true; p.shirt = SB.CAST[who] ? SB.CAST[who].col : '#FFB736';
+  p.a = Math.atan2(pl.y - gy, pl.x - gx); pedLook(p, pl.x, pl.y, 99);
+  MS.spoke = p;
+}
+function cutControls() { if (arcRef.setPads) arcRef.setPads(PADS); if (arcRef.showStick) arcRef.showStick(true); }
+// How many lamp posts and trees stand between a camera and the people it frames: the street is full of both, and a
+// shot that only checks walls ends up looking at a pole
+function cutOccluders(cx, cz, tx, tz) {
+  let n = 0;
+  const x0 = Math.min(cx, tx), x1 = Math.max(cx, tx), z0 = Math.min(cz, tz), z1 = Math.max(cz, tz);
+  const dx = tx - cx, dz = tz - cz, L2 = dx * dx + dz * dz || 1;
+  const near = (px, pz, r) => { const t = clamp(((px - cx) * dx + (pz - cz) * dz) / L2, 0, 1); return hyp(cx + dx * t - px, cz + dz * t - pz) < r; };
+  for (let ty = clamp(Math.floor((z0 - 40) / TILE), 0, TN - 1); ty <= clamp(Math.floor((z1 + 40) / TILE), 0, TN - 1); ty++) {
+    for (let tx2 = clamp(Math.floor((x0 - 40) / TILE), 0, TN - 1); tx2 <= clamp(Math.floor((x1 + 40) / TILE), 0, TN - 1); tx2++) {
+      const bk = BK[ty * TN + tx2]; if (!bk) continue;
+      for (const l of bk.l) if (near(l.x, l.y, 8)) n++;
+      for (const t of bk.t) if (near(t.x, t.y, t.r * 2.6 + 4)) n++;
+      // the signal poles on the four corners of every junction
+      for (const q of RB[ty * TN + tx2].inter) {
+        const sx = XR[q.i].hw + 6, sy = YR[q.j].hw + 6, cx2 = XC[q.i], cy2 = YC[q.j];
+        if (near(cx2 - sx, cy2 - sy, 8)) n++; if (near(cx2 + sx, cy2 + sy, 8)) n++; if (near(cx2 + sx, cy2 - sy, 8)) n++; if (near(cx2 - sx, cy2 + sy, 8)) n++;
+      }
+    }
+  }
+  return n;
+}
+function endCut() {
+  const c = G.cut; G.cut = null; CAM.ov = null;
+  if (POST) POST.letterbox(0, 0.4);
+  cutControls();
+  if (MS.spoke) { MS.spoke.pause = 0; MS.spoke.idle = ''; MS.spoke.lookT = 0; MS.spoke.guest = false; MS.spoke = null; }
+  if (c && c.then) c.then();
+}
+function updateCut(dt) {
+  const c = G.cut, ln = c.lines[c.i], inp = arcRef.input;
+  c.t += dt;
+  const need = clamp(ln[1].length * 0.055, 2.4, 6.5);
+  const skip = c.t > 0.35 && (inp.hit('Space', 'Enter', 'KeyJ', 'KeyF', 'Escape') || inp.tap() || inp.pointer.pressed);
+  if (c.t > need || skip) {
+    c.i++; c.t = 0;
+    if (c.i >= c.lines.length) { endCut(); return; }
+    arcRef.sfx.tone(c.lines[c.i][0] === 'kiran' ? 330 : 392, 0.08, { type: 'triangle', vol: 0.06 });
+  }
+  // a two-shot that slowly circles the two of them; it cuts to the other side for each new speaker
+  const tx = MS.spoke ? (pl.x + MS.spoke.x) / 2 : pl.x, ty = MS.spoke ? (pl.y + MS.spoke.y) / 2 : pl.y;
+  // pick, once per line, the angle that sees them both with no wall in the way
+  const red = arcRef.reducedMotion, dist = pl.veh ? 110 : 56, h = pl.veh ? 34 : 19;
+  if (c.shotI !== c.i) {
+    // a two-shot: side on to the line between the two of them, a little over the shoulder of whoever is listening
+    const sp = MS.spoke, ax = sp ? Math.atan2(sp.y - pl.y, sp.x - pl.x) : (pl.veh ? pl.veh.a : pl.a);
+    c.shotI = c.i; let best = ax + PI / 2, bs = -1e9, bo = 0;
+    for (let k = 0; k < 12; k++) {
+      const yw = ax + PI / 2 + (c.i % 2 ? 0.35 : -0.35) + k * TAU / 12, cx = tx - Math.cos(yw) * dist, cz = ty - Math.sin(yw) * dist;
+      // look along the lines to each of them, not just the middle: a pole beside one of them blocks that one
+      const sp2 = MS.spoke, oc = cutOccluders(cx, cz, pl.x, pl.y) + (sp2 ? cutOccluders(cx, cz, sp2.x, sp2.y) : 0);
+      let sc = clearLine(cx, cz, tx, ty) && !solidAt(cx, cz) ? 3 : 0; sc -= oc * 1.2; sc += onRoad(cx, cz) ? 0.6 : 0; sc += k === 0 ? 0.3 : 0; sc -= k * 0.01;
+      if (sc > bs) { bs = sc; best = yw; bo = oc; }
+    }
+    // when every side has a pole in it, crane up so the two of them are framed over it
+    c.camYaw = best; c.camH = bo ? h * 1.9 : h;
+  }
+  const yaw = c.camYaw + (red ? 0 : c.t * 0.04);
+  CAM.ov = [tx - Math.cos(yaw) * dist, c.camH || h, ty - Math.sin(yaw) * dist, tx, pl.veh ? 12 : 14, ty, arcRef.w < arcRef.h ? 62 : 46];
+}
+
+function startMission(m) {
+  if (MS.m || G.cut) return;
+  if (G.job) failJob('Dropped for the story', true);
+  MS.m = m; MS.i = -1; MS.st = null; MS.ents = []; MS.crash0 = G.stats.crashes;
+  G.heat = Math.min(G.heat, 0.9);
+  banner(m.title, SB.CAST[m.giver] ? SB.CAST[m.giver].name : '', 2200, '#FFB736');
+  arcRef.sfx.tone(523, 0.14, { type: 'triangle', vol: 0.12 }); arcRef.sfx.tone(784, 0.2, { type: 'triangle', vol: 0.12, delay: 0.12 });
+  playCut(m.intro, () => nextStep());
+}
+function msEnt(v) { MS.ents.push(v); v.mission = true; return v; }
+function cleanMission() {
+  for (const e of MS.ents) {
+    if (e.T) { e.mission = false; if (!e.player) { e.ai = null; e.removeLater = true; e.siren = false; } }
+    else { const k = PD.indexOf(e); if (k >= 0) { if (e.guard || e.foe) PD.splice(k, 1); else { e.foe = false; e.state = 'walk'; } } }
+  }
+  MS.ents.length = 0;
+  if (G.mrace) G.mrace = null;
+}
+function nextStep() {
+  const m = MS.m; if (!m) return;
+  MS.i++;
+  if (MS.i >= m.steps.length) { passMission(); return; }
+  const s = m.steps[MS.i], st = MS.st = { k: s.k, s, t: 0, label: s.label || '' };
+  const D = DIFF[G.diff];
+  switch (s.k) {
+    case 'talk': playCut(s.lines, () => nextStep()); return;
+    case 'heat': G.heat = Math.max(G.heat, s.stars + 0.05); G.unseen = 0; if (!s.quiet) banner(s.stars + ' stars', 'The police are coming', 1800, '#FF5252'); nextStep(); return;
+    case 'hour': G.hour = s.h; nextStep(); return;
+    case 'steal': {
+      const p = placeOf(s.at);
+      let v = null;
+      for (const o of V) if (o.type === s.type && !o.player && !o.wreck && hyp(o.x - p.x, o.y - p.y) < 160) v = o;
+      if (!v) {
+        if (s.type === 'boat') v = mkVeh('boat', p.x, p.y, p.a != null ? p.a : PI, { parked: true });
+        else { const sp = nearestParkSpot(p.x, p.y); v = mkVeh(s.type, sp.x, sp.y, sp.a, { parked: true }); }
+        v.c.hb = true; v.driver = false;
+      }
+      st.v = msEnt(v); st.tx = v.x; st.ty = v.y;
+      break;
+    }
+    case 'drive': case 'goto': case 'pickup': case 'deliver': case 'boat': {
+      const p = placeOf(s.at); st.tx = p.x; st.ty = p.y;
+      if (s.time) st.tl = st.tmax = s.time * D.time;
+      if (s.k === 'deliver') st.v = pl.veh;
+      st.crash0 = G.stats.crashes;
+      break;
+    }
+    case 'wait': st.hold = 0; break;
+    case 'tail': case 'escort': case 'chase': setupFollow(s, st); break;
+    case 'race': setupMissionRace(s, st); break;
+    case 'brawl': setupBrawl(s, st); break;
+    case 'stealth': setupStealth(s, st); break;
+  }
+  if (st.label && s.k !== 'race') banner(st.label, '', 2400, '#FFB736');
+}
+function nearestParkSpot(x, y) {
+  const n = nearestNode(x, y), useH = Math.abs(y - YC[n.j]) < Math.abs(x - XC[n.i]);
+  const rp = useH ? { axis: 'h', idx: n.j, pos: clamp(x, XC[0] + 90, XC[NX - 1] - 90) } : { axis: 'v', idx: n.i, pos: clamp(y, YC[0] + 90, YC[NY - 1] - 90) };
+  const C = rp.axis === 'h' ? XC : YC, R = rp.axis === 'h' ? XR : YR;
+  for (let k = 0; k < C.length; k++) if (Math.abs(rp.pos - C[k]) < R[k].hw + 70) rp.pos = C[k] + (rp.pos > C[k] ? 1 : -1) * (R[k].hw + 72);
+  return parkSpot(rp, 1);
+}
+// A route along the road grid: a walk from one node to another, or a random wander that never doubles back.
+function routeTo(ax, ay, bx, by) {
+  const a = nearestNode(ax, ay), b = nearestNode(bx, by), out = [];
+  let i = a.i, j = a.j;
+  while (i !== b.i || j !== b.j) { if (i !== b.i && (j === b.j || rr() < 0.5)) i += i < b.i ? 1 : -1; else j += j < b.j ? 1 : -1; out.push({ x: XC[i], y: YC[j] }); }
+  out.push({ x: bx, y: by });
+  return out;
+}
+function routeWander(x, y, n, awayX, awayY) {
+  const a = nearestNode(x, y), out = []; let i = a.i, j = a.j, pi = -1, pj = -1;
+  for (let k = 0; k < n; k++) {
+    const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map((q) => [i + q[0], j + q[1]]).filter((q) => q[0] >= 0 && q[1] >= 0 && q[0] < NX && q[1] < NY && !(q[0] === pi && q[1] === pj));
+    let best = opts[0], bs = -1e9;
+    for (const q of opts) { const sc = hyp(XC[q[0]] - awayX, YC[q[1]] - awayY) * 0.003 + rr() * 2.2; if (sc > bs) { bs = sc; best = q; } }
+    pi = i; pj = j; i = best[0]; j = best[1]; out.push({ x: XC[i], y: YC[j] });
+  }
+  return out;
+}
+function spawnOnRoad(x, y, type, col, faceX, faceY) {
+  const n = nearestNode(x, y);
+  const horiz = Math.abs(faceX - XC[n.i]) > Math.abs(faceY - YC[n.j]);
+  const dir = horiz ? (faceX > XC[n.i] ? 1 : -1) : (faceY > YC[n.j] ? 1 : -1);
+  const lane = horiz ? laneCoord('h', n.j, dir, 0) : laneCoord('v', n.i, dir, 0);
+  const px = horiz ? XC[n.i] + dir * (XR[n.i].hw + 30) : lane, py = horiz ? lane : YC[n.j] + dir * (YR[n.j].hw + 30);
+  const v = mkVeh(type, px, py, headingOf(horiz ? 'h' : 'v', dir), { col });
+  v.driver = true; v.parked = false;
+  return v;
+}
+function setupFollow(s, st) {
+  const D = DIFF[G.diff];
+  if (s.k === 'tail') {
+    const p = placeOf(s.from), q = placeOf(s.to);
+    const v = msEnt(spawnOnRoad(p.x, p.y, 'van', '#2b2f3a', q.x, q.y));
+    v.ai = { kind: 'rival', route: routeTo(v.x, v.y, q.x, q.y), k: 0, cp: 0, go: false, mul: 0.5, rev: 0, done: false };
+    st.v = v; st.sus = 0; st.lost = 0; st.wait = 2.2;
+  } else if (s.k === 'chase') {
+    const v = msEnt(spawnOnRoad(pl.x + Math.cos(pl.a) * 260, pl.y + Math.sin(pl.a) * 260, 'coupe', '#3b2a4f', pl.x + Math.cos(pl.a) * 900, pl.y + Math.sin(pl.a) * 900));
+    v.hp = v.maxhp = 170; v.armor = 0.6; v.wallK = 0.25;
+    v.ai = { kind: 'rival', route: routeWander(v.x, v.y, 60, pl.x, pl.y), k: 0, cp: 0, go: true, mul: 0.78 + 0.08 * (D.rival - 0.82) / 0.16, rev: 0, done: false };
+    st.v = v; st.tl = st.tmax = s.time * D.time; st.far = 0;
+  } else {
+    const p = placeOf(s.from), q = placeOf(s.to);
+    const v = msEnt(spawnOnRoad(p.x, p.y, 'van', '#e8452c', q.x, q.y));
+    v.hp = v.maxhp = 260; v.float = true; v.armor = 0.8;
+    // the parade route: up through the bazaar lanes, along the boulevard, then down to the sea road
+    const mid = { x: XC[3], y: YC[6] }, r1 = routeTo(v.x, v.y, XC[6], YC[4]), r2 = routeTo(XC[6], YC[4], mid.x, mid.y), r3 = routeTo(mid.x, mid.y, q.x, q.y);
+    v.ai = { kind: 'rival', route: r1.concat(r2, r3), k: 0, cp: 0, go: false, mul: 0.36, rev: 0, done: false };
+    st.v = v; st.far = 0; st.wait = 3; st.crew = 0; st.crewT = 5; st.crewMax = 4 + DIFF[G.diff].count;
+  }
+}
+function crewCar(target) {
+  const a = rr() * TAU, x = target.x + Math.cos(a) * 520, y = target.y + Math.sin(a) * 520;
+  const v = msEnt(spawnOnRoad(x, y, 'coupe', '#17171b', target.x, target.y));
+  v.ai = { kind: 'chase', tgt: target, role: (MS.ents.length) % 3, side: rr() < 0.5 ? 1 : -1, mul: 0.86 * DIFF[G.diff].police, rev: 0 };
+  v.crew = true; v.hp = v.maxhp = 90;
+  return v;
+}
+
+/* ---- a race as a mission step: checkpoints through the hills, a rival who drives like a person */
+function setupMissionRace(s, st) {
+  const D = DIFF[G.diff], n0 = nearestNode(pl.x, pl.y), cps = [];
+  let ci = n0.i, cj = n0.j;
+  for (let k = 0; k < (s.n || 6); k++) {
+    for (let t = 0; t < 40; t++) { const ni = clamp(ci + ((rr() * 7) | 0) - 3, 6, NX - 1), nj = clamp(cj + ((rr() * 7) | 0) - 3, 0, 9), dd = Math.abs(ni - ci) + Math.abs(nj - cj); if (dd >= 2 && dd <= 5 && !cps.some((c) => c.i === ni && c.j === nj)) { ci = ni; cj = nj; break; } }
+    cps.push({ i: ci, j: cj, x: XC[ci], y: YC[cj] });
+  }
+  const route = []; let ri = n0.i, rj = n0.j;
+  cps.forEach((c, k) => { while (ri !== c.i || rj !== c.j) { if (ri !== c.i && (rj === c.j || rr() < 0.5)) ri += ri < c.i ? 1 : -1; else rj += rj < c.j ? 1 : -1; route.push({ x: XC[ri], y: YC[rj], cp: ri === c.i && rj === c.j ? k : null }); } });
+  const rv = msEnt(spawnOnRoad(pl.x + 40, pl.y + 30, 'coupe', '#ff3b8a', cps[0].x, cps[0].y));
+  rv.race = true; rv.vmul = 1.02; rv.armor = 0.3; rv.noWreck = true;
+  rv.ai = { kind: 'rival', route, k: 0, cp: 0, go: false, mul: D.rival, rev: 0, done: false };
+  st.r = G.mrace = { cps, cp: 0, stage: 'count', cdt: 3.4, rival: rv, lastN: 0 };
+  rv.ai.rc = st.r;
+  st.tx = cps[0].x; st.ty = cps[0].y;
+  banner('Hill climb', 'Race starts in three', 1800, '#FF5EA8');
+}
+
+/* ---- a fist fight: the other one telegraphs a punch, you step out of it or hit first */
+function setupBrawl(s, st) {
+  const ax = pl.a, fx = pl.x + Math.cos(ax) * 46, fy = pl.y + Math.sin(ax) * 46, sp = walkSpot(fx, fy);
+  const n = nearestNode(sp.x, sp.y), p = mkPed({ i: n.i, j: n.j, sx: 0, sy: 0 });
+  p.x = sp.x; p.y = sp.y; p.foe = true; p.fhp = 100; p.downs = 0; p.state = 'fight'; p.wind = 0; p.cool = 1.2; p.name = SB.CAST[s.foe] ? SB.CAST[s.foe].name : 'Rival';
+  p.shirt = s.foe === 'bina' ? '#7dff9b' : '#ff8a3d'; p.hs = s.foe === 'bina' ? 0.98 : 1.08; p.bw = s.foe === 'bina' ? 1 : 1.25;
+  p.soft = s.foe === 'bina';
+  st.foe = msEnt(p);
+}
+function punch() {
+  if (pl.veh || G.cut || pl.punchT > 0) return;
+  pl.punchT = 0.42;
+  if (HUM.me) HUM.me.h.play('throw', { speed: 2.1, side: 'right', intensity: 0.9 });
+  arcRef.sfx.noise(0.07, { freq: 900, filter: 'bandpass', vol: 0.08 });
+  const fx = Math.cos(pl.a), fy = Math.sin(pl.a);
+  let best = null, bd = 34;
+  for (const p of PD) {
+    if (p.state === 'down' || p.guest) continue;
+    const dx = p.x - pl.x, dy = p.y - pl.y, d = hyp(dx, dy); if (d > 34 || d < 0.1) continue;
+    if ((dx * fx + dy * fy) / d < 0.35) continue;
+    if (d < bd) { bd = d; best = p; }
+  }
+  if (!best) return;
+  arcRef.sfx.tone(140, 0.09, { type: 'square', slide: 70, vol: 0.14 }); arcRef.sfx.noise(0.09, { freq: 500, vol: 0.12 });
+  arcRef.haptic('hit', 0.6);
+  if (vxOn()) VX.fx.impact(vxAt(best.x, 14, best.y), VX.n, { kind: 'dust', size: 0.5 });
+  if (best.foe) {
+    const counter = best.wind > 0;
+    best.fhp -= counter ? 34 : 21; best.wind = 0; best.cool = Math.max(best.cool, 0.5); best.stag = 0.3;
+    best.x += fx * 6; best.y += fy * 6;
+    popText(counter ? 'Counter!' : 'Hit', best.x, best.y - 16, counter ? '#FFB736' : '#ffffff');
+    if (best.fhp <= 0) knockDown(best, fx, fy);
+  } else {
+    knockDown(best, fx, fy);
+    if (MS.m && MS.st && MS.st.k === 'stealth') return;
+    addHeat(G.copDist < 500 ? 0.6 : 0.25, 'punch');
+  }
+}
+function knockDown(p, fx, fy) {
+  p.state = 'down'; p.t = p.foe ? 2.4 : 2.0; p.vx = fx * 60; p.vy = fy * 60; p.idle = ''; p.pause = 0; if (p.mate) { p.mate.mate = null; p.mate = null; }
+  if (p.rig) p.rig.h.play('fall', { intensity: 1 });
+  if (p.foe) { p.downs++; popText(p.downs >= 3 ? 'Down for good' : 'Knocked down ' + p.downs, p.x, p.y - 20, '#FFB736'); arcRef.haptic('heavy', 0.7); if (POST && !arcRef.reducedMotion) POST.kick(-3); }
+  for (let q = 0; q < 6; q++) emit('dust', p.x, p.y, (rr() - 0.5) * 40, (rr() - 0.5) * 40, 0.6, 5, 'rgba(225,215,195,.5)');
+}
+// Down people lie still a moment, then get up and walk off. A sparring foe gets back up to fight on.
+function updateDown(p, dt) {
+  p.t -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(0.05, dt); p.vy *= Math.pow(0.05, dt);
+  if (solidAt(p.x, p.y)) { p.x -= p.vx * dt; p.y -= p.vy * dt; }
+  if (p.t > 0) return;
+  if (p.foe && p.downs < 3) { p.state = 'fight'; p.fhp = 100; p.cool = 1.0; popText('Back up', p.x, p.y - 18, '#ff8a3d'); return; }
+  p.state = 'walk'; p.scared = 3; p.react = 'shout'; p.reactT = 1.2; p.pause = 1.2; pedLook(p, pl.x, pl.y, 1.4);
+  if (p.foe) { p.foe = false; p.done = true; }
+}
+function updateFoe(p, dt) {
+  if (p.state === 'down') { updateDown(p, dt); return; }
+  const dx = pl.x - p.x, dy = pl.y - p.y, d = hyp(dx, dy) || 1, D = DIFF[G.diff];
+  p.a = Math.atan2(dy, dx); pedLook(p, pl.x, pl.y, 0.4);
+  if (p.stag > 0) { p.stag -= dt; p.mv = 0; return; }
+  if (p.wind > 0) {
+    p.wind -= dt; p.mv = 0;
+    if (p.wind <= 0) {
+      if (p.rig) p.rig.h.play('throw', { speed: 2.2, intensity: 1 });
+      if (d < 30 && pl.inv <= 0 && !pl.veh) {
+        const dmg = (p.soft ? 5 : 9) * (0.8 + 0.25 * D.gain); pl.hp -= dmg; pl.inv = 0.5; pl.vx += dx / d * 120; pl.vy += dy / d * 120;
+        popText('Ow!', pl.x, pl.y - 14, '#FF8A3D'); arcRef.sfx.tone(180, 0.12, { type: 'triangle', slide: 90, vol: 0.16 }); arcRef.haptic('hit', 0.7);
+        if (!arcRef.reducedMotion) G.shake = Math.max(G.shake, 4);
+        if (pl.hp <= 0) { pl.hp = 1; startCaught('ko'); }
+      } else popText('Missed', p.x, p.y - 16, '#c9a96e');
+      p.cool = (p.soft ? 1.6 : 1.1) / D.police + rr() * 0.6;
+    }
+    return;
+  }
+  p.cool -= dt;
+  // close in, circle a little, then wind up; a human hesitates and sometimes swings too early
+  const want = 24 + Math.sin(G.time * 1.3 + p.ph) * 4;
+  if (d > want) { const sp = d > 80 ? 52 : 30; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; p.mv = sp; p.anim += dt * PI * sp / 13; }
+  else { const sx = -dy / d, sy = dx / d, k = Math.sin(G.time * 0.8 + p.ph) * 14; p.x += sx * k * dt; p.y += sy * k * dt; p.mv = Math.abs(k); }
+  if (solidAt(p.x, p.y)) { p.x -= dx / d * 30 * dt; p.y -= dy / d * 30 * dt; }
+  if (p.cool <= 0 && d < 46) { p.wind = p.soft ? 0.7 : 0.48; popText('!', p.x, p.y - 22, '#FF5252'); }
+}
+
+/* ---- stealth: guards walk a beat, turn, and see a cone in front of them */
+function setupStealth(s, st) {
+  const p = placeOf(s.at), from = { x: pl.x, y: pl.y };
+  st.tx = p.x; st.ty = p.y; st.sus = 0;
+  const n = s.guards || 3, dx = p.x - from.x, dy = p.y - from.y, L = hyp(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  for (let k = 0; k < n; k++) {
+    const t = (k + 1) / (n + 1), cx = from.x + dx * t, cy = from.y + dy * t, side = k % 2 ? 1 : -1;
+    const a0 = walkSpot(cx - uy * 70 * side, cy + ux * 70 * side), a1 = walkSpot(cx + uy * 60 * side, cy - ux * 60 * side);
+    const nn = nearestNode(a0.x, a0.y), g = mkPed({ i: nn.i, j: nn.j, sx: 0, sy: 0 });
+    g.x = a0.x; g.y = a0.y; g.guard = true; g.pa = a0; g.pb = a1; g.leg = 1; g.hold = rr() * 1.5; g.shirt = '#1d2b4a'; g.sp = 14 + rr() * 4; g.look = 0;
+    msEnt(g);
+  }
+}
+function updateGuard(g, dt) {
+  if (g.state === 'down') { updateDown(g, dt); return; }
+  const tgt = g.leg ? g.pb : g.pa, dx = tgt.x - g.x, dy = tgt.y - g.y, d = hyp(dx, dy);
+  if (g.alert > 0) { g.alert -= dt; g.a += wrapA(Math.atan2(pl.y - g.y, pl.x - g.x) - g.a) * Math.min(1, dt * 3); g.mv = 0; return; }
+  if (g.hold > 0) { g.hold -= dt; g.mv = 0; g.a += Math.sin(G.time * 0.9 + g.ph) * dt * 0.8; return; }
+  if (d < 4) { g.leg = 1 - g.leg; g.hold = 1.6 + rr() * 1.8; return; }
+  g.a += wrapA(Math.atan2(dy, dx) - g.a) * Math.min(1, dt * 4);
+  g.x += Math.cos(g.a) * g.sp * dt; g.y += Math.sin(g.a) * g.sp * dt; g.mv = g.sp; g.anim += dt * PI * g.sp / 12;
+}
+// How much of the player each guard can see this frame, 0..1.
+function guardSees(g) {
+  if (pl.veh || g.state === 'down') return 0;
+  const dx = pl.x - g.x, dy = pl.y - g.y, d = hyp(dx, dy), R = 150 + (pl.sprint ? 40 : 0);
+  if (d > R) return d < 70 && pl.sprint ? 0.4 : 0;
+  const ang = Math.abs(wrapA(Math.atan2(dy, dx) - g.a));
+  if (ang > 0.62 && d > 26) return 0;
+  if (!clearLine(g.x, g.y, pl.x, pl.y)) return 0;
+  return clamp(1.25 - d / R, 0.25, 1);
+}
+
+/* ---- running the current step */
+function updateMission(dt) {
+  const m = MS.m, st = MS.st; if (!m || !st || G.cut) return;
+  const s = st.s, D = DIFF[G.diff];
+  st.t += dt;
+  const dT = st.tx != null ? hyp(pl.x - st.tx, pl.y - st.ty) : 1e9, v = pl.veh;
+  if (st.tl != null) { st.tl -= dt; if (st.tl <= 0) { failMission('Out of time'); return; } }
+  if (s.gentle && G.stats.crashes - st.crash0 >= 3) { failMission(SB.CAST.zarina.name + ' got out and took a rickshaw'); return; }
+  if (s.gentle && G.stats.crashes > st.crash0 && !st.moaned) { st.moaned = true; G.say = { who: 'zarina', text: pick(['Kiran! My knees!', 'Gently, I said gently!', 'Is this how they drive abroad?']), t: 0 }; }
+  if (st.lastCr !== G.stats.crashes) { if (st.lastCr != null && s.gentle) st.moaned = false; st.lastCr = G.stats.crashes; }
+  switch (st.k) {
+    case 'enter': if (v && !v.wreck && !v.T.boat) nextStep(); break;
+    case 'steal':
+      if (st.v.wreck) { failMission('The ' + st.v.T.name + ' was wrecked'); return; }
+      st.tx = st.v.x; st.ty = st.v.y;
+      if (v === st.v) nextStep();
+      break;
+    case 'drive': if (v && !v.wreck && dT < (v.T.boat ? 60 : 46)) nextStep(); break;
+    case 'deliver':
+      if (st.v && st.v.wreck) { failMission('The car was wrecked'); return; }
+      if (st.v && v !== st.v && hyp(pl.x - st.v.x, pl.y - st.v.y) > 600) { failMission('You left the car behind'); return; }
+      if (v && v === st.v && dT < 48 && stars() === 0) nextStep();
+      else if (v === st.v && dT < 48 && stars() > 0 && !st.warned) { st.warned = true; banner('Not with the police watching', 'Lose the stars first', 1800, '#FF5252'); }
+      break;
+    case 'boat': if (v && v.T.boat && dT < 70) { if (vxOn()) VX.fx.splash(vxAt(v.x, -1, v.y)); nextStep(); } break;
+    case 'goto': if (dT < 26 && (!s.foot || !v)) nextStep(); else if (s.foot && v && dT < 120 && !st.told) { st.told = true; banner('On foot for this', 'Get out of the vehicle', 1600, '#FFB736'); } break;
+    case 'pickup':
+      if (dT < 20 && !v) { popText('Got it', pl.x, pl.y - 18, '#7dff9b'); arcRef.sfx.tone(880, 0.1, { type: 'triangle', vol: 0.12 }); arcRef.haptic('success', 0.6); if (m.id === 'm11') G.carry = true; nextStep(); }
+      else if (v && dT < 80 && !st.told) { st.told = true; banner('Get out to pick it up', '', 1400, '#FFB736'); }
+      break;
+    case 'wait': {
+      const still = (v ? vSpeed(v) : hyp(pl.vx, pl.vy)) < 25;
+      st.hold = still ? st.hold + dt : Math.max(0, st.hold - dt * 2);
+      if (st.hold >= s.t) nextStep();
+      break;
+    }
+    case 'lose': if (G.heat <= 0.001) { SAVE.stats.escapes++; nextStep(); } break;
+    case 'tail': {
+      const tv = st.v; if (tv.wreck) { failMission('You wrecked the van'); return; }
+      st.tx = tv.x; st.ty = tv.y;
+      if (st.wait > 0) { st.wait -= dt; if (st.wait <= 0) tv.ai.go = true; }
+      const d = hyp(pl.x - tv.x, pl.y - tv.y);
+      if (d < 90) st.sus += dt * (d < 50 ? 0.8 : 0.4) * D.gain; else st.sus = Math.max(0, st.sus - dt * 0.12);
+      if (d > 560) st.lost += dt; else st.lost = Math.max(0, st.lost - dt);
+      if (st.sus >= 1) { failMission('The driver spotted you'); return; }
+      if (st.lost > 7) { failMission('You lost the van'); return; }
+      if (tv.ai && tv.ai.done) { tv.ai = null; tv.c.brk = 1; tv.c.thr = 0; nextStep(); }
+      break;
+    }
+    case 'chase': {
+      const tv = st.v; st.tx = tv.x; st.ty = tv.y;
+      const d = hyp(pl.x - tv.x, pl.y - tv.y);
+      st.far = d > 900 ? st.far + dt : 0;
+      if (st.far > 8) { failMission('The forger got away'); return; }
+      if (tv.ai && tv.ai.done) tv.ai.route = tv.ai.route.concat(routeWander(tv.x, tv.y, 30, pl.x, pl.y));
+      if (tv.ai) tv.ai.done = false;
+      if (tv.hp < tv.maxhp * 0.35 || tv.wreck) {
+        tv.ai = null; tv.c.thr = 0; tv.c.brk = 1; tv.c.hb = true; tv.driver = false; tv.parked = true; spawnRunner(tv);
+        PL.dropped = walkSpot(tv.x - Math.sin(tv.a) * 26, tv.y + Math.cos(tv.a) * 26);
+        banner('He stopped!', 'The forger ran off. Grab the briefcase', 2000, '#38D6B8'); arcRef.haptic('success', 0.6);
+        nextStep();
+      }
+      break;
+    }
+    case 'escort': {
+      const fv = st.v; st.tx = fv.x; st.ty = fv.y;
+      if (fv.wreck || fv.hp <= 0) { failMission('The float is wrecked'); return; }
+      if (st.wait > 0) { st.wait -= dt; if (st.wait <= 0) fv.ai.go = true; }
+      st.far = hyp(pl.x - fv.x, pl.y - fv.y) > 700 ? st.far + dt : 0;
+      if (st.far > 7) { failMission('You left the float alone'); return; }
+      st.crewT -= dt;
+      if (st.crewT <= 0 && st.crew < st.crewMax && fv.ai && fv.ai.go) { st.crewT = 9 + rr() * 6; st.crew++; crewCar(fv); if (st.crew === 1) banner('Crane\'s crew!', 'Ram them before they ram the float', 1800, '#FF5252'); }
+      for (const e of MS.ents) if (e.crew && e.ai && (e.hp < e.maxhp * 0.45 || e.wreck)) { e.ai = null; e.c.thr = 0; e.c.brk = 1; e.driver = false; e.parked = true; e.removeLater = true; spawnRunner(e); popText('Crew car out', e.x, e.y - 16, '#7dff9b'); }
+      if (fv.ai && fv.ai.done) { fv.ai = null; fv.c.brk = 1; fv.c.thr = 0; nextStep(); }
+      break;
+    }
+    case 'race': {
+      const r = st.r, rv = r.rival;
+      if (r.stage === 'count') {
+        r.cdt -= dt; const n = Math.ceil(r.cdt);
+        if (n !== r.lastN && n > 0) { r.lastN = n; arcRef.sfx.tone(520, 0.12, { type: 'square', vol: 0.14 }); banner(String(n), 'Race starts', 900, '#FF5EA8'); }
+        if (r.cdt <= 0) { r.stage = 'race'; rv.ai.go = true; banner('GO!', '', 900, '#38D6B8'); arcRef.sfx.tone(880, 0.3, { type: 'square', vol: 0.16 }); arcRef.haptic('boost', 0.9); }
+        break;
+      }
+      const cp = r.cps[r.cp];
+      if (cp && hyp(pl.x - cp.x, pl.y - cp.y) < 58) {
+        r.cp++; arcRef.sfx.tone(700 + r.cp * 60, 0.12, { type: 'triangle', vol: 0.15 });
+        if (r.cp >= r.cps.length) { G.mrace = null; nextStep(); return; }
+        popText('Checkpoint ' + r.cp, pl.x, pl.y - 20, '#FF5EA8');
+      }
+      if (rv.ai && rv.ai.done) { failMission('Nisha got there first'); return; }
+      if (rv.stuck > 3.2 && rv.ai) { const a = rv.ai, wp = a.route[Math.min(a.k, a.route.length - 1)]; if (wp) { rv.x = wp.x - Math.cos(rv.a) * 30; rv.y = wp.y - Math.sin(rv.a) * 30; rv.vx = rv.vy = 0; rv.stuck = 0; } }
+      const c2 = r.cps[Math.min(r.cp, r.cps.length - 1)]; st.tx = c2.x; st.ty = c2.y;
+      break;
+    }
+    case 'brawl': {
+      const f = st.foe;
+      st.tx = f.x; st.ty = f.y;
+      if (v) { if (!st.told) { st.told = true; banner('Fists only', 'Get out of the car', 1500, '#FFB736'); } break; }
+      if (f.done || f.downs >= 3) { nextStep(); }
+      break;
+    }
+    case 'stealth': {
+      let see = 0;
+      for (const e of MS.ents) if (e.guard) { const k = guardSees(e); if (k > see) see = k; if (k > 0.3) e.alert = Math.max(e.alert || 0, 0.4); }
+      st.sus = see > 0 ? st.sus + dt * see * 0.9 * D.gain : Math.max(0, st.sus - dt * 0.25);
+      st.seen = see > 0;
+      if (st.sus >= 1) { G.heat = Math.max(G.heat, 2.05); failMission('A guard saw you'); return; }
+      if (dT < 18 && !v) { popText('Deed swapped', pl.x, pl.y - 18, '#7dff9b'); arcRef.sfx.tone(988, 0.12, { type: 'triangle', vol: 0.12 }); nextStep(); }
+      break;
+    }
+  }
+}
+function failMission(why) {
+  const m = MS.m; if (!m) return;
+  cleanMission();
+  if (G.cut) { G.cut = null; CAM.ov = null; cutControls(); }
+  MS.m = null; MS.st = null; MS.cd = 5;
+  G.carry = false;
+  banner('Job failed', why, 2800, '#FF5252');
+  arcRef.haptic('fail', 0.8); arcRef.sfx.tone(240, 0.3, { type: 'sawtooth', slide: 110, vol: 0.16 });
+}
+function passMission() {
+  const m = MS.m; if (!m) return;
+  cleanMission();
+  MS.st = null;
+  G.carry = false;
+  const pay = m.pay;
+  G.cash += pay; SAVE.stats.earned += pay;
+  if (m.id[0] === 't') { if (SAVE.lessons.indexOf(m.id) < 0) SAVE.lessons.push(m.id); G.schoolDone = true; }
+  else if (!isDone(m.id)) { SAVE.done.push(m.id); SAVE.story = Math.max(SAVE.story, SB.MISSIONS.indexOf(m) + 1); }
+  if (m.id === 'm2') addToGarage('super');
+  if (m.id === 'm7') addToGarage('moto');
+  if (m.id === 'm11' && !owns('suite')) SAVE.props.push('suite');
+  saveNow();
+  banner('Job done', money(pay) + (m.unlock ? '   Unlocked: ' + m.unlock : ''), 3600, '#38D6B8');
+  popText('+' + money(pay), pl.x, pl.y - 22, '#7dff9b'); sfxCash(); arcRef.haptic('success', 1);
+  if (POST) POST.flash(0.18, '#e4ffe4');
+  vxPayday();
+  const after = () => { MS.m = null; MS.cd = 4; playCut(m.outro, m.finale ? storyFinale : null); };
+  if (REC.n > 30 && !arcRef.reducedMotion) startReplay('Job done', after); else after();
+}
+function addToGarage(type) {
+  if (SAVE.garage.some((c) => c.type === type)) return;
+  if (SAVE.garage.length >= 5) SAVE.garage.shift();
+  SAVE.garage.push({ type, col: VT[type].cols[0], up: {} });
+}
+// The festival over the bay: a wide shot from the promenade out to sea, and the sky full of fireworks.
+function storyFinale() {
+  G.hour = Math.max(G.hour, 19.4);
+  G.finaleCam = true;
+  CAM.ov = [pl.x + 170, 70, pl.y + 90, pl.x - 420, 150, pl.y - 40, 54];
+  if (vxOn()) {
+    VX.fx.winBurst(vxAt(pl.x - 120, 4, pl.y), { size: 4 });
+    for (let k = 0; k < 5; k++) VX.fx.fireworks(vxAt(pl.x - 380 - k * 70, 170 + k * 30, pl.y + (k - 2) * 160), { size: 8, launch: true, delay: k * 0.35 });
+  }
+  G.finaleT = 3.2;
+  G.fwT = 0;
+}
+
+/* ---- police escalation: roadblocks from three stars, a helicopter with a searchlight from four */
+const HELI = { on: false, x: 0, y: 0, alt: 230, vx: 0, vy: 0, lx: 0, ly: 0, rot: 0, leave: false, see: false, thump: 0 };
+function updateEscalation(dt) {
+  const st = stars();
+  // roadblocks: two cruisers parked across the road ahead of where you are heading
+  G.rbCd = (G.rbCd || 0) - dt;
+  if (st >= 3 && pl.veh && !pl.veh.T.boat && vSpeed(pl.veh) > 140 && G.rbCd <= 0) { G.rbCd = st >= 4 ? 11 : 15; placeRoadblock(); }
+  for (const v of V) {
+    if (!v.rb) continue;
+    const d = hyp(v.x - pl.x, v.y - pl.y);
+    if (st === 0 || d > 1500) { v.remove = true; continue; }
+    if (d < 170 && !(v.ai && v.ai.kind === 'chase')) { v.rb = false; v.parked = false; startChase(v); }
+  }
+  // the helicopter
+  if (st >= 4 && !HELI.on) { const a = rr() * TAU; Object.assign(HELI, { on: true, leave: false, x: pl.x + Math.cos(a) * 1100, y: pl.y + Math.sin(a) * 1100, vx: 0, vy: 0, lx: pl.x, ly: pl.y }); banner('Helicopter', 'Stay out of the searchlight', 1800, '#FF5252'); }
+  if (HELI.on && st < 4) HELI.leave = true;
+  HELI.see = false;
+  if (HELI.on) {
+    const H = HELI, tx = H.leave ? H.x + (H.x - pl.x) : pl.x, ty = H.leave ? H.y + (H.y - pl.y) : pl.y;
+    const pv = pl.veh, px = pv ? pv.vx : pl.vx, py = pv ? pv.vy : pl.vy;
+    const dx = tx + px * 0.6 - H.x - 140, dy = ty + py * 0.6 - H.y, d = hyp(dx, dy) || 1, top = H.leave ? 500 : 360 * DIFF[G.diff].police;
+    H.vx = lerp(H.vx, dx / d * Math.min(top, d * 1.4), Math.min(1, dt * 0.9)); H.vy = lerp(H.vy, dy / d * Math.min(top, d * 1.4), Math.min(1, dt * 0.9));
+    H.x += H.vx * dt; H.y += H.vy * dt; H.rot += dt * 26;
+    // the light swings after you with a person's lag and overshoot; it cannot see through a roof
+    const err = 1 - Math.min(1, dt * (1.6 + st * 0.2));
+    H.lx = pl.x + (H.lx - pl.x) * err + Math.sin(G.time * 1.7) * 6 * dt * 60; H.ly = pl.y + (H.ly - pl.y) * err + Math.cos(G.time * 1.3) * 6 * dt * 60;
+    if (!H.leave && hyp(pl.x - H.lx, pl.y - H.ly) < 78 && hyp(pl.x - H.x, pl.y - H.y) < 700) H.see = true;
+    if (H.leave && hyp(H.x - pl.x, H.y - pl.y) > 1600) H.on = false;
+    H.thump -= dt;
+    const hd = hyp(H.x - pl.x, H.y - pl.y);
+    if (H.thump <= 0 && hd < 1200) { H.thump = 0.085; arcRef.sfx.noise(0.06, { freq: 180, vol: clamp(1 - hd / 1200, 0, 1) * 0.07 }); }
+  }
+  if (HELI.see) G.unseen = 0;
+}
+function placeRoadblock() {
+  const v = pl.veh, ca = Math.cos(v.a), sa = Math.sin(v.a), n = nearestNode(pl.x, pl.y);
+  const horiz = Math.abs(ca) > Math.abs(sa), sg = horiz ? Math.sign(ca) : Math.sign(sa);
+  // on the road you are on, in the middle of the next block but one ahead of you
+  if (horiz ? Math.abs(pl.y - YC[n.j]) > YR[n.j].hw + 10 : Math.abs(pl.x - XC[n.i]) > XR[n.i].hw + 10) return;
+  const C = horiz ? XC : YC, pos = horiz ? pl.x : pl.y;
+  let k = -1;
+  for (let q = 0; q < C.length; q++) { const ahead = (C[q] - pos) * sg; if (ahead > 260 && (k < 0 || ahead < (C[k] - pos) * sg)) k = q; }
+  if (k < 0 || k + sg < 0 || k + sg >= C.length) return;
+  const mid = (C[k] + C[k + sg]) / 2;
+  const x = horiz ? mid : XC[n.i], y = horiz ? YC[n.j] : mid, a = horiz ? PI / 2 : 0;
+  const R = horiz ? YR[n.j] : XR[n.i], half = R.hw * 0.5;
+  let made = 0;
+  for (const s of [-1, 1]) {
+    const px = horiz ? x : x + s * half, py = horiz ? y + s * half : y;
+    if (!freeSpot(px, py, 40)) continue;
+    const c = mkVeh('police', px, py, a + (s > 0 ? 0.25 : -0.25), { parked: true });
+    c.rb = true; c.siren = true; c.driver = false; c.c.hb = true; made++;
+  }
+  if (made) { popText('Roadblock ahead', pl.x, pl.y - 26, '#FF5252'); G.roadblocks = (G.roadblocks || 0) + 1; }
+}
+
+/* ---- the car you are in: boats on the water, flight off a ramp */
+function stepBoat(v, dt) {
+  const T = v.T, c = v.c, ca = Math.cos(v.a), sa = Math.sin(v.a);
+  let f = v.vx * ca + v.vy * sa, l = -v.vx * sa + v.vy * ca;
+  const vmax = T.vmax * (v.vmul || 1);
+  if (!v.wreck) {
+    if (c.thr > 0) f += T.acc * (v.accMul || 1) * c.thr * Math.max(0.05, 1 - Math.pow(clamp(f / vmax, 0, 1.2), 2)) * dt;
+    if (c.brk > 0) f -= (f > 10 ? T.brake : T.acc * 0.5) * c.brk * dt;
+  }
+  f -= f * 0.35 * dt; f = Math.max(f, -vmax * 0.25);
+  l *= Math.exp(-T.grip * dt * (c.hb ? 0.4 : 1));
+  const sf = clamp(Math.abs(f) / 40, 0.15, 1);
+  v.a += c.str * T.steer * sf * (f >= -2 ? 1 : -1) * dt * (1 - 0.3 * clamp(Math.abs(f) / vmax, 0, 1));
+  v.steerVis = lerp(v.steerVis, c.str, Math.min(1, dt * 6));
+  v.vx = ca * f - sa * l; v.vy = sa * f + ca * l; v.f = f; v.l = l;
+  v.x += v.vx * dt; v.y += v.vy * dt;
+  // a white wake off the stern, spray off the bow when it is fast
+  const spd = Math.abs(f);
+  if (spd > 40 && rr() < dt * (8 + spd * 0.04) && vDist(v) < 800) { const bx = v.x - ca * T.L * 0.5, by = v.y - sa * T.L * 0.5; emit('dust', bx + (rr() - 0.5) * 8, by + (rr() - 0.5) * 8, -v.vx * 0.2 + (rr() - 0.5) * 30, -v.vy * 0.2 + (rr() - 0.5) * 30, 1.2, 7 + rr() * 6, 'rgba(235,245,250,.55)'); }
+  if (spd > 240 && rr() < dt * 10 && vxOn() && vDist(v) < 500 && !GL.soft) VX.fx.impact(vxAt(v.x + ca * T.L * 0.4, 0, v.y + sa * T.L * 0.4), VX.n, { kind: 'water', size: 0.45 });
+  v.age += dt; if (v.crashCd > 0) v.crashCd -= dt;
+}
+// A boat runs into anything that is not open water.
+function collideBoat(v) {
+  const T = v.T, ca = Math.cos(v.a), sa = Math.sin(v.a);
+  for (let k = 0; k < T.circ.length; k++) {
+    const cx = v.x + ca * T.circ[k], cy = v.y + sa * T.circ[k];
+    let pushX = 0, pushY = 0, hitAny = false;
+    for (let q = 0; q < 8; q++) {
+      const a = q / 8 * TAU, px = cx + Math.cos(a) * T.r, py = cy + Math.sin(a) * T.r;
+      if (!waterAt(px, py)) { pushX -= Math.cos(a); pushY -= Math.sin(a); hitAny = true; }
+    }
+    if (!hitAny) continue;
+    const l = hyp(pushX, pushY) || 1, nx = pushX / l, ny = pushY / l;
+    v.x += nx * 3; v.y += ny * 3;
+    const vn = v.vx * nx + v.vy * ny;
+    if (vn < 0) { v.vx -= 1.5 * vn * nx; v.vy -= 1.5 * vn * ny; v.vx *= 0.8; v.vy *= 0.8; if (-vn > 80 && v.crashCd <= 0) { v.crashCd = 0.3; crashFx(v, -vn * 0.7, cx, cy); damage(v, (-vn - 80) * 0.05); } }
+  }
+}
+// Ramps: drive up one fast and fly. The slow motion and the side-on camera are the reward.
+function rampCheck(v, dt) {
+  if (v.air || v.T.boat) return;
+  v.z = 0;
+  for (const r of RAMPS) {
+    const dx = v.x - r.x, dy = v.y - r.y; if (dx * dx + dy * dy > 60 * 60) continue;
+    const c = Math.cos(r.a), s = Math.sin(r.a), lx = dx * c + dy * s, lz = -dx * s + dy * c;
+    const along = v.vx * c + v.vy * s;
+    // the lip: anything that crossed the top edge this step at speed leaves the ground
+    if (Math.abs(lz) > 18 || lx < -32 || lx > 32 + Math.max(0, along) * 0.08) continue;
+    v.z = Math.min(15, (lx + 32) / 64 * 15);
+    if (lx > 24 && along > 120) {
+      v.air = { r, t: 0, x0: v.x, y0: v.y, sp: along }; v.vz = along * 0.38 + 30; v.z = 15;
+      if (v.player) { G.stunt = { t: 0, r, best: 0 }; arcRef.sfx.tone(300, 0.4, { type: 'sawtooth', slide: 700, vol: 0.1 }); arcRef.haptic('boost', 0.7); }
+      return;
+    }
+  }
+}
+function airStep(v, dt) {
+  const A = v.air; A.t += dt;
+  v.x += v.vx * dt; v.y += v.vy * dt; v.vx *= Math.pow(0.97, dt); v.vy *= Math.pow(0.97, dt);
+  v.z += v.vz * dt; v.vz -= 560 * dt;
+  v.airPitch = clamp(-v.vz * 0.0011, -0.35, 0.3);
+  if (v.z > 0) return;
+  v.z = 0; v.airPitch = 0;
+  const hard = -v.vz;
+  v.vz = 0; v.air = null;
+  if (hard > 260) { crashFx(v, hard * 0.5, v.x, v.y); damage(v, (hard - 260) * 0.12); }
+  if (vxOn() && vDist(v) < 700) VX.fx.impact(vxAt(v.x, 1, v.y), VX.n, { kind: 'dust', size: 1.2 });
+  if (v.player && G.stunt) {
+    const dist = Math.round(hyp(v.x - A.x0, v.y - A.y0) / 10), airT = A.t;
+    G.stunt = null;
+    if (v.wreck) { banner('Stunt failed', 'Landed it badly', 1600, '#FF5252'); return; }
+    const first = SAVE.jumps.indexOf(A.r.id) < 0, ok = dist >= 18;
+    if (ok && first) { SAVE.jumps.push(A.r.id); G.cash += 500; saveNow(); }
+    const pay = ok ? (first ? 500 : 60) : 0;
+    if (!first && ok) G.cash += pay;
+    banner(ok ? 'Stunt jump' : 'Small hop', dist + ' m in the air, ' + airT.toFixed(1) + ' s' + (pay ? '   ' + money(pay) : '') + (ok && first ? '   ' + SAVE.jumps.length + ' of ' + RAMPS.length : ''), 2400, ok ? '#FFB736' : '#c9a96e');
+    if (ok) { sfxCash(); arcRef.haptic('success', 0.8); if (vxOn()) VX.fx.ring(vxAt(v.x, 2, v.y), '#FFB736'); }
+  }
+}
+
+/* ---- moon shells, property and shops */
+function updatePickupsAndPlaces(dt) {
+  if (G.mode === 'story' || G.mode === 'free') {
+    for (const sh of SHELLS) {
+      if (SAVE.shells.indexOf(sh.id) >= 0) continue;
+      if (hyp(sh.x - pl.x, sh.y - pl.y) < (pl.veh ? 26 : 18)) {
+        SAVE.shells.push(sh.id); G.cash += 50; saveNow(); sfxCash(); arcRef.haptic('success', 0.5);
+        banner('Moon shell', SAVE.shells.length + ' of ' + SHELLS.length + ' found   ' + money(50), 2000, '#bfe7ff');
+        if (vxOn()) VX.fx.ring(vxAt(sh.x, 3, sh.y), '#bfe7ff');
+        if (SAVE.shells.length === SHELLS.length) { G.cash += 5000; banner('Every moon shell!', money(5000) + ' and the Pearl paint', 3200, '#bfe7ff'); }
+      }
+    }
+    // property for sale: walk into the green $ marker
+    G.cdPanel = (G.cdPanel || 0) - dt;
+    if (!pl.veh && G.cdPanel <= 0) for (const P of SB.PROPERTIES) {
+      if (owns(P.id) || (P.story && !isDone(P.story))) continue;
+      const p = placeOf(P.at); if (hyp(p.x - pl.x, p.y - pl.y) < 22) { openPropertyPanel(P); break; }
+    }
+  }
+  // shops: drive in
+  // a shop opens as you drive in, once: you have to leave its forecourt before it opens again
+  let inside = null;
+  if (pl.veh && !pl.veh.T.boat && G.mode !== 'hustle') for (const sh of SHOPS) { const p = placeOf(sh.at); if (hyp(p.x - pl.x, p.y - pl.y) < 40) inside = sh; }
+  if (inside && inside !== G.inShop && vSpeed(pl.veh) < 160) { if (inside.k === 'spray') respray(inside); else openTunePanel(); }
+  G.inShop = inside;
+}
+function copsWatching() { for (const v of V) if (v.police && !v.wreck && v.ai && v.ai.kind === 'chase' && hyp(v.x - pl.x, v.y - pl.y) < 360 && clearLine(v.x, v.y, pl.x, pl.y)) return true; return HELI.see; }
+function respray(sh) {
+  const v = pl.veh, st = stars(), free = owns('wash') && SAVE.washDay !== dayOf();
+  if (st > 0 && copsWatching()) { banner('Not with them watching', 'Break their sight first', 1800, '#FF5252'); return; }
+  const cost = free ? 0 : st > 0 ? 75 * st + 50 : 60;
+  if (G.cash < cost) { banner(sh.name, 'A respray costs ' + money(cost), 1600, '#FFB736'); return; }
+  G.cash -= cost; if (free) SAVE.washDay = dayOf();
+  const cols = v.T.cols.concat(['#2f6fe0', '#e8452c', '#2fd5a0', '#8a4bff', '#e9e7e2', '#3b3f47']);
+  let c = v.col; for (let k = 0; k < 8 && c === v.col; k++) c = pick(cols); v.col = c;
+  const had = st;
+  G.heat = 0; G.unseen = 99; for (const o of V) if (o.ai && o.ai.kind === 'chase' && o.police) releaseCop(o);
+  if (MS.m && MS.st && MS.st.k === 'lose') nextStep();
+  if (had) SAVE.stats.escapes++;
+  saveNow();
+  banner(sh.name, had ? 'New colour, no questions asked   ' + (cost ? money(cost) : 'free') : 'Fresh paint   ' + (cost ? money(cost) : 'free'), 2200, '#38D6B8');
+  arcRef.sfx.noise(0.5, { freq: 3000, filter: 'highpass', vol: 0.08 }); arcRef.haptic('success', 0.5);
+  if (vxOn()) VX.fx.impact(vxAt(v.x, 8, v.y), VX.n, { kind: 'powder', size: 1.2, color: c });
+}
+const dayOf = () => Math.floor(((G.dayClock || 0) + 18.2) / 24);
+function openPanel(p) { G.panel = true; arcRef.input.clear(); arcRef.panel(p); }
+function closePanel() { G.panel = false; G.cdPanel = 3; arcRef.hidePanel(); arcRef.input.clear(); }
+function openPropertyPanel(P) {
+  const can = G.cash >= P.price;
+  openPanel({
+    eyebrow: P.kind === 'home' ? 'Home for sale' : 'Business for sale', title: esc(P.name),
+    html: '<p>' + esc(P.note) + '. Pays <b>' + money(P.income) + '</b> into your wallet every morning' + (P.kind === 'home' ? ', and you can wake up here' : '') + '.</p><div class="stat"><div>Price<b>' + money(P.price) + '</b></div><div>Your wallet<b>' + money(G.cash) + '</b></div></div>',
+    actions: [{ label: can ? 'Buy it' : 'Not enough cash', primary: true, on: () => { if (G.cash >= P.price) { G.cash -= P.price; SAVE.props.push(P.id); saveNow(); arcRef.toast(P.name + ' is yours', money(P.income) + ' every morning', 1800); sfxCash(); } closePanel(); } }, { label: 'Not now', on: closePanel }],
+  });
+}
+function openTunePanel() {
+  const v = pl.veh; if (!v) return;
+  v.up = v.up || {};
+  const rows = SB.UPGRADES.map((u) => { const lv = v.up[u.id] | 0, cost = u.cost[lv]; return '<div class="sb-up"><div><b>' + esc(u.name) + '</b> <span class="sb-pips">' + '■'.repeat(lv) + '□'.repeat(3 - lv) + '</span><small>' + esc(u.note) + '</small></div>' + (lv >= 3 ? '<button type="button" class="sb-buy" disabled>Full</button>' : '<button type="button" class="sb-buy" data-up="' + u.id + '"' + (G.cash < cost ? ' disabled' : '') + '>' + money(cost) + '</button>') + '</div>'; }).join('');
+  const inG = v.own != null;
+  injectCss();
+  openPanel({
+    eyebrow: 'Torque Bros garage', title: esc(v.T.name),
+    html: '<p>Wallet <b>' + money(G.cash) + '</b>. Tune it and the brothers keep it safe for you; it waits at your home every time you wake up.</p><div class="sb-ups">' + rows + '</div>',
+    actions: [{ label: inG ? 'Done' : 'Keep it in my garage', primary: true, on: () => { keepInGarage(v); closePanel(); } }, { label: 'Leave', on: closePanel }],
+  });
+  const card = document.querySelector('.arc-card'); if (!card) return;
+  card.querySelectorAll('[data-up]').forEach((el) => el.addEventListener('click', () => {
+    const u = SB.UPGRADES.find((x) => x.id === el.getAttribute('data-up')), lv = v.up[u.id] | 0;
+    if (lv >= 3 || G.cash < u.cost[lv]) return;
+    G.cash -= u.cost[lv]; v.up[u.id] = lv + 1; applyUpgrades(v); keepInGarage(v); saveNow();
+    arcRef.sfx.tone(520, 0.08, { type: 'triangle', vol: 0.12 }); arcRef.sfx.tone(780, 0.14, { type: 'triangle', vol: 0.12, delay: 0.08 });
+    openTunePanel();
+  }));
+}
+function keepInGarage(v) {
+  const rec = { type: v.type, col: v.col, up: Object.assign({}, v.up || {}) };
+  if (v.own != null && SAVE.garage[v.own]) SAVE.garage[v.own] = rec;
+  else { if (SAVE.garage.length >= 5) SAVE.garage.shift(); SAVE.garage.push(rec); v.own = SAVE.garage.length - 1; }
+  v.mine = true; saveNow();
+}
+function applyUpgrades(v) {
+  const u = v.up || {};
+  v.vmul = 1 + 0.07 * (u.eng | 0); v.accMul = 1 + 0.12 * (u.eng | 0); v.brkMul = 1 + 0.15 * (u.brk | 0); v.armor = 1 - 0.2 * (u.arm | 0); v.gripMul = 1 + 0.07 * (u.tyr | 0);
+}
+// Your own cars wait outside the home you wake up at.
+function parkGarageCars(s) {
+  const list = SAVE.garage.slice(0, 3);
+  list.forEach((c, k) => {
+    if (V.some((o) => o.own === k && !o.wreck && hyp(o.x - s.x, o.y - s.y) < 400)) return;
+    const R = YR[s.j], off = R.blvd ? 76 : 41, type = VT[c.type] ? c.type : 'hatch';
+    const x = XC[s.i] + (s.sx ? 1 : -1) * (XR[s.i].hw + 84 + k * 62), y = YC[s.j] + (s.sy ? 1 : -1) * off;
+    if (!freeSpot(x, y, 40)) return;
+    const v = mkVeh(type, x, y, s.sy ? PI : 0, { parked: true, col: c.col });
+    v.c.hb = true; v.driver = false; v.mine = true; v.own = k; v.up = Object.assign({}, c.up || {}); applyUpgrades(v);
+  });
+}
+// Every morning each property pays in.
+function payday() {
+  const d = dayOf();
+  if (SAVE.lastDay < 0) { SAVE.lastDay = d; return; }
+  if (d <= SAVE.lastDay) return;
+  SAVE.lastDay = d;
+  let sum = 0; for (const P of SB.PROPERTIES) if (owns(P.id)) sum += P.income;
+  if (sum > 0) { G.cash += sum; SAVE.stats.earned += sum; saveNow(); arcRef.toast('Morning takings ' + money(sum), 'From your homes and businesses', 2200); sfxCash(); }
+}
+function keepBoats() {
+  let nd = 0, nj = 0;
+  for (const v of V) if (v.type === 'boat' && !v.player) { if (hyp(v.x - PL.dock.x, v.y - PL.dock.y) < 300) nd++; if (hyp(v.x - PL.jetty.x, v.y - PL.jetty.y) < 300) nj++; }
+  if (nd === 0 && hyp(pl.x - PL.dock.x, pl.y - PL.dock.y) > 300 && hyp(pl.x - PL.dock.x, pl.y - PL.dock.y) < 2400) { const b = mkVeh('boat', PL.dock.x, PL.dock.y, PL.dock.a, { parked: true }); b.c.hb = true; b.driver = false; b.moored = true; }
+  if (nj === 0 && hyp(pl.x - PL.jetty.x, pl.y - PL.jetty.y) > 300 && hyp(pl.x - PL.jetty.x, pl.y - PL.jetty.y) < 2400) { const b = mkVeh('boat', PL.jetty.x, PL.jetty.y, PI, { parked: true }); b.c.hb = true; b.driver = false; b.moored = true; }
+}
+
+/* ---- the radio: five stations made live, and a DJ who talks between songs */
+const RADIO = { st: 0, step: 0, t: 0, dj: '', djT: 0, nextDj: 6, name: '', show: 0 };
+const NOTE = (m) => 440 * Math.pow(2, (m - 69) / 12);
+const SCALE = { maj: [0, 2, 4, 5, 7, 9, 11], min: [0, 2, 3, 5, 7, 8, 10] };
+function stationsOpen() { return SB.STATIONS.filter((s) => !s.unlock || G.mode !== 'story' || isDone(s.unlock)); }
+function radioOn() { return pl.veh && !G.cut && !G.replay && RADIO.st < stationsOpen().length && G.phase === 'play' && !G.panel; }
+function radioSwitch(d) {
+  const n = stationsOpen().length + 1;
+  RADIO.st = (RADIO.st + d + n) % n; SAVE.radio = RADIO.st; RADIO.step = 0; RADIO.t = 0; RADIO.nextDj = 2.5;
+  const S = stationsOpen()[RADIO.st];
+  RADIO.name = S ? S.name : 'Radio off'; RADIO.show = 2.4;
+  arcRef.sfx.noise(0.12, { freq: 2400, filter: 'bandpass', vol: 0.05 });
+}
+function updateRadio(dt) {
+  if (RADIO.show > 0) RADIO.show -= dt;
+  if (RADIO.djT > 0) RADIO.djT -= dt;
+  if (!radioOn()) return;
+  const S = stationsOpen()[RADIO.st]; if (!S) return;
+  RADIO.nextDj -= dt;
+  if (RADIO.nextDj <= 0) {
+    RADIO.nextDj = 22 + rr() * 16;
+    const pool = stars() >= 2 && S.chase ? S.chase : WX.rain > 0.4 && S.rain ? S.rain : S.lines;
+    RADIO.dj = S.host + ': ' + pick(pool); RADIO.djT = 7;
+  }
+  if (!S.bpm || arcRef.sfx.muted) return;
+  const stepT = 60 / S.bpm / 4;
+  RADIO.t += dt;
+  while (RADIO.t >= stepT) {
+    RADIO.t -= stepT;
+    const k = RADIO.step++ % 64, bar = (k / 16) | 0, b16 = k % 16, sc = S.minor ? SCALE.min : SCALE.maj;
+    const deg = S.prog[bar % S.prog.length], root = S.root + sc[deg % 7], vol = 0.026;
+    const swing = S.beat === 'swing' && b16 % 2 ? stepT * 0.33 : 0;
+    // drums
+    if (S.beat !== 'lazy' || b16 % 8 === 0) { if (b16 % 4 === 0) arcRef.sfx.tone(110, 0.12, { type: 'sine', slide: 42, vol: vol * 1.6, delay: swing }); }
+    if (S.beat === 'lazy' && b16 === 10) arcRef.sfx.tone(110, 0.12, { type: 'sine', slide: 42, vol: vol * 1.3 });
+    if ((b16 === 4 || b16 === 12) && S.beat !== 'lazy') arcRef.sfx.noise(0.08, { freq: 1800, filter: 'bandpass', vol: vol * 1.2 });
+    if (S.beat === 'drive' || S.beat === 'four' ? b16 % 2 === 0 : b16 % 4 === 2) arcRef.sfx.noise(0.03, { freq: 7000, filter: 'highpass', vol: vol * 0.6 });
+    // bass on the root, a step in a bar
+    if (b16 === 0 || b16 === 8 || (S.beat === 'drive' && b16 % 4 === 0)) arcRef.sfx.tone(NOTE(root - 12), stepT * (S.beat === 'drive' ? 3 : 6), { type: S.bass, vol: vol * 1.2, delay: swing });
+    // a lead that arpeggiates the chord and wanders a little
+    const pat = [0, -1, 2, -1, 4, -1, 2, 7, 0, -1, 4, -1, 2, 4, -1, -1];
+    if (pat[b16] >= 0) {
+      const iv = pat[b16], noteDeg = (deg + iv) % 7, oct = Math.floor((deg + iv) / 7) * 12;
+      const wob = ((k * 7 + bar * 3) % 11 === 0) ? sc[(noteDeg + 1) % 7] : sc[noteDeg];
+      arcRef.sfx.tone(NOTE(S.root + 12 + wob + oct), stepT * 1.6, { type: S.lead, vol: vol * (S.lead === 'sawtooth' || S.lead === 'square' ? 0.5 : 0.85), delay: swing });
+    }
+  }
+}
+
+/* ---- weather: clear, cloud, rain, storm; wet roads shine and grip less */
+const WX = { state: 'clear', rain: 0, cloud: 0, wet: 0, t: 40, flash: 0, rumble: -1, pin: 'auto' };
+const WX_STATES = { clear: { rain: 0, cloud: 0 }, cloudy: { rain: 0, cloud: 0.55 }, rain: { rain: 0.7, cloud: 0.8 }, storm: { rain: 1, cloud: 1 } };
+function setWeather(s) { WX.state = s; WX.t = 50 + rr() * 70; }
+function updateWeather(dt) {
+  if (WX.pin === 'auto') { WX.t -= dt; if (WX.t <= 0) { const r = rr(); setWeather(WX.state === 'storm' ? 'rain' : r < 0.35 ? 'clear' : r < 0.6 ? 'cloudy' : r < 0.88 ? 'rain' : 'storm'); } }
+  const W0 = WX_STATES[WX.state] || WX_STATES.clear;
+  WX.rain = lerp(WX.rain, W0.rain, 1 - Math.exp(-dt * 0.25)); WX.cloud = lerp(WX.cloud, W0.cloud, 1 - Math.exp(-dt * 0.2));
+  WX.wet = WX.rain > WX.wet ? lerp(WX.wet, WX.rain, 1 - Math.exp(-dt * 0.18)) : lerp(WX.wet, WX.rain, 1 - Math.exp(-dt * 0.04));
+  if (WX.flash > 0) WX.flash -= dt;
+  if (WX.state === 'storm' && WX.rain > 0.6) {
+    WX.next = (WX.next == null ? 6 : WX.next) - dt;
+    if (WX.next <= 0) {
+      WX.next = 7 + rr() * 12; WX.flash = 0.18; WX.rumble = 0.6 + rr() * 1.2;
+      if (POST && !arcRef.reducedMotion) POST.flash(0.22, '#dfe8ff');
+      if (vxOn() && GL.q >= 1) { const a = CAM.yaw + (rr() - 0.5) * 1.2, d = 700 + rr() * 500; VX.fx.lightning(vxAt(CAM.x + Math.cos(a) * d, 700, CAM.z + Math.sin(a) * d), vxAt2(CAM.x + Math.cos(a) * d + 40, 0, CAM.z + Math.sin(a) * d)); }
+    }
+  }
+  if (WX.rumble > 0) { WX.rumble -= dt; if (WX.rumble <= 0) { WX.rumble = -1; arcRef.sfx.noise(1.6, { freq: 160, vol: 0.18 }); arcRef.haptic('heavy', 0.3); } }
+  UN.uWet.value = WX.wet;
+}
+
+/* ---- the replay: the last eight seconds of you and the cars around you, played back from a TV camera */
+const REC_N = 120, REC_K = 8;
+const REC = { buf: new Float32Array(REC_N * REC_K * 6), ids: new Int32Array(REC_N * REC_K), cnt: new Uint8Array(REC_N), head: 0, n: 0, acc: 0 };
+const _recPick = [];
+function recordFrame(dt) {
+  REC.acc += dt; if (REC.acc < 1 / 15) return; REC.acc = 0;
+  const h = REC.head, base = h * REC_K;
+  _recPick.length = 0;
+  if (pl.veh) _recPick.push(pl.veh);
+  for (const v of V) { if (v === pl.veh || _recPick.length >= REC_K) continue; if (hyp(v.x - pl.x, v.y - pl.y) < 320 && !v.parked) _recPick.push(v); }
+  let c = 0;
+  if (!pl.veh) { REC.ids[base] = -1; const o = base * 6; REC.buf[o] = pl.x; REC.buf[o + 1] = pl.y; REC.buf[o + 2] = pl.a; REC.buf[o + 3] = 0; c = 1; }
+  for (const v of _recPick) { if (c >= REC_K) break; const o = (base + c) * 6; REC.ids[base + c] = v.id; REC.buf[o] = v.x; REC.buf[o + 1] = v.y; REC.buf[o + 2] = v.a; REC.buf[o + 3] = v.z || 0; REC.buf[o + 4] = v.vx; REC.buf[o + 5] = v.vy; c++; }
+  REC.cnt[h] = c; REC.head = (h + 1) % REC_N; REC.n = Math.min(REC_N, REC.n + 1);
+}
+function startReplay(title, then) {
+  const frames = Math.min(REC.n, 96);
+  const snap = V.map((v) => [v, v.x, v.y, v.a, v.z || 0, v.vx, v.vy]);
+  G.replay = { t: 0, frames, dur: frames / 15, title, then, snap, px: pl.x, py: pl.y, pa: pl.a, shot: 0 };
+  if (POST) POST.letterbox(1, 0.4);
+}
+function endReplay() {
+  const R = G.replay; if (!R) return;
+  for (const s of R.snap) { const v = s[0]; v.x = s[1]; v.y = s[2]; v.a = s[3]; v.z = s[4]; v.vx = s[5]; v.vy = s[6]; }
+  pl.x = R.px; pl.y = R.py; pl.a = R.pa; G.replay = null; CAM.ov = null;
+  if (POST) POST.letterbox(0, 0.4);
+  if (R.then) R.then();
+}
+const _byId = new Map();
+function updateReplay(dt) {
+  const R = G.replay, inp = arcRef.input;
+  R.t += dt * 0.7;
+  if (R.t > R.dur || (R.t > 0.4 && (inp.hit('Space', 'Enter', 'KeyJ', 'KeyF') || inp.tap() || inp.pointer.pressed))) { endReplay(); return; }
+  const fpos = R.t * 15, f0 = Math.floor(fpos), u = fpos - f0;
+  const idx = (k) => (REC.head - R.frames + clamp(k, 0, R.frames - 1) + REC_N * 2) % REC_N;
+  const h0 = idx(f0), h1 = idx(f0 + 1);
+  _byId.clear(); for (const v of V) _byId.set(v.id, v);
+  let fx = pl.x, fy = pl.y, fa = 0;
+  for (let c = 0; c < REC.cnt[h0]; c++) {
+    const id = REC.ids[h0 * REC_K + c], o0 = (h0 * REC_K + c) * 6;
+    let o1 = o0; for (let c1 = 0; c1 < REC.cnt[h1]; c1++) if (REC.ids[h1 * REC_K + c1] === id) o1 = (h1 * REC_K + c1) * 6;
+    const x = lerp(REC.buf[o0], REC.buf[o1], u), y = lerp(REC.buf[o0 + 1], REC.buf[o1 + 1], u), a = REC.buf[o0 + 2] + wrapA(REC.buf[o1 + 2] - REC.buf[o0 + 2]) * u, z = lerp(REC.buf[o0 + 3], REC.buf[o1 + 3], u);
+    if (id === -1) { pl.x = x; pl.y = y; pl.a = a; if (c === 0) { fx = x; fy = y; fa = a; } continue; }
+    const v = _byId.get(id); if (!v) continue;
+    v.x = x; v.y = y; v.a = a; v.z = z; v.vx = (REC.buf[o1] - REC.buf[o0]) * 15; v.vy = (REC.buf[o1 + 1] - REC.buf[o0 + 1]) * 15;
+    if (c === 0) { fx = x; fy = y; fa = a; }
+  }
+  // a broadcast cut every two seconds: low tracking shot, a crane over the top, a chase camera
+  const shot = Math.floor(R.t / 2) % 3, k = R.t % 2, red = arcRef.reducedMotion;
+  if (shot === 0) { const sa = fa + PI / 2; CAM.ov = [fx + Math.cos(sa) * 90 - Math.cos(fa) * (40 - k * 30), 12, fy + Math.sin(sa) * 90 - Math.sin(fa) * (40 - k * 30), fx, 10, fy, 46]; }
+  else if (shot === 1) { const ya = fa + 0.6 + (red ? 0 : k * 0.25); CAM.ov = [fx - Math.cos(ya) * 150, 150 - k * 20, fy - Math.sin(ya) * 150, fx, 6, fy, 50]; }
+  else CAM.ov = [fx - Math.cos(fa) * 70, 26, fy - Math.sin(fa) * 70, fx + Math.cos(fa) * 60, 10, fy + Math.sin(fa) * 60, 58];
+  G.fx = fx; G.fy = fy;
+}
+
+/* ---- the extra things in the scene: the helicopter, the ramps, the rain, the lighthouse, the moon shells */
+const EX = {};
+function buildExtras(scene, wmat) {
+  // police helicopter: a white body with a blue band, a tail boom, skids and two rotors
+  const hg = new GB(), white = [0.86, 0.87, 0.9], blue = [0.06, 0.18, 0.55], dark = [0.05, 0.05, 0.06];
+  blobG(hg, 0, 16, 0, 22, 12, 11, LOD ? 12 : 8, LOD ? 6 : 4, white, white);
+  boxG(hg, -14, 12, -11.2, 18, 16, 11.2, blue);
+  blobG(hg, 12, 18, 0, 10, 8, 8.8, 10, 4, [0.03, 0.05, 0.08], [0.06, 0.09, 0.12]);
+  boxG(hg, -58, 15, -2, -18, 20, 2, white);
+  boxG(hg, -62, 15, -1, -54, 32, 1, blue);
+  for (const z of [-10, 10]) { boxG(hg, -18, 1, z - 1, 20, 2.6, z + 1, dark); boxG(hg, -8, 2.6, z - 0.6, -6, 6, z + 0.6, dark); boxG(hg, 8, 2.6, z - 0.6, 10, 6, z + 0.6, dark); }
+  boxG(hg, -2, 27, -2, 2, 31, 2, dark);
+  const hm = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.3 });
+  EX.heli = new THREE.Group(); EX.heli.visible = false;
+  const body = new THREE.Mesh(hg.geometry(), hm); body.castShadow = true; EX.heli.add(body);
+  const rg = new GB(); boxG(rg, -88, 0, -2.2, 88, 0.8, 2.2, dark); boxG(rg, -2.2, 0, -88, 2.2, 0.8, 88, dark);
+  EX.rotor = new THREE.Mesh(rg.geometry(), hm); EX.rotor.position.set(0, 31, 0); EX.heli.add(EX.rotor);
+  const tg = new GB(); boxG(tg, -12, -1, -0.5, 12, 1, 0.5, dark);
+  EX.tail = new THREE.Mesh(tg.geometry(), hm); EX.tail.position.set(-60, 26, 2.2); EX.heli.add(EX.tail);
+  EX.heli.scale.setScalar(1.15);
+  scene.add(EX.heli);
+  const cg = new THREE.CylinderGeometry(0.12, 1, 1, 24, 1, true); cg.translate(0, 0.5, 0);
+  EX.beam = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ map: FX.texBeam, color: 0xdfe8ff, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }));
+  EX.beam.frustumCulled = false; EX.beam.visible = false; EX.beam.renderOrder = 3; scene.add(EX.beam);
+  // stunt ramps: a steel wedge in yellow and black chevrons
+  const cv = newCv(128, 64), c = cv.getContext('2d');
+  c.fillStyle = '#e8b21c'; c.fillRect(0, 0, 128, 64); c.fillStyle = '#16161a';
+  for (let k = -2; k < 8; k++) { c.beginPath(); c.moveTo(k * 24, 0); c.lineTo(k * 24 + 12, 0); c.lineTo(k * 24 + 30, 64); c.lineTo(k * 24 + 18, 64); c.closePath(); c.fill(); }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = 4;
+  const wg = new THREE.BufferGeometry();
+  const L = 32, Hh = 15, Wd = 18;
+  const P = [-L, 0, -Wd, L, Hh, -Wd, L, Hh, Wd, -L, 0, Wd, L, 0, -Wd, L, 0, Wd];
+  const pos = [], uv = [];
+  const tri = (a, b, cc, ua, ub, uc) => { for (const i of [a, b, cc]) pos.push(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]); uv.push(...ua, ...ub, ...uc); };
+  tri(0, 2, 1, [0, 0], [3, 1], [3, 0]); tri(0, 3, 2, [0, 0], [0, 1], [3, 1]);
+  tri(1, 2, 5, [0, 0], [1, 0], [1, 0.4]); tri(1, 5, 4, [0, 0], [1, 0.4], [0, 0.4]);
+  tri(0, 1, 4, [0, 0], [1, 0.4], [1, 0]); tri(3, 5, 2, [0, 0], [1, 0], [1, 0.4]);
+  wg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); wg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); wg.computeVertexNormals();
+  EX.ramps = new THREE.InstancedMesh(wg, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.35 }), RAMPS.length);
+  EX.ramps.castShadow = true; EX.ramps.receiveShadow = true;
+  const d = new THREE.Object3D();
+  RAMPS.forEach((r, i) => { d.position.set(r.x, 0.4, r.y); d.rotation.set(0, -r.a, 0); d.updateMatrix(); EX.ramps.setMatrixAt(i, d.matrix); });
+  EX.ramps.instanceMatrix.needsUpdate = true; EX.ramps.computeBoundingSphere();
+  scene.add(EX.ramps);
+  // the lighthouse on its rock, north in the bay
+  const lg = new GB(), rock = [0.24, 0.22, 0.2];
+  blobG(lg, 0, -6, 0, 34, 12, 30, 10, 3, rock, [0.32, 0.3, 0.27]);
+  for (let k = 0; k < 6; k++) cylG(lg, 0, 4 + k * 18, 0, 13 - k * 1.1, 12 - k * 1.1, 18, 14, k % 2 ? [0.9, 0.88, 0.84] : [0.62, 0.08, 0.06]);
+  cylG(lg, 0, 112, 0, 9, 9, 10, 12, [0.95, 0.9, 0.7], [2, 0, 0, 0]);
+  cylG(lg, 0, 122, 0, 10, 2, 8, 12, [0.15, 0.15, 0.17]);
+  EX.light = new THREE.Mesh(lg.geometry(), GL.cityMat); EX.light.position.set(140, 0, 480); EX.light.castShadow = true; scene.add(EX.light);
+  // rain: streaks that live in a box around the camera, moved entirely on the GPU
+  const RN = 2200, rp = new Float32Array(RN * 6), re = new Float32Array(RN * 2);
+  for (let i = 0; i < RN; i++) { const x = rr() * 900, y = rr() * 420, z = rr() * 900; rp.set([x, y, z, x, y, z], i * 6); re[i * 2] = 0; re[i * 2 + 1] = 1; }
+  const rgeo = new THREE.BufferGeometry(); rgeo.setAttribute('position', new THREE.BufferAttribute(rp, 3)); rgeo.setAttribute('aEnd', new THREE.BufferAttribute(re, 1));
+  EX.rainU = { uTime: UN.uTime, uCam: { value: new THREE.Vector3() }, uAmt: { value: 0 }, uWind: { value: new THREE.Vector2(18, 6) } };
+  EX.rain = new THREE.LineSegments(rgeo, new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, uniforms: EX.rainU,
+    vertexShader: 'attribute float aEnd; uniform float uTime; uniform vec3 uCam; uniform float uAmt; uniform vec2 uWind; varying float vA;' +
+      'void main(){ vec3 p = position; float fall = 760.0; p.y = mod(p.y - uTime * fall, 420.0); p.x += uWind.x * (420.0 - p.y) * 0.05; p.z += uWind.y * (420.0 - p.y) * 0.05;' +
+      'vec3 w = vec3(uCam.x + mod(p.x - uCam.x, 900.0) - 450.0, uCam.y - 160.0 + p.y, uCam.z + mod(p.z - uCam.z, 900.0) - 450.0);' +
+      'w -= vec3(uWind.x, -fall, uWind.y) * 0.022 * aEnd; vec4 mv = modelViewMatrix * vec4(w, 1.0); gl_Position = projectionMatrix * mv;' +
+      'float h = fract(sin(dot(position.xz, vec2(12.9898, 78.233))) * 43758.5); vA = step(h, uAmt) * (1.0 - smoothstep(200.0, 450.0, -mv.z)) * mix(0.55, 0.2, aEnd); }',
+    fragmentShader: 'varying float vA; void main(){ if (vA < 0.01) discard; gl_FragColor = vec4(0.82, 0.88, 0.96, min(1.0, vA * 1.15)); }',
+  }));
+  EX.rain.frustumCulled = false; EX.rain.visible = false; EX.rain.renderOrder = 6; scene.add(EX.rain);
+}
+const _hq = new THREE.Quaternion(), _hup = new THREE.Vector3(0, 1, 0), _hdir = new THREE.Vector3();
+function syncExtras(dt) {
+  const H = HELI;
+  EX.heli.visible = H.on && (G.phase === 'play' || G.phase === 'over'); EX.beam.visible = false;
+  // warm-up frames behind the menu: the helicopter and its light drawn once under the street, shadows included
+  if (GL.warmFrames > 0) { GL.warmFrames--; if (!GL.warmFrames && vxOn()) VX.fx.clear(); EX.heli.visible = EX.beam.visible = EX.rain.visible = true; EX.heli.position.set(CAM.lx, -260, CAM.lz); EX.beam.position.set(CAM.lx, -300, CAM.lz); EX.beam.scale.set(30, 100, 30); EX.rainU.uAmt.value = 0; return; }
+  if (EX.heli.visible) {
+    const tilt = clamp(hyp(H.vx, H.vy) / 900, 0, 0.25);
+    EX.heli.position.set(H.x, H.alt + Math.sin(GL.clock * 0.9) * 4, H.y);
+    EX.heli.rotation.set(0, -Math.atan2(H.vy, H.vx), -tilt, 'YXZ');
+    EX.rotor.rotation.y = H.rot; EX.tail.rotation.z = H.rot * 1.7;
+    // the searchlight: a cone of light to the ground and a bright pool where it lands
+    _hdir.set(H.x - H.lx, H.alt - 14, H.y - H.ly); const L = _hdir.length(); _hdir.multiplyScalar(1 / L);
+    _hq.setFromUnitVectors(_hup, _hdir); EX.beam.position.set(H.lx, 1, H.ly); EX.beam.quaternion.copy(_hq); EX.beam.scale.set(38, L, 38);
+    EX.beam.material.opacity = 0.05 + 0.13 * TOD.lamp; EX.beam.visible = true;
+    addPool(H.lx, 2.6, H.ly, 150, H.see ? [1, 0.85, 0.7] : [0.9, 0.95, 1], 0.4 + 0.3 * TOD.lamp);
+    FX.pools.count = nPool; FX.pools.instanceMatrix.needsUpdate = true; FX.pools.instanceColor.needsUpdate = true;
+    const red = Math.floor(GL.clock * 2.5) % 2;
+    FX.glow.add(H.x, H.alt + 4, H.y, red ? 1 : 0.15, red ? 0.12 : 0.3, red ? 0.08 : 1, 0.9, 16);
+  }
+  // rain
+  const amt = WX.rain * (GL.q >= 2 ? 1 : GL.q === 1 ? 0.65 : 0.35);
+  EX.rain.visible = amt > 0.02 && !(G.replay && arcRef.reducedMotion);
+  if (EX.rain.visible) { EX.rainU.uAmt.value = amt; EX.rainU.uCam.value.set(CAM.x, CAM.y, CAM.z); }
+  // the lighthouse lamp turns
+  { const a = GL.clock * 0.9, lx = 140 + Math.cos(a) * 14, lz = 480 + Math.sin(a) * 14; FX.glow.add(lx, 117, lz, 1, 0.92, 0.7, 0.4 + 0.6 * TOD.lamp, 90); FX.glow.add(140, 117, 480, 1, 0.9, 0.7, 0.6, 30); }
+}
+// Markers that only exist for the story and the city: drawn from syncFx's own helpers.
+function extraMarks(mark) {
+  const mm = missionMarker();
+  if (mm) mark(mm.p.x, mm.p.y, 26, 260, '#FFB736', 1);
+  const st = MS.st;
+  if (st && !G.cut && st.tx != null) {
+    const col = st.k === 'stealth' ? '#38D6B8' : st.k === 'race' ? '#FF5EA8' : st.k === 'brawl' ? '#FF8A3D' : '#FFB736';
+    if (!(st.k === 'tail' || st.k === 'chase' || st.k === 'escort' || st.k === 'brawl')) mark(st.tx, st.ty, 34, 240, col, 1);
+    else if (st.v) addRing(st.v.x, st.v.y, st.v.T.L * 0.75, lin(st.k === 'escort' ? '#38D6B8' : '#FF5252'), 0.6 + 0.3 * Math.sin(GL.clock * 6));
+    if (st.k === 'race' && st.r) for (let k = st.r.cps.length - 1; k > st.r.cp; k--) mark(st.r.cps[k].x, st.r.cps[k].y, 24, 100, '#b4446f', 1);
+  }
+  if (G.mode === 'story' || G.mode === 'free') {
+    for (const P of SB.PROPERTIES) { if (owns(P.id) || (P.story && !isDone(P.story))) continue; const p = placeOf(P.at); mark(p.x, p.y, 14, 60, '#7dff9b', 0.45); }
+    for (const sh of SHELLS) {
+      if (SAVE.shells.indexOf(sh.id) >= 0) continue;
+      const dx = sh.x - CAM.x, dz = sh.y - CAM.z; if (dx * dx + dz * dz > 420 * 420) continue;
+      const bob = arcRef.reducedMotion ? 0 : Math.sin(GL.clock * 2.4 + sh.x) * 2;
+      FX.glow.add(sh.x, 8 + bob, sh.y, 0.75, 0.9, 1, 0.95, 16); FX.glow.add(sh.x, 8 + bob, sh.y, 0.5, 0.7, 1, 0.4, 40);
+      addRing(sh.x, sh.y, 9, [0.6, 0.8, 1], 0.4);
+    }
+  }
+  if (G.mode !== 'hustle') for (const sh of SHOPS) { const p = placeOf(sh.at); mark(p.x, p.y, 20, 90, sh.k === 'spray' ? '#38D6B8' : '#9b8cff', 0.55); }
+  // a guard's view: an amber fan on the ground in front of them, red once they have seen you
+  if (st && st.k === 'stealth') for (const g of MS.ents) {
+    if (!g.guard || g.state === 'down' || nCone >= 90) continue;
+    FX.mats.p.set(g.x, 2.6, g.y); FX.mats.e.set(0, -g.a, 0); FX.mats.q.setFromEuler(FX.mats.e); FX.mats.v1.set(150, 1, 150 * 0.72);
+    FX.mats.m2.compose(FX.mats.p, FX.mats.q, FX.mats.v1); FX.cones.setMatrixAt(nCone, FX.mats.m2); setCol(FX.cones, nCone, (g.alert || 0) > 0 ? [1, 0.25, 0.15] : [1, 0.72, 0.25], 0.85); nCone++;
+    const alert = (g.alert || 0) > 0, ca = Math.cos(g.a), sa = Math.sin(g.a);
+    addRing(g.x, g.y, 11, alert ? [1, 0.25, 0.15] : [1, 0.72, 0.25], 0.7);
+    FX.glow.add(g.x + ca * 5, 12, g.y + sa * 5, 1, 0.9, 0.7, 0.9, 14); addPool(g.x + ca * 70, 2.6, g.y + sa * 70, 90, [1, 0.85, 0.6], 0.35);
+  }
+  if (G.wp) mark(G.wp.x, G.wp.y, 18, 160, '#b7a6ff', 0.8);
+}
+
+/* ---- HUD pieces for the story */
+function missionCard(c, x, y, w, arc) {
+  const t = arc.touchMode, fs = t ? 13 : 14, m = MS.m, st = MS.st;
+  c.font = '600 ' + fs + 'px ' + F_UI;
+  const lines = wrapLines(c, st ? st.label || '...' : m.blurb, w - 24, 2);
+  let sub = '', frac = null, fcol = '#FFB736', right = '';
+  if (st) {
+    if (st.tl != null) { frac = st.tl / st.tmax; right = Math.max(0, Math.ceil(st.tl)) + 's'; }
+    if (st.k === 'tail') { frac = st.sus; fcol = '#FF5252'; sub = st.lost > 0.5 ? 'Losing it: ' + Math.max(0, Math.ceil(7 - st.lost)) + 's' : hyp(pl.x - st.v.x, pl.y - st.v.y) < 90 ? 'Too close!' : 'Keep your distance'; }
+    else if (st.k === 'chase') { sub = 'Their car ' + Math.max(0, Math.round((st.v.hp / st.v.maxhp - 0.35) / 0.65 * 100)) + '%'; }
+    else if (st.k === 'escort') { frac = st.v.hp / st.v.maxhp; fcol = '#38D6B8'; sub = 'Float health   Crew cars ' + st.crew + '/' + st.crewMax; }
+    else if (st.k === 'brawl') { const f = st.foe; frac = f.state === 'down' ? 0 : f.fhp / 100; fcol = '#FF8A3D'; sub = (f.name || 'Rival') + '   down ' + f.downs + ' of 3'; }
+    else if (st.k === 'stealth') { frac = st.sus; fcol = st.seen ? '#FF5252' : '#38D6B8'; sub = st.seen ? 'A guard sees you' : 'Unseen'; }
+    else if (st.k === 'race' && st.r) { sub = st.r.stage === 'count' ? 'Get ready' : 'Checkpoint ' + Math.min(st.r.cp + 1, st.r.cps.length) + '/' + st.r.cps.length + '   Nisha ' + (st.r.rival.ai ? st.r.rival.ai.cp : 0); }
+    else if (st.k === 'wait') { frac = st.hold / st.s.t; }
+    else if (st.k === 'lose') sub = stars() + (stars() === 1 ? ' star' : ' stars') + (HELI.on ? ', helicopter up' : '');
+  }
+  const lh = fs + 4, h = 30 + lines.length * lh + (sub ? 16 : 0) + (frac != null ? 12 : 0);
+  plate(c, x, y, w, h, 12, 0.74);
+  c.fillStyle = '#FFB736'; c.beginPath(); c.arc(x + 14, y + 16, 4.5, 0, TAU); c.fill();
+  text(c, (G.mode === 'school' ? 'LESSON' : 'STORY') + '  ' + m.title.toUpperCase(), x + 26, y + 16, '600 11px ' + F_MONO, '#FFB736');
+  text(c, money(m.pay), x + w - 12, y + 16, '700 12px ' + F_MONO, '#7dff9b', 'right');
+  let yy = y + 36;
+  for (const l of lines) { text(c, l, x + 12, yy, '600 ' + fs + 'px ' + F_UI, '#FBF5EC'); yy += lh; }
+  if (sub) { text(c, sub, x + 12, yy, '500 12px ' + F_MONO, 'rgba(251,245,236,.78)'); yy += 16; }
+  if (frac != null) { bar(c, x + 12, yy - 2, w - 24 - (right ? 40 : 0), 6, clamp(frac, 0, 1), fcol); if (right) text(c, right, x + w - 12, yy + 1, '700 12px ' + F_MONO, '#FBF5EC', 'right'); }
+  return h;
+}
+function drawLetterbox(c, w, h, k, tall) { const b = Math.round(Math.min(h * (tall ? 0.17 : 0.11), tall ? 150 : 90) * k); c.fillStyle = '#000'; c.fillRect(0, 0, w, tall ? Math.round(b * 0.6) : b); c.fillRect(0, h - b, w, b); return b; }
+function drawCut(c, arc) {
+  const w = arc.w, h = arc.h, cu = G.cut, ln = cu.lines[cu.i], who = SB.CAST[ln[0]] || { name: ln[0], col: '#fff' };
+  const b = drawLetterbox(c, w, h, clamp(cu.t * 4 + (cu.i ? 1 : 0), 0, 1), true), t = arc.touchMode;
+  const fs = t ? 15 : 19, lh = fs + 6, mw = Math.min(w - 36, 760);
+  c.font = '500 ' + fs + 'px ' + F_UI;
+  const lines = wrapLines(c, ln[1], mw, 3);
+  const top = h - b + 16;
+  c.save(); c.globalAlpha = clamp(cu.t * 6, 0, 1);
+  text(c, who.name.toUpperCase(), w / 2, top, '700 ' + (t ? 11 : 12) + 'px ' + F_MONO, who.col, 'center');
+  lines.forEach((l, i) => text(c, l, w / 2, top + 20 + i * lh, '500 ' + fs + 'px ' + F_UI, '#FBF5EC', 'center'));
+  c.restore();
+  if (MS.m) text(c, MS.m.title, w / 2, Math.round(b * 0.3), '500 ' + (t ? 18 : 24) + 'px ' + F_DISP, '#FFB736', 'center');
+  text(c, (t ? 'Tap' : 'Space') + ' to skip', w - 14, Math.round(b * 0.3), '600 11px ' + F_MONO, 'rgba(251,245,236,.5)', 'right');
+}
+function drawReplayHud(c, arc) {
+  const w = arc.w, h = arc.h, R = G.replay, b = drawLetterbox(c, w, h, clamp(R.t * 3, 0, 1));
+  const on = arc.reducedMotion || Math.floor(R.t * 2) % 2 === 0;
+  if (on) { c.fillStyle = '#ff3b3b'; c.beginPath(); c.arc(24, b + 22, 6, 0, TAU); c.fill(); }
+  text(c, 'REPLAY', 38, b + 22, '700 13px ' + F_MONO, '#FBF5EC');
+  text(c, R.title, w / 2, b / 2 + 2, '500 ' + (arc.touchMode ? 20 : 26) + 'px ' + F_DISP, '#FFB736', 'center');
+  const pw = Math.min(260, w - 60); bar(c, w / 2 - pw / 2, h - b / 2 - 3, pw, 5, R.t / R.dur, '#FFB736');
+  text(c, (arc.touchMode ? 'Tap' : 'Space') + ' to skip', w - 16, h - b / 2, '600 11px ' + F_MONO, 'rgba(251,245,236,.55)', 'right');
+}
+function drawCityExtras(c, arc) {
+  const w = arc.w, h = arc.h, t = arc.touchMode;
+  // the radio: station name when it changes, the DJ along the bottom
+  if (RADIO.show > 0 && pl.veh) {
+    const a = clamp(RADIO.show / 0.4, 0, 1), S = stationsOpen()[RADIO.st];
+    c.save(); c.globalAlpha = a;
+    const y0 = t ? h - (arc.hudPad ? arc.hudPad().bottom : 188) - 96 : h - 118;
+    text(c, RADIO.name, w / 2, y0, '500 ' + (t ? 20 : 24) + 'px ' + F_DISP, '#FBF5EC', 'center');
+    if (S) text(c, S.genre.toUpperCase() + '   ' + S.host.toUpperCase(), w / 2, y0 + 20, '600 10px ' + F_MONO, '#c9a96e', 'center');
+    c.restore();
+  }
+  if (RADIO.djT > 0 && pl.veh && !G.banner) {
+    c.save(); c.globalAlpha = clamp(RADIO.djT / 0.6, 0, 1) * clamp((7 - RADIO.djT) / 0.4, 0, 1);
+    c.font = '500 13px ' + F_UI; const lines = wrapLines(c, RADIO.dj, Math.min(w - 40, 460), 2), bw = Math.min(w - 20, 480), bh = 14 + lines.length * 18;
+    const by = t ? h - (arc.hudPad ? arc.hudPad().bottom : 188) - bh - 64 : h - 150 - bh;
+    plate(c, w / 2 - bw / 2, by, bw, bh, 10, 0.62);
+    lines.forEach((l, i) => text(c, l, w / 2, by + 15 + i * 18, '500 13px ' + F_UI, 'rgba(251,245,236,.9)', 'center'));
+    c.restore();
+  }
+  // a passenger speaking up
+  if (G.say) {
+    G.say.t += 1 / 60; if (G.say.t > 3) G.say = null;
+    else { const who = SB.CAST[G.say.who]; text(c, (who ? who.name + ': ' : '') + G.say.text, w / 2, h * (t ? 0.58 : 0.7), '600 15px ' + F_UI, '#FFB736', 'center'); }
+  }
+  if (G.stunt) { text(c, 'STUNT JUMP', w / 2, h * 0.2, '500 ' + (t ? 26 : 34) + 'px ' + F_DISP, '#FFB736', 'center'); text(c, Math.round(hyp(pl.x - pl.veh.air.x0, pl.y - pl.veh.air.y0) / 10) + ' m', w / 2, h * 0.2 + 30, '700 15px ' + F_MONO, '#FBF5EC', 'center'); }
+  // the arrow for a waypoint when nothing else is pointing
+  const st = MS.st, j = G.job;
+  if (G.stuntCam) return;
+  if (!j && !(st && st.tx != null) && G.wp) drawArrowTo(c, arc, G.wp.x, G.wp.y, '#b7a6ff');
+  else if (!j && st && st.tx != null && !G.cut) drawArrowTo(c, arc, st.tx, st.ty, '#FFB736');
+  if (!j && !MS.m && !G.wp) { const mm = missionMarker(); if (mm && hyp(mm.p.x - pl.x, mm.p.y - pl.y) > 140) drawArrowTo(c, arc, mm.p.x, mm.p.y, '#FFB736', 0.55); }
+}
+function drawArrowTo(c, arc, tx, ty, col, alpha) {
+  const w = arc.w, h = arc.h, t = arc.touchMode, dx = tx - pl.x, dy = ty - pl.y, d = hyp(dx, dy);
+  const on = toScreen(tx, 120, ty) && SCR.x > 30 && SCR.x < w - 30 && SCR.y > 30 && SCR.y < h - 30;
+  if (d < 90 || on) return;
+  const fx = Math.cos(CAM.yaw), fy = Math.sin(CAM.yaw), ang = Math.atan2(dx * -fy + dy * fx, dx * fx + dy * fy);
+  const ax = w / 2, ay = h * (t ? 0.5 : 0.56);
+  c.save(); c.globalAlpha = alpha || 1; c.translate(ax, ay); c.rotate(ang);
+  c.fillStyle = col; c.strokeStyle = '#16130e'; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(0, -20); c.lineTo(14, 10); c.lineTo(0, 3); c.lineTo(-14, 10); c.closePath(); c.fill(); c.stroke();
+  c.restore();
+  c.save(); c.globalAlpha = alpha || 1; c.font = '700 11px ' + F_MONO; c.textAlign = 'center'; c.textBaseline = 'middle';
+  const txt = Math.round(d / 10) + ' m'; c.lineWidth = 3; c.strokeStyle = 'rgba(10,8,5,.85)'; c.strokeText(txt, ax, ay + 28); c.fillStyle = '#fff'; c.fillText(txt, ax, ay + 28); c.restore();
+}
+function storyBlips(out) {
+  const mm = missionMarker(); if (mm) out.push({ x: mm.p.x, y: mm.p.y, col: '#FFB736', ch: 'S', r: 8, pulse: true });
+  const st = MS.st;
+  if (st && st.tx != null) out.push({ x: st.tx, y: st.ty, col: st.k === 'escort' ? '#38D6B8' : '#FFB736', ch: '*', r: 8, pulse: true });
+  if (G.wp) out.push({ x: G.wp.x, y: G.wp.y, col: '#b7a6ff', ch: 'W', r: 7 });
+  if (G.mode !== 'hustle') for (const sh of SHOPS) { const p = placeOf(sh.at); out.push({ x: p.x, y: p.y, col: sh.k === 'spray' ? '#38D6B8' : '#9b8cff', ch: sh.k === 'spray' ? 'P' : 'T', r: 5.5 }); }
+  if (G.mode === 'story' || G.mode === 'free') for (const P of SB.PROPERTIES) { if (owns(P.id) || (P.story && !isDone(P.story))) continue; const p = placeOf(P.at); out.push({ x: p.x, y: p.y, col: '#7dff9b', ch: '$', r: 5.5 }); }
+  for (const r of RAMPS) if (SAVE.jumps.indexOf(r.id) < 0 && G.mode !== 'hustle') out.push({ x: r.x, y: r.y, col: '#e8b21c', ch: '^', r: 5, mapOnly: true });
+  if (G.mode !== 'hustle') { out.push({ x: PL.dock.x, y: PL.dock.y, col: '#6fa8ff', ch: 'B', r: 5, mapOnly: true }); out.push({ x: PL.jetty.x, y: PL.jetty.y, col: '#6fa8ff', ch: 'B', r: 5, mapOnly: true }); }
+}
+
+/* ---- the menu's extra screens */
+const MENU_CSS = '.sb-h{margin:14px 0 6px;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-warm)}' +
+  '.sb-rules p{margin:0 0 8px;font-size:14px;line-height:1.45;color:var(--ink-dim)}.sb-rules b{color:var(--ink);font-weight:600}' +
+  '.sb-tab{width:100%;border-collapse:collapse;margin:4px 0 14px;font-size:13px}.sb-tab td,.sb-tab th{padding:6px 8px;border-bottom:1px solid var(--rule);color:var(--ink-dim);text-align:left;vertical-align:top}.sb-tab th{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:500}' +
+  '.sb-tab tr.me td{color:var(--ink);background:var(--primary-soft)}.sb-tab td.n{font-family:var(--font-mono);text-align:right;white-space:nowrap}.sb-tab small{display:block;color:var(--ink-mute);font-size:12px}' +
+  '.sb-line{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 10px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}.sb-line b{display:block;font-size:16px;color:var(--ink);font-weight:500}' +
+  '.sb-prog{height:8px;border-radius:4px;background:var(--rule);overflow:hidden;margin:4px 0 12px}.sb-prog i{display:block;height:100%;background:var(--accent-warm)}' +
+  '.sb-ups{display:grid;gap:8px;margin:0 0 12px}.sb-up{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 10px;border:1px solid var(--rule);border-radius:10px}.sb-up b{font-size:14px;color:var(--ink);font-weight:500}.sb-up small{display:block;font-size:12px;color:var(--ink-mute)}.sb-pips{font-family:var(--font-mono);color:var(--accent-warm);letter-spacing:.2em;margin-left:6px}' +
+  '.sb-buy{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--rule-strong);background:var(--bg-deep);color:var(--ink);font:600 13px var(--font-body);cursor:pointer}.sb-buy:disabled{opacity:.5;cursor:default}' +
+  '.arc-card:has(.sb-rules),.arc-card:has(.sb-tab){padding-bottom:0}.arc-card:has(.sb-rules) .arc-actions,.arc-card:has(.sb-tab) .arc-actions{position:sticky;bottom:0;background:var(--bg-elev);padding:12px 0 clamp(14px,3vw,22px);margin-top:8px;box-shadow:0 -14px 14px var(--bg-elev);z-index:2}';
+let cssDone = false;
+function injectCss() { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = MENU_CSS; document.head.appendChild(s); }
+function progressHtml() {
+  const pct = SB.percentOf(SAVE, RAMPS.length, SHELLS.length), nm = SB.MISSIONS[SAVE.story];
+  return '<div class="sb-line"><span>Story<b>' + Math.min(SAVE.story, SB.MISSIONS.length) + ' of ' + SB.MISSIONS.length + '</b></span><span>Wallet<b>' + money(SAVE.cash) + '</b></span><span>Complete<b>' + pct + '%</b></span></div>' +
+    '<div class="sb-prog"><i style="width:' + pct + '%"></i></div>' + (nm ? '<p>Next job: <b>' + esc(nm.title) + '</b>. ' + esc(nm.blurb) + '</p>' : '<p>The story is done. The city is yours.</p>');
+}
+function openCity() {
+  injectCss();
+  const rows = SB.MISSIONS.map((m, i) => '<tr class="' + (i === SAVE.story ? 'me' : '') + '"><td>' + (i + 1) + '. ' + esc(m.title) + '<small>' + (i <= SAVE.story ? esc(m.blurb) : 'Locked') + '</small></td><td class="n">' + (isDone(m.id) ? 'Done' : i === SAVE.story ? 'Next' : '') + '</td><td class="n">' + money(m.pay) + '</td></tr>').join('');
+  const props = SB.PROPERTIES.map((P) => '<tr class="' + (owns(P.id) ? 'me' : '') + '"><td>' + esc(P.name) + '<small>' + esc(P.note) + '</small></td><td class="n">' + (owns(P.id) ? 'Owned' : money(P.price)) + '</td><td class="n">+' + money(P.income) + '</td></tr>').join('');
+  const cars = SAVE.garage.map((g) => { const T = VT[g.type] || VT.hatch, u = g.up || {}; const lv = (u.eng | 0) + (u.brk | 0) + (u.arm | 0) + (u.tyr | 0); return '<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:' + esc(g.col) + '"></i>' + esc(T.name) + '</td><td class="n">' + (lv ? lv + ' parts' : 'Stock') + '</td></tr>'; }).join('');
+  const S = SAVE.stats, sd = SAVE.side;
+  arcRef.panel({
+    eyebrow: 'Story and city', title: 'Sultan <em>Bay</em>',
+    html: progressHtml() + '<div class="sb-h">The story</div><table class="sb-tab"><tr><th>Job</th><th></th><th>Pay</th></tr>' + rows + '</table>' +
+      '<div class="sb-h">Property</div><table class="sb-tab"><tr><th>Place</th><th></th><th>A day</th></tr>' + props + '</table>' +
+      '<div class="sb-h">Your garage</div><table class="sb-tab">' + cars + '</table>' +
+      '<div class="sb-line"><span>Stunt jumps<b>' + SAVE.jumps.length + '/' + RAMPS.length + '</b></span><span>Moon shells<b>' + SAVE.shells.length + '/' + SHELLS.length + '</b></span><span>Couriers<b>' + sd.courier + '</b></span><span>Fares<b>' + sd.fare + '</b></span><span>Races won<b>' + sd.race + '</b></span><span>Getaways<b>' + sd.getaway + '</b></span><span>Escapes<b>' + S.escapes + '</b></span><span>Busted<b>' + S.busted + '</b></span><span>Earned<b>' + money(S.earned) + '</b></span></div>',
+    actions: [{ label: 'Back to the menu', primary: true, on: () => arcRef.menu() }, { label: 'Start the story again', on: confirmReset }],
+  });
+}
+function confirmReset() {
+  arcRef.panel({ eyebrow: 'Start again', title: 'Wipe the save?', html: '<p>Your cash, story, property, garage and collectibles go back to the start. Best scores stay.</p>', actions: [{ label: 'Keep my save', primary: true, on: openCity }, { label: 'Wipe and start again', on: () => { SAVE = SB.freshSave(); SB.writeSave(SAVE); arcRef.toast('A fresh start', '', 1400); arcRef.menu(); } }] });
+}
+function openRules() { injectCss(); arcRef.panel({ eyebrow: 'How to play', title: 'A city of <em>chances</em>', html: SB.RULES_HTML, showKeys: true, actions: [{ label: 'Back to the menu', primary: true, on: () => arcRef.menu() }] }); }
 
 /* ================================================================ HUD */
 const F_MONO = '"JetBrains Mono", ui-monospace, monospace', F_UI = 'Inter, -apple-system, sans-serif', F_DISP = 'Fraunces, "Times New Roman", serif';
@@ -3689,6 +5127,7 @@ const blipSpec = () => {
     if (j.cps) { for (let q = j.cp; q < j.cps.length; q++) out.push({ x: j.cps[q].x, y: j.cps[q].y, col: '#FF5EA8', ch: String(q + 1), r: q === j.cp ? 8 : 5.5, pulse: q === j.cp }); }
     else if (j.tx != null) out.push({ x: j.tx, y: j.ty, col: j.col, ch: '*', r: 8, pulse: true });
   }
+  storyBlips(out);
   return out;
 };
 
@@ -3704,6 +5143,7 @@ function drawMinimap(c, cx, cy, R, arc) {
   const edge = R - 9;
   // labels drawn upright: handle by drawing each blip's letter after un-rotating
   for (const b of blipSpec()) {
+    if (b.mapOnly) continue;
     let dx = (b.x - pl.x) * s, dy = (b.y - pl.y) * s; const d = hyp(dx, dy);
     if (d > edge) { dx *= edge / d; dy *= edge / d; }
     const pu = b.pulse ? 1 + 0.18 * Math.sin(G.time * 6) : 1;
@@ -3735,11 +5175,11 @@ function drawMinimap(c, cx, cy, R, arc) {
   c.strokeStyle = G.copDist < 440 && stars() > 0 && !arc.reducedMotion ? (flash ? '#ff5252' : '#4b8bff') : '#c9a96e'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
 }
 
-const DLABELS = [['Marine Parade', 640, 1700], ['Bandar Docks', 1300, 4300], ['Qila Quarter', 1900, 960], ['Chowk Bazaar', 2900, 2200], ['Malabar Heights', 4260, 1100], ['Navi Business Park', 4100, 3900], ['Lakshmi Nagar', 1850, 3000]];
+const DLABELS = [['Corniche Beach', 640, 1700], ['Anchor Port', 1300, 4300], ['Old Qila', 1900, 960], ['Lantern Bazaar', 2900, 2200], ['Cedar Hills', 4260, 1100], ['Crescent Towers', 4100, 3900], ['Palm Gardens', 1850, 3000]];
 function drawFullMap(c, arc) {
   const w = arc.w, h = arc.h;
   c.fillStyle = 'rgba(6,5,3,.92)'; c.fillRect(0, 0, w, h);
-  const top = 56, bottom = 46, size = Math.min(w - 24, h - top - bottom), s = size / W, ox = (w - size) / 2, oy = top + (h - top - bottom - size) / 2;
+  const top = 56, bottom = w < 520 ? 92 : 70, size = Math.min(w - 24, h - top - bottom), s = size / W, ox = (w - size) / 2, oy = top + (h - top - bottom - size) / 2;
   c.save(); c.translate(ox, oy);
   c.fillStyle = '#10141c'; c.fillRect(0, 0, size, size);
   c.drawImage(mmCv, 0, 0, size, size);
@@ -3758,10 +5198,10 @@ function drawFullMap(c, arc) {
   c.restore();
   c.restore();
   text(c, 'CITY MAP', 16, 28, '600 12px ' + F_MONO, '#c9a96e');
-  text(c, arc.touchMode ? 'Tap Map to close' : 'Press M to close', w - 16, 28, '600 12px ' + F_MONO, 'rgba(251,245,236,.7)', 'right');
-  const leg = [['C', '#FFB736', 'Courier'], ['F', '#38D6B8', 'Fare'], ['R', '#FF5EA8', 'Race'], ['G', '#FF5252', 'Getaway'], ['H', '#38D6B8', 'Safehouse']];
-  let lx = Math.max(12, w / 2 - (leg.length * 84) / 2); const ly = h - 22;
-  for (const l of leg) { c.fillStyle = l[1]; c.beginPath(); c.arc(lx + 8, ly, 8, 0, TAU); c.fill(); c.fillStyle = '#16130e'; c.font = '700 11px ' + F_MONO; c.textAlign = 'center'; c.fillText(l[0], lx + 8, ly + 0.5); text(c, l[2], lx + 21, ly, '500 12px ' + F_UI, 'rgba(251,245,236,.8)'); lx += 84; }
+  text(c, (arc.touchMode ? 'Tap a spot for a waypoint. Map pad closes' : 'Click a spot for a waypoint. M closes'), w - 16, 28, '600 ' + (w < 500 ? 10 : 12) + 'px ' + F_MONO, 'rgba(251,245,236,.7)', 'right');
+  const leg = [['S', '#FFB736', 'Story'], ['C', '#FFB736', 'Courier'], ['F', '#38D6B8', 'Fare'], ['R', '#FF5EA8', 'Race'], ['G', '#FF5252', 'Getaway'], ['H', '#38D6B8', 'Home'], ['$', '#7dff9b', 'For sale'], ['P', '#38D6B8', 'Respray'], ['T', '#9b8cff', 'Tune'], ['^', '#e8b21c', 'Ramp'], ['B', '#6fa8ff', 'Boat']];
+  const per = w < 520 ? 6 : leg.length, cwid = Math.min(84, (w - 24) / per);
+  leg.forEach((l, k) => { const row = Math.floor(k / per), col = k % per, n = Math.min(per, leg.length - row * per); const lx = w / 2 - (n * cwid) / 2 + col * cwid, ly = h - 44 - (Math.ceil(leg.length / per) - 1 - row) * 20; c.fillStyle = l[1]; c.beginPath(); c.arc(lx + 8, ly, 7, 0, TAU); c.fill(); c.fillStyle = '#16130e'; c.font = '700 10px ' + F_MONO; c.textAlign = 'center'; c.fillText(l[0], lx + 8, ly + 0.5); text(c, l[2], lx + 19, ly, '500 ' + (w < 520 ? 10 : 12) + 'px ' + F_UI, 'rgba(251,245,236,.8)'); });
 }
 
 function jobCard(c, x, y, w, arc) {
@@ -3776,7 +5216,7 @@ function jobCard(c, x, y, w, arc) {
     else if (j.type === 'getaway') { const need = G.heat < 1 ? 3 : DIFF[G.diff].decay; fraction = clamp(G.unseen / need, 0, 1); sub = G.copDist < 440 ? 'They can see you' : 'Out of sight'; rewardTxt = money(j.base * jobMult()); }
     if (j.type === 'fare') sub = 'Comfort ' + '★'.repeat(Math.max(0, 3 - j.crashes)) + '☆'.repeat(Math.min(3, j.crashes));
     if (j.needCar && j.noCar > 0.5) sub = 'Get back in a car: ' + Math.max(0, Math.ceil(12 - j.noCar)) + 's';
-  } else lines = wrapLines(c, 'No job running. Step into a glowing marker.', w - 24, 2);
+  } else { const nm = nextMission(); lines = wrapLines(c, nm && G.mode === 'story' ? 'Next story job: ' + nm.title + '. Walk into the gold S on the map.' : 'No job running. Step into a glowing marker.', w - 24, 2); }
   const lh = fs + 4, h = 30 + lines.length * lh + (sub ? 16 : 0) + (fraction != null ? 12 : 0) + (j ? 0 : 20);
   plate(c, x, y, w, h, 12, 0.72);
   c.fillStyle = j ? j.col : '#c9a96e'; c.beginPath(); c.arc(x + 14, y + 16, 4.5, 0, TAU); c.fill();
@@ -3802,6 +5242,8 @@ function jobCard(c, x, y, w, arc) {
 
 function drawHUD(c, arc) {
   const w = arc.w, h = arc.h, t = arc.touchMode, pad = t ? 10 : 14;
+  if (G.cut) { drawCut(c, arc); return; }
+  if (G.replay) { drawReplayHud(c, arc); return; }
   const st = stars();
   // vignette when wanted
   if (st >= 1 && G.copDist < 500) {
@@ -3812,6 +5254,7 @@ function drawHUD(c, arc) {
     c.fillStyle = g; c.fillRect(0, 0, w, h);
   }
   drawLabels(c, arc);
+  if (!G.mapOpen) drawCityExtras(c, arc);
   // cash / stars / bars
   const cw = t ? 148 : 214, ch = t ? 96 : 120, x = pad, y = pad;
   plate(c, x, y, cw, ch, 12, 0.74);
@@ -3828,6 +5271,7 @@ function drawHUD(c, arc) {
     }
     starPath(c, sx, sy, sr); c.strokeStyle = filled ? 'rgba(255,183,54,.9)' : 'rgba(251,245,236,.3)'; c.lineWidth = 1; c.stroke();
   }
+  if (HELI.on && !HELI.leave) text(c, HELI.see ? 'IN THE LIGHT' : 'HELI', x + cw - 10, sy, '700 ' + (t ? 8.5 : 10) + 'px ' + F_MONO, HELI.see ? '#FF5252' : '#6fa8ff', 'right');
   const by = y + (t ? 60 : 87);
   text(c, 'HP', x + 12, by + 3, '600 10px ' + F_MONO, 'rgba(251,245,236,.7)');
   bar(c, x + 38, by, cw - 52, t ? 6 : 7, pl.hp / 100, pl.hp < 30 ? '#FF5252' : '#7dff9b');
@@ -3844,7 +5288,7 @@ function drawHUD(c, arc) {
       text(c, 'HUSTLE', w / 2, pad + 13, '600 10px ' + F_MONO, G.hustleLeft < 30 ? '#FF8A8A' : '#c9a96e', 'center');
       text(c, mm + ':' + (ss < 10 ? '0' : '') + ss, w / 2, pad + 32, '500 22px ' + F_DISP, G.hustleLeft < 30 && Math.floor(G.time * 2) % 2 ? '#FF8A8A' : '#FBF5EC', 'center');
     } else {
-      text(c, 'FREE ROAM', w / 2, pad + 13, '600 10px ' + F_MONO, '#c9a96e', 'center');
+      text(c, (G.mode === 'story' ? 'STORY' : G.mode === 'school' ? 'SCHOOL' : 'FREE ROAM') + '  ' + WX.state.toUpperCase(), w / 2, pad + 13, '600 10px ' + F_MONO, '#c9a96e', 'center');
       text(c, hourText(G.hour), w / 2, pad + 32, '500 20px ' + F_DISP, '#FBF5EC', 'center');
     }
   }
@@ -3865,13 +5309,14 @@ function drawHUD(c, arc) {
     text(c, G.mode === 'hustle' ? 'TIME ' + lbl : lbl, mcx, mcy + R + 41.5, '600 11px ' + F_MONO, G.mode === 'hustle' && G.hustleLeft < 30 ? '#FF8A8A' : '#FBF5EC', 'center');
   }
   // job card
-  if (t) { const jw = Math.max(170, w - pad * 2 - (R * 2 + 14)); jobCard(c, pad, y + ch + 6, jw, arc); }
-  else { const jw = 292; jobCard(c, w - pad - jw, pad, jw, arc); }
+  const card = MS.m ? missionCard : jobCard;
+  if (t) { const jw = Math.max(170, w - pad * 2 - (R * 2 + 14)); card(c, pad, y + ch + 6, jw, arc); }
+  else { const jw = 292; card(c, w - pad - jw, pad, jw, arc); }
   // speed / vehicle (desktop, and on touch when the stick is not in the corner)
   if (!t || arc.touchStyle !== 'pads') {
     plate(c, pad, h - pad - 54, 190, 54, 12, 0.7);
     const sp = v ? Math.round(vSpeed(v) * 0.36) : 0;
-    text(c, v ? v.T.name.toUpperCase() : 'ON FOOT', pad + 12, h - pad - 38, '600 10px ' + F_MONO, '#c9a96e');
+    text(c, v ? v.T.name.toUpperCase() + (RADIO.st < stationsOpen().length ? '   ' + stationsOpen()[RADIO.st].name.toUpperCase() : '') : 'ON FOOT', pad + 12, h - pad - 38, '600 ' + (v ? 9 : 10) + 'px ' + F_MONO, '#c9a96e');
     text(c, v ? String(sp) : (pl.moving ? 'WALKING' : 'STANDING'), pad + 12, h - pad - 18, '500 ' + (v ? 26 : 16) + 'px ' + F_DISP, '#FBF5EC');
     if (v) text(c, 'km/h', pad + 12 + c.measureText(String(sp)).width + 8, h - pad - 14, '600 11px ' + F_MONO, 'rgba(251,245,236,.65)');
   }
@@ -3928,7 +5373,9 @@ function drawLabels(c, arc) {
   const w = arc.w, h = arc.h, t = arc.touchMode;
   const items = [];
   for (const o of G.offers) if (!o.hidden && o.cd <= 0) items.push([o.x, o.y, JT[o.type].col, JT[o.type].letter, 150, 0]);
-  for (const s of SAFE) items.push([s.x, s.y, '#38D6B8', 'H', 84, 0]);
+  for (const s of SAFE) if (!(G.mode === 'story' || G.mode === 'free') || owns(s.prop)) items.push([s.x, s.y, '#38D6B8', 'H', 84, 0]);
+  const mm0 = missionMarker(); if (mm0) items.push([mm0.p.x, mm0.p.y, '#FFB736', 'S', 290, 1]);
+  if (MS.st && MS.st.tx != null && !(MS.st.k === 'brawl')) items.push([MS.st.tx, MS.st.ty, '#FFB736', MS.st.k === 'stealth' ? 'V' : '*', MS.st.v ? 70 : 270, 1]);
   const j = G.job;
   if (j) {
     if (j.cps) { for (let q = j.cp; q < j.cps.length; q++) items.push([j.cps[q].x, j.cps[q].y, '#FF5EA8', String(q + 1), q === j.cp ? 270 : 120, q === j.cp ? 1 : 0]); }
@@ -3971,7 +5418,7 @@ function drawLabels(c, arc) {
   // a hint for whatever the player is doing now, on touch
   if (t && arc.touchStyle !== 'pads') {
     const tilt = arc.touchStyle === 'tilt', car = !!pl.veh;
-    const tip = car ? (G.stopHold ? 'Stopped. Tap to get out, or touch the screen to drive on.' : tilt ? 'Tilt to steer. Tap to brake, tap again when stopped to get out.' : 'Drag left or right to steer. Drag down to brake. Swipe up to honk.') : (tilt ? 'Tilt to turn and hold a finger to walk. Tap a car to get in.' : 'Drag to walk. Tap a nearby car to get in.');
+    const tip = car ? (G.stopHold ? 'Stopped. Tap to get out, or touch the screen to drive on.' : tilt ? 'Tilt to steer. Tap to brake, tap again when stopped to get out.' : 'Drag to steer, down to brake. Swipe up to honk, sideways to change the radio.') : (tilt ? 'Tilt to turn and hold a finger to walk. Tap a car to get in.' : 'Drag to walk. Tap a car to get in, or a person in front of you to punch.');
     if (tip !== G.tip) { G.tip = tip; G.tipT = 7; }
     if (G.tipT > 0 && !G.banner) {
       const a = clamp(G.tipT / 1.2, 0, 1);
@@ -4000,43 +5447,55 @@ function enterAttract() {
   G.preload = true;
 }
 
-const MENU_HTML = '<p>It is dusk in Saffron City. Walk to a car and get in to borrow it, then drive into a glowing marker to take a job: courier runs, taxi fares, street races or a getaway. Crash, carjack or run people off the road and the heat rises, so break the police\'s sight to cool off.</p>' +
-  '<p>Free roam has no clock. The ten minute hustle ends when time is up and your score is your cash.</p>';
+const PADS = [{ label: 'Car', key: 'KeyF' }, { label: 'Brake', key: 'Space', big: true, hot: true }, { label: 'Map', key: 'KeyM', keep: true }, { label: 'Punch', key: 'KeyJ' }, { label: 'Horn', key: 'KeyH' }];
+const MENU_HTML = '<p>Rain, neon and the sea. You are Kiran, a getaway driver home after three years, and Silas Crane is stealing Lantern Bazaar with forged papers. Twelve story jobs, side jobs, boats, stunt ramps, property and five radio stations. Nobody gets hurt: the police just want a word.</p>';
 function showMenu(arc, extra) {
+  injectCss();
   arc.menu({
-    eyebrow: 'Open-world sandbox', title: 'Saffron <em>City</em>',
-    html: (extra || '') + MENU_HTML,
+    eyebrow: 'Open-world crime caper', title: 'Sultan <em>Bay</em>',
+    html: (extra || '') + MENU_HTML + progressHtml(),
     options: [
-      { id: 'mode', label: 'Mode', choices: [{ v: 'free', label: 'Free roam' }, { v: 'hustle', label: 'Ten minute hustle' }] },
-      { id: 'diff', label: 'Police heat', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      { id: 'mode', label: 'Mode', value: 'story', choices: [{ v: 'story', label: 'Story' }, { v: 'free', label: 'Free roam' }, { v: 'hustle', label: 'Ten minute hustle' }, { v: 'school', label: 'Driving school' }] },
+      { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      { id: 'weather', label: 'Weather', value: 'auto', choices: [{ v: 'auto', label: 'Changing' }, { v: 'clear', label: 'Clear' }, { v: 'rain', label: 'Rain' }, { v: 'storm', label: 'Storm' }] },
     ],
+    actions: [{ label: 'Play', primary: true, on: () => arc.start() }, { label: 'Story and city', on: openCity }, { label: 'How to play', on: openRules }, { label: 'All games', href: '/games' }],
   });
 }
 
 const arc = Arcade.create({
   // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
   graphics(level) { if (level === 'auto') { GL.pinned = false; return; } GL.q = level === 'sharp' ? 2 : 0; GL.pinned = true; applyQuality(); },
-  slug: 'saffron-city', title: 'Saffron City', genre: 'Open-world sandbox', three: true,
-  keys: [['WASD / arrows', 'Walk or drive'], ['Space', 'Handbrake (sprint on foot)'], ['Shift', 'Sprint on foot'], ['F', 'Get in or out of a car'], ['H', 'Horn'], ['Q / E', 'Turn the camera on foot'], ['M', 'City map']],
+  slug: 'sultan-bay', title: 'Sultan Bay', genre: 'Open-world crime caper', three: true,
+  keys: [['WASD / arrows', 'Walk, drive or steer a boat'], ['Space', 'Handbrake (sprint on foot)'], ['Shift', 'Sprint on foot'], ['F', 'Get in or out of a car or boat'], ['J / click', 'Punch on foot, next radio station in a car'], ['R', 'Next radio station'], ['H', 'Horn'], ['Q / E', 'Turn the camera on foot'], ['M', 'City map (click to set a waypoint)'], ['Space / Enter', 'Skip a scene or replay']],
   gestures: {
     drag: 'xy', tilt: true,
-    hint: 'Drag to walk or steer   Drag down to brake   Tap a car to get in   Swipe up to honk',
-    keys: [['Drag', 'Walk on foot. In a car: left and right steer, down brakes'], ['Tap', 'Tap a nearby car to get in. In a car, tap when stopped to get out'], ['Swipe up', 'Honk the horn'], ['Tilt style', 'Tilt to steer, hold a finger to walk, tap to brake'], ['Map pad', 'Open the city map']],
+    hint: 'Drag to walk or steer   Tap a car to get in, a person to punch   Swipe sideways for the radio',
+    keys: [['Drag', 'Walk on foot. In a car: left and right steer, down brakes'], ['Tap', 'Tap a nearby car to get in, or punch the person in front. In a car, tap when stopped to get out'], ['Swipe up', 'Honk the horn, or sprint on foot'], ['Swipe left / right', 'Change the radio station'], ['Tilt style', 'Tilt to steer, hold a finger to walk, tap to brake'], ['Map pad', 'Open the map, tap it to set a waypoint']],
   },
-  // Controller: A car, X handbrake, B horn, Y map; right trigger gas, left trigger brake.
-  gamepad: { buttons: ['KeyF', 'Space', 'KeyH', 'KeyM'], rt: 'ArrowUp', lt: 'ArrowDown' },
-  touch: { stick: true, pads: [{ label: 'Car', key: 'KeyF' }, { label: 'Brake', key: 'Space', big: true, hot: true }, { label: 'Map', key: 'KeyM', keep: true }, { label: 'Horn', key: 'KeyH' }] },
-  touchKeys: [['On-screen stick', 'Walk or steer'], ['Car', 'Get in or out'], ['Brake', 'Handbrake'], ['Horn', 'Honk'], ['Map', 'Open the city map']],
-  touchHint: 'Stick to walk or steer, Car pad to get in, Brake, Horn, Map',
-  gameKeys: ['KeyF', 'KeyH', 'KeyM', 'KeyQ', 'KeyE', 'ShiftLeft', 'ShiftRight'],
-  hint: 'WASD move   F car   Space handbrake   H horn   Q E camera   M map',
+  // Controller: A car, X handbrake, B punch (radio in a car), Y map; right trigger gas, left trigger brake.
+  gamepad: { buttons: ['KeyF', 'Space', 'KeyJ', 'KeyM'], rt: 'ArrowUp', lt: 'ArrowDown' },
+  touch: { stick: true, pads: PADS },
+  touchKeys: [['On-screen stick', 'Walk or steer'], ['Car', 'Get in or out'], ['Brake', 'Handbrake, sprint on foot'], ['Punch', 'Punch on foot, next radio station in a car'], ['Horn', 'Honk'], ['Map', 'Open the city map, tap it for a waypoint']],
+  touchHint: 'Stick to walk or steer, Car to get in, Punch, Brake, Horn, Map',
+  gameKeys: ['KeyF', 'KeyH', 'KeyM', 'KeyQ', 'KeyE', 'KeyJ', 'KeyR', 'ShiftLeft', 'ShiftRight'],
+  hint: 'WASD move   F car   J punch   R radio   Space handbrake   M map',
+  pauseHtml() {
+    const lines = [];
+    if (MS.m) lines.push('<p><b>' + esc(MS.m.title) + '</b>: ' + esc(MS.st ? MS.st.label || MS.m.blurb : MS.m.blurb) + '</p>');
+    else if (G.job) lines.push('<p><b>' + esc(G.job.name) + '</b>: ' + esc(G.job.label) + '</p>');
+    if (G.mode === 'story' || G.mode === 'free') lines.push(progressHtml());
+    return lines.join('');
+  },
+  onResume() { if (G.panel) G.panel = false; },
   formatScore: (v) => money(v),
   resize(a) { resizeGL(a); },
   init(a) {
     arcRef = a;
     initGL(a);
     a.debug = () => {
-      let police = 0, traffic = 0, chase = 0;
+      let police = 0, traffic = 0, chase = 0, rb = 0, boats = 0;
+      for (const v of V) { if (v.rb) rb++; if (v.T.boat) boats++; }
       for (const v of V) { if (v.police) { police++; if (v.ai && v.ai.kind === 'chase') chase++; } else if (v.ai && v.ai.kind === 'traffic') traffic++; }
       const pv = pl.veh;
       return {
@@ -4048,6 +5507,10 @@ const arc = Arcade.create({
         chain: G.chain, hustleLeft: Math.round(G.hustleLeft), tiles: GL.chunks.size, zoom: +CAM.fov.toFixed(1), caught: !!G.caught, arrest: +G.arrest.toFixed(2),
         offers: G.offers.map((o) => ({ t: o.type, x: Math.round(o.x), y: Math.round(o.y), cd: Math.round(o.cd) })), jobs: G.stats.jobs, crashes: G.stats.crashes,
         ctl: pv ? { thr: +pv.c.thr.toFixed(2), brk: +pv.c.brk.toFixed(2), str: +pv.c.str.toFixed(2), f: Math.round(pv.f), hold: !!G.stopHold } : null, cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, verts: (() => { let n = 0; for (const c of GL.chunks.values()) n += c.mesh.geometry.attributes.position.count; return n; })(), cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
+        story: SAVE.story, mission: MS.m ? MS.m.id : null, step: MS.st ? MS.st.k + ':' + MS.i : null, cutscene: !!G.cut, replay: !!G.replay, panel: !!G.panel,
+        radio: RADIO.st < stationsOpen().length ? stationsOpen()[RADIO.st].id : 'off', weather: WX.state, rain: +WX.rain.toFixed(2), wet: +WX.wet.toFixed(2), heli: HELI.on, heliSees: HELI.see, roadblocks: rb, boats,
+        ramps: RAMPS.length, jumps: SAVE.jumps.length, shells: SHELLS.length, shellsFound: SAVE.shells.length, props: SAVE.props.slice(), garage: SAVE.garage.length, air: !!(pv && pv.air), z: pv ? Math.round(pv.z || 0) : 0,
+        foe: MS.st && MS.st.foe ? { hp: Math.round(MS.st.foe.fhp), downs: MS.st.foe.downs, state: MS.st.foe.state } : null, sus: MS.st && MS.st.sus != null ? +MS.st.sus.toFixed(2) : null, waypoint: !!G.wp, percent: SB.percentOf(SAVE, RAMPS.length, SHELLS.length),
       };
     };
     // helpers for automated tests
@@ -4058,10 +5521,22 @@ const arc = Arcade.create({
       cash(n) { G.cash = n; }, heat(n) { G.heat = n; G.unseen = 0; }, time(h) { G.hour = h; }, hustle(s) { G.hustleLeft = s; },
       car(type) { const v = mkVeh(type || 'hatch', pl.x + 40, pl.y, 0); v.driver = false; v.parked = true; v.c.hb = true; return v; },
       enter() { tryEnter(); }, leave() { leaveCar(false); }, V, PD, G, pl, SAFE, CAM, GL, quality(q) { GL.q = q; GL.pinned = true; applyQuality(); },
-      vfx: () => VX.state, payday() { vxPayday(); },
+      vfx: () => VX.state, HUM, VX, payday() { vxPayday(); },
       wreck() { let b = null, bd = 1e9; for (const v of V) { if (v.player || v.wreck) continue; const d = hyp(v.x - CAM.lx, v.y - CAM.lz); if (d < bd) { bd = d; b = v; } } if (b) wreckVeh(b); return !!b; },
       job(type) { const o = G.offers.find((q) => q.type === type); if (o) { pl.x = o.x; pl.y = o.y; if (pl.veh) { pl.veh.x = o.x; pl.veh.y = o.y; } startJob(o); } },
       finish() { const j = G.job; if (j && j.tx != null) { pl.x = j.tx; pl.y = j.ty; if (pl.veh) { pl.veh.x = j.tx; pl.veh.y = j.ty; } } },
+      // story helpers: start a mission by id, skip a scene, jump to the current target, and the city's systems
+      mission(id) { const m = SB.MISSIONS.concat(SB.LESSONS).find((q) => q.id === id); if (m) { MS.m = null; MS.cd = 0; startMission(m); } return !!m; },
+      skipCut() { if (G.cut) { G.cut.i = G.cut.lines.length - 1; G.cut.t = 99; } if (G.replay) G.replay.t = 999; },
+      toTarget() { const st = MS.st; if (st && st.tx != null) { const x = st.tx - 6, y = st.ty; pl.x = x; pl.y = y; if (pl.veh) { pl.veh.x = x; pl.veh.y = y; pl.veh.vx = pl.veh.vy = 0; } } },
+      story(n) { SAVE.story = n; SAVE.done = SB.MISSIONS.slice(0, n).map((m) => m.id); saveNow(); },
+      weather(w) { WX.pin = w; setWeather(w); }, closePanel() { if (G.panel) closePanel(); }, abort() { if (G.replay) { G.replay.then = null; endReplay(); } if (G.cut) { G.cut = null; CAM.ov = null; cutControls(); } if (MS.m) failMission('Stopped'); MS.cd = 0; G.caught = null; }, heli() { G.heat = 4.2; G.unseen = 0; }, RAMPS, SHELLS, PL, MS, HELI, WX, RADIO, SAVE: () => SAVE, radio(d) { radioSwitch(d || 1); }, punch() { punch(); },
+      replay() { startReplay('Replay', null); }, ramp(k) { const r = RAMPS[k || 0]; if (!r || !pl.veh) return false; const v = pl.veh; v.x = r.x - Math.cos(r.a) * 110; v.y = r.y - Math.sin(r.a) * 110; v.a = r.a; v.vx = Math.cos(r.a) * 420; v.vy = Math.sin(r.a) * 420; v.f = 420; v.c.thr = 1; CAM.yaw = r.a; return true; },
+    };
+    // for the poster script and tests: pin quality, and a rainy night drive in the Vesper with the banners cleared
+    a.dev = {
+      quality(q) { GL.q = clamp(q, 0, 2); GL.pinned = true; applyQuality(); },
+      poster() { WX.pin = 'rain'; setWeather('rain'); WX.rain = WX.cloud = WX.wet = 0.75; G.hour = 20.6; if (pl.veh) leaveCar(true); const v = mkVeh('super', pl.x + 30, pl.y, pl.a, { parked: true }); tryEnter(v); G.banner = null; MS.cd = 999; },
     };
     try { if (/[?&]q=(\d)/.test(location.search)) { GL.q = +RegExp.$1; GL.pinned = true; } } catch (e) { /* no query */ }
     if (GL.renderer) applyQuality();
@@ -4069,7 +5544,7 @@ const arc = Arcade.create({
     showMenu(a);
   },
   start(a, ch) {
-    G.mode = ch.mode === 'hustle' ? 'hustle' : 'free'; G.diff = DIFF[ch.diff] ? ch.diff : 'normal';
+    G.mode = ['story', 'free', 'hustle', 'school'].indexOf(ch.mode) >= 0 ? ch.mode : 'story'; G.diff = DIFF[ch.diff] ? ch.diff : 'normal';
     G.active = true; resetGame();
     a.input.clear();
   },
@@ -4077,11 +5552,14 @@ const arc = Arcade.create({
     if (G.active) {
       G.active = false;
       let extra = '';
-      if (G.mode === 'free' && G.phase === 'play') {
+      if ((G.mode === 'free' || G.mode === 'story') && G.phase === 'play') {
+        if (MS.m) failMission('Quit to the menu');
+        saveNow();
         const cash = Math.round(G.cash);
         a.record(cash);
-        extra = '<div class="stat"><div>Banked in free roam<b>' + money(cash) + '</b></div><div>Rank<b style="font-size:17px">' + esc(rankOf(cash)) + '</b></div></div>';
+        extra = '<div class="stat"><div>In your wallet<b>' + money(cash) + '</b></div><div>Rank<b style="font-size:17px">' + esc(rankOf(cash)) + '</b></div></div>';
       }
+      if (G.cut) cutControls(); cleanMission(); MS.m = null; G.cut = null; G.replay = null; CAM.ov = null; HELI.on = false; G.finaleCam = false;
       enterAttract();
       showMenu(a, extra);
     } else if (G.phase !== 'attract') { enterAttract(); }
@@ -4090,11 +5568,12 @@ const arc = Arcade.create({
   idle(dt, a) {
     if (a.state === 'menu') { updateWorld(dt, false); updateCamera(dt, false); }
     else if (a.state === 'over') {
+      if (G.finaleCam && vxOn()) { G.fwT = (G.fwT || 0) - dt; if (G.fwT <= 0) { G.fwT = 0.9 + rr() * 0.8; VX.fx.fireworks(vxAt(pl.x - 380 - rr() * 300, 160 + rr() * 110, pl.y + (rr() - 0.5) * 600), { size: 7 + rr() * 3, launch: true }); } }
       if (pl.veh) { const c = pl.veh.c; c.thr = 0; c.brk = 0.3; c.str = 0; c.hb = true; }
       stopHum(); updateWorld(dt, true); updateCamera(dt, true);
     }
   },
-  update(dt, a) { const t0 = performance.now(); updatePlay(dt); GL.cpuUpd = lerp(GL.cpuUpd || 0, performance.now() - t0, 0.1); },
+  update(dt, a) { const t0 = performance.now(); updatePlay(G.stunt && !a.reducedMotion ? dt * 0.42 : dt); GL.cpuUpd = lerp(GL.cpuUpd || 0, performance.now() - t0, 0.1); },
   render(ctx, a) {
     if (GL.fail) {
       ctx.fillStyle = '#0F0D0A'; ctx.fillRect(0, 0, a.w, a.h);
