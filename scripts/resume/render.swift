@@ -8,8 +8,8 @@ let content=try JSONSerialization.jsonObject(with:Data(contentsOf:URL(fileURLWit
 let W:CGFloat=595.276, H:CGFloat=841.89, M:CGFloat=35, CW:CGFloat=525.276
 let ink=NSColor(calibratedRed:0.09,green:0.17,blue:0.25,alpha:1)
 let teal=NSColor(calibratedRed:0.07,green:0.39,blue:0.42,alpha:1)
-let muted=NSColor(calibratedRed:0.32,green:0.39,blue:0.45,alpha:1)
-let line=NSColor(calibratedRed:0.81,green:0.87,blue:0.87,alpha:1)
+let muted=NSColor(calibratedRed:53.0/255,green:71.0/255,blue:88.0/255,alpha:1)
+let line=NSColor(calibratedRed:148.0/255,green:168.0/255,blue:176.0/255,alpha:1)
 var bounds=CGRect(x:0,y:0,width:W,height:H)
 let path=root+"/assets/resume.pdf"
 let pdf=CGContext(URL(fileURLWithPath:path) as CFURL,mediaBox:&bounds,[kCGPDFContextTitle:"Anchit Tandon | Senior Product Manager & AI Builder",kCGPDFContextAuthor:"Anchit Tandon"] as CFDictionary)!
@@ -60,6 +60,7 @@ section("PROFESSIONAL EXPERIENCE",&y)
 for r in content["roles"] as! [[String:Any]]{
  heading(r["title"] as! String,r["dates"] as! String,&y)
  y+=text(r["sub"] as! String,M,y,CW,8.4,false,muted)+4
+ if let previous=r["previous_roles"] as? String { y+=text(previous,M,y,CW,8.0,false,muted)+4 }
  for b in r["bullets"] as! [String]{bullet(b,&y,9.8)}
  y+=2
 }
@@ -70,9 +71,9 @@ start();y=29
 text("ANCHIT TANDON",M,y,300,12,true);text("EXPERIENCE & COMPLETE PORTFOLIO",M+240,y,285,8.3,true,teal);y+=23
 section("EARLIER TECHNICAL EXPERIENCE",&y)
 heading("Citymall | Software Engineer","Mar 2022 - Jun 2022",&y)
-y+=text("Backend services and data pipelines for consumer-commerce applications.",M,y,CW,9.3)+6
+y+=text("Developed backend services and data pipelines for consumer-commerce applications.",M,y,CW,9.3)+6
 heading("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",&y)
-y+=text("Built backend services for consumer apps and took product ownership of an early live-sports-commentary product.",M,y,CW,9.3)+3
+y+=text("Built backend services for consumer apps and owned product delivery for an early live-sports-commentary product.",M,y,CW,9.3)+3
 section("CORE SKILLS",&y)
 y+=text("Product: Discovery, strategy, roadmaps, prioritisation, experimentation and monetisation.",M,y,CW,9.1)+3
 y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, Next.js, Supabase.",M,y,CW,9.1)+3
@@ -115,3 +116,4 @@ finish(2);pdf.closePDF()
 let doc=PDFDocument(url:URL(fileURLWithPath:path))!
 print("Pages:",doc.pageCount)
 precondition(doc.pageCount == 2, "Resume must remain two pages")
+
