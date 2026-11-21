@@ -469,13 +469,13 @@
       if (p.dailies && p.dailies.length) {
         p.dailies.slice().reverse().forEach(function (d) {
           var id = p.id + '/' + d.date + '/' + (d.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-          var film = { id: id, title: p.title + ': ' + d.title, subtitle: 'Daily, ' + d.date, synopsis: d.note || '', poster: d.poster || p.poster, runtime_s: d.duration_s, language: p.language, style: p.style, sources: d.hls ? { hls: d.hls } : { mp4: d.src }, download: d.hls ? null : d.src, credits: [], chapters: [], _kind: 'daily' };
+          var film = { id: id, title: p.title + ': ' + d.title, subtitle: 'Daily, ' + d.date, synopsis: d.note || '', poster: d.poster || p.poster, runtime_s: d.duration_s, language: p.language, style: p.style, sources: { mp4: d.src }, download: d.src, credits: [], chapters: [], _kind: 'daily' };
           state.byId[id] = film;
           dailies.appendChild(el('div', { class: 'daily' }, [
             el('button', { class: 'thumb', type: 'button', 'aria-label': 'Play ' + d.title, onclick: function () { play(id, 0, true, 'daily'); scrollToPlayer(); } }, [
               el('img', { src: d.poster || p.poster_card || p.poster, alt: '', loading: 'lazy' }), el('span', { class: 'play', html: PLAY_SVG })
             ]),
-            el('div', null, [el('div', { class: 'd', text: d.date + (d.duration_s ? ' · ' + (d.duration_s >= 120 ? Math.floor(d.duration_s / 60) + ':' + String(Math.round(d.duration_s % 60)).padStart(2, '0') : d.duration_s + ' s') : '') }), el('h4', { text: d.title }), el('p', { text: d.note || '' })])
+            el('div', null, [el('div', { class: 'd', text: d.date + (d.duration_s ? ' · ' + d.duration_s + ' s' : '') }), el('h4', { text: d.title }), el('p', { text: d.note || '' })])
           ]));
         });
       } else dailies.appendChild(el('p', { class: 'empty', text: 'No dailies yet.' }));
