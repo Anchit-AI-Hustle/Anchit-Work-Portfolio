@@ -425,7 +425,7 @@ function debugState() {
   if (!W) return { state: a.state, phase: 'none', renderer: VIEW ? VIEW.name : 'none' };
   const P = W.P, s = S.curW(P);
   return {
-    state: a.state, phase: W.attract ? 'attract' : W.phase, mode: W.kind, mp: W.mp ? W.mp.id : null, map: W.mapId, mission: W.mission ? W.mission.id : null, diff: W.cfg.diff, renderer: VIEW ? VIEW.name : 'none', alive: !W.over,
+    state: a.state, phase: W.attract ? 'attract' : W.phase, mode: W.kind, mp: W.mp ? W.mp.id : null, map: W.mapId, mission: W.mission ? W.mission.id : null, diff: W.cfg.diff, renderer: VIEW ? VIEW.name : 'none',
     playerOut: !P.alive, x: +P.x.toFixed(2), y: +P.y.toFixed(2), z: +P.z.toFixed(2), yaw: +P.yaw.toFixed(3), pitch: +P.pitch.toFixed(3), hp: Math.round(P.hp), armor: Math.round(P.armor),
     weapon: s.def.id, ammo: s.mag, spare: s.spare, reloading: s.reloadT > 0, stance: P.stance, ads: +P.adsK.toFixed(2), sprint: P.sprint, lean: +P.leanK.toFixed(2), frag: P.frag, tac: P.tac, cook: P.cookT >= 0,
     kos: W.stats.kos, downs: W.stats.downs, shots: W.stats.shots, hits: W.stats.hits, streakPts: P.streakPts, score: W.score.slice(0, 2), time: +W.t.toFixed(2), clock: Math.round(S.matchClock(W)),
@@ -555,7 +555,7 @@ export function boot(view) {
     render(ctx, a) {
       if (NOVIEW) return;
       if (!W) { ctx.fillStyle = '#07080a'; ctx.fillRect(0, 0, a.w, a.h); return; }
-      let ok = true;
+      let ok;
       try { ok = VIEW.render(a, W, ctx) !== false; } catch (e) { ok = false; console.warn(e); }
       for (const e of W.ev) if (e.k === 'toast' && !W.attract && a.state === 'play') a.toast(e.text, e.small, 1800);
       W.ev.length = 0;

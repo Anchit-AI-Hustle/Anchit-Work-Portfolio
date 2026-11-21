@@ -453,7 +453,7 @@ function buildFallbackFigures() {
 let KIT = null;
 function kitGeos() {
   if (KIT) return KIT;
-  const helmet = mergeGeos([[new THREE.SphereGeometry(0.128, 18, 10, 0, TAU, 0, Math.PI * 0.52), M4(0, 0.1, 0.005, 0, 0, 0, 1.05, 0.98, 1.1), '#ffffff'], [CYL(0.142, 0.15, 0.03, 18, 1), M4(0, 0.085, 0.01, 0, 0, 0, 1, 1, 1.12), '#ffffff'], [BOX(0.06, 0.03, 0.02), M4(0, 0.17, 0.13), '#3a3a3a']]);
+  const helmet = mergeGeos([[new THREE.SphereGeometry(0.128, 18, 10, 0, TAU, 0, Math.PI * 0.52), M4(0, 0.1, 0.005, 0, 0, 0, 1.05, 0.98, 1.1), '#ffffff'], [CYL(0.142, 0.15, 0.03, 18), M4(0, 0.085, 0.01, 0, 0, 0, 1, 1, 1.12), '#ffffff'], [BOX(0.06, 0.03, 0.02), M4(0, 0.17, 0.13), '#3a3a3a']]);
   const vest = mergeGeos([[BOX(0.36, 0.34, 0.07), M4(0, 0.05, 0.13), '#ffffff'], [BOX(0.36, 0.34, 0.07), M4(0, 0.05, -0.12), '#ffffff'], [BOX(0.11, 0.09, 0.05), M4(-0.11, -0.06, 0.18), '#d8d8d8'], [BOX(0.11, 0.09, 0.05), M4(0.0, -0.06, 0.18), '#d8d8d8'], [BOX(0.11, 0.09, 0.05), M4(0.11, -0.06, 0.18), '#d8d8d8'], [BOX(0.07, 0.04, 0.24), M4(-0.15, 0.22, 0.0), '#cfcfcf'], [BOX(0.07, 0.04, 0.24), M4(0.15, 0.22, 0.0), '#cfcfcf']]);
   KIT = { helmet, vest, mats: [0, 1, 2].map((t) => { const k = t === 2 ? D.FFA_KIT : D.FACTIONS[t].kit; return { helmet: std({ color: k.helmet, vertexColors: true, roughness: 0.78 }), vest: std({ color: k.vest, vertexColors: true, roughness: 0.88 }) }; }) };
   KIT.mats.forEach((m) => { m.helmet.userData.keepMat = true; m.vest.userData.keepMat = true; });
