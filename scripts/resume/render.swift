@@ -46,11 +46,12 @@ y+=text("Anchit Tandon",M,y,CW,29,true)+3
 y+=text("SENIOR PRODUCT MANAGER & AI BUILDER",M,y,CW,10.8,true,teal)+4
 y+=text("Technical Product Management · AI Agents · D2C Growth",M,y,CW,9.1,false,muted)+6
 y+=text("Delhi, India  |  +91 98739 45238  |  anchit.tandon@gmail.com",M,y,CW,8.7)+3
+y+=text("Open to full-time Senior PM roles  ·  Remote or Delhi NCR  ·  Available to join immediately",M,y,CW,8.4,false,muted)+3
 text("anchit-tandon.com",M,y,140,8.7,false,teal,"https://anchit-tandon.com")
 y+=text("linkedin.com/in/anchit-tandon",M+143,y,300,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+10
 NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:89)).fill()
 let projectCount=(content["projects"] as! [[String:String]]).count
-let metrics=[("5×","ET Prime · ₹15L to ₹80L/mo"),("400%+","ROI · ET Prime · Six months"),("₹3Cr+","Annual revenue · ET Markets"),("+27%","Engagement · ET Markets"),("+25%","Daily active users · ET Markets"),("150+","Qualified leads/day · from ~30"),("15,000+","Marathon participants"),("\(projectCount)","Products, demos & concepts")]
+let metrics=[("5×","ET Prime · ₹15L to ₹80L/mo"),("400%+","ROI · ET Prime · Six months"),("₹3Cr+","Annual revenue · ET Markets"),("+27%","Engagement · ET Markets"),("+25%","Daily active users · ET Markets"),("150+","Qualified leads/day · from ~30"),("18K+","Runners · Delhi Half Marathon"),("\(projectCount)","Products, demos & concepts")]
 for col in 1...3 {let x=M+CGFloat(col)*(CW/4);line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+10));p.line(to:NSPoint(x:x,y:y+79));p.lineWidth=0.45;p.stroke()}
 for (i,m) in metrics.enumerated(){let centerX=M+(CGFloat(i%4)+0.5)*(CW/4);let rowY=y+CGFloat(i/4)*44.5;metricText(m.0,centerX,rowY+20,14.2,true,ink);metricText(m.1,centerX,rowY+35,7.2,false,muted)}
 y+=96
@@ -65,6 +66,7 @@ for r in content["roles"] as! [[String:Any]]{
  y+=2
 }
 print("Page 1 content ends:",y)
+precondition(y <= H-38, "Page 1 content overflows the footer")
 finish(1)
 
 start();y=29
@@ -73,11 +75,12 @@ section("EARLIER TECHNICAL EXPERIENCE",&y)
 heading("Citymall | Software Engineer","Mar 2022 - Jun 2022",&y)
 y+=text("Developed backend services and data pipelines for consumer-commerce applications.",M,y,CW,9.3)+6
 heading("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",&y)
-y+=text("Built backend services for consumer apps and owned product delivery for an early live-sports-commentary product.",M,y,CW,9.3)+3
+y+=text("Built and scaled backend services for consumer apps; as Product Owner, ran delivery of a live sports-commentary product.",M,y,CW,9.3)+3
 section("CORE SKILLS",&y)
-y+=text("Product: Discovery, strategy, roadmaps, prioritisation, experimentation and monetisation.",M,y,CW,9.1)+3
-y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, Next.js, Supabase.",M,y,CW,9.1)+3
-y+=text("Growth & analytics: Funnels, subscriptions, lifecycle CRM, SQL, Klaviyo, WebEngage and Mixpanel.",M,y,CW,9.1)+3
+y+=text("Product: Discovery, strategy, roadmaps, prioritisation, A/B experimentation, pricing and monetisation.",M,y,CW,9.1)+3
+y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, React, Node.js, Next.js, Supabase, Vercel.",M,y,CW,9.1)+3
+y+=text("Growth & analytics: Funnels, subscriptions, lifecycle CRM, SQL, Klaviyo, WebEngage, Mixpanel and Shopify.",M,y,CW,9.1)+3
+y+=text("Tools: Figma, Jira.",M,y,CW,9.1)+3
 section("EDUCATION",&y)
 let educationX:[CGFloat]=[M,M+176,M+399,M+471]
 let educationW:[CGFloat]=[170,217,66,54]
