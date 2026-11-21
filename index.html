@@ -3654,6 +3654,11 @@
     // canvas clear + 130 arcs is a whole extra painted layer competing with the
     // scroll for the same frame; the particles are ambient, so freezing them
     // for the duration of a gesture costs nothing anyone can see.
+    // The frame governor has stepped this device down and hidden the canvas:
+    // stop for good, not just out of sight. Hiding it left the loop clearing
+    // and redrawing a canvas nobody could see, on the device least able to
+    // afford it.
+    if(document.documentElement.hasAttribute('data-lean')){ window.__floatBgStopped = true; return; }
     if(window.__scrolling){ requestAnimationFrame(draw); return; }
     x.clearRect(0,0,W,H);
     for(var k=0;k<ps.length;k++){ var p=ps[k]; if(!still){ p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;} }

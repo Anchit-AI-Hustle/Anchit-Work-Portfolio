@@ -376,6 +376,8 @@ const check = (ok, label, detail) => {
       return { a, b, c: window.__ambientStep(), lite, lean };
     });
     check(gov.a === 'lite' && gov.lite.tier === 'lite' && gov.lite.ring2 === 0, 'governor: the first step down is the lite tier', JSON.stringify(gov.lite));
+    await pg.waitForTimeout(200);
+    check(await pg.evaluate(() => window.__floatBgStopped === true), 'governor: the particle canvas stops drawing at lean, not only hides');
     check(gov.b === 'lean' && gov.lean.lean && gov.lean.dust === 0 && gov.lean.beams === 0 && gov.lean.glow >= 1 && gov.c === '', 'governor: the second step drops dust and edges, keeps the light, and is the last', JSON.stringify(gov.lean));
     check(stray.length === 0, 'no brackets or numbered counter tags in any view', [...new Set(stray)].slice(0, 4).join(' | '));
     await pg.close();
