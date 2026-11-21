@@ -60,6 +60,7 @@ section("PROFESSIONAL EXPERIENCE",&y)
 for r in content["roles"] as! [[String:Any]]{
  heading(r["title"] as! String,r["dates"] as! String,&y)
  y+=text(r["sub"] as! String,M,y,CW,8.4,false,muted)+4
+ if let previous=r["previous_roles"] as? String { y+=text(previous,M,y,CW,8.0,false,muted)+4 }
  for b in r["bullets"] as! [String]{bullet(b,&y,9.8)}
  y+=2
 }
@@ -115,3 +116,4 @@ finish(2);pdf.closePDF()
 let doc=PDFDocument(url:URL(fileURLWithPath:path))!
 print("Pages:",doc.pageCount)
 precondition(doc.pageCount == 2, "Resume must remain two pages")
+
