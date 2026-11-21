@@ -29,7 +29,7 @@ const GAMES = {
   'laddoo-dash': { modes: ['classic', 'rush'] },
   'mela-pinball': { ceiling: 2_000_000_000, modes: ['classic', 'rush', 'free'] },
   'midnight-apex': { lower: true, timeUnit: 's', floor: 15, ceiling: 7_200, minRunMs: 15_000, rooms: true, modes: ['career', 'race', 'sprint', 'drift', 'drag', 'time', 'pursuit'] },
-  'nitro-goal': { rooms: true, maxPlayers: 8, modes: ['quick', 'season', 'hoops', 'puck', 'training'] },
+  'nitro-goal': { rooms: true, maxPlayers: 8, modes: ['quick', 'season', 'hoops', 'puck', 'training', '3v3', '2v2', '1v1'] },
   'paint-ops': { rooms: true, maxPlayers: 12, modes: ['splat', 'ctf', 'campaign'] },
   'rally-cage': { modes: ['lives', 'eleven', 'survival'] },
   'rangoli-drop': { ceiling: 100_000_000, modes: ['marathon', 'sprint', 'blitz'] },
