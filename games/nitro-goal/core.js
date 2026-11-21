@@ -9,6 +9,9 @@
  * surface and which way is inward.
  */
 
+import { CLUBS, LEAGUE, PACKS, PACK_KEYS, LINES, CHAT, CASTERS, RULES_HTML, CONTROLS_HTML, GARAGE, BODY_KEYS, BOOST_COL, rankOf, xpFor, loadProfile, saveProfile, loadGarage, saveGarage, unlocked, needText, newUnlocks, loadSeason, saveSeason, clearSeason, newSeason, nextFixture, seasonResult, standings, tableHtml, bracketHtml, trainBest, trainSave, pickLine, esc } from '/games/nitro-goal/meta.js';
+export { CLUBS, GARAGE, BOOST_COL };
+
 export const TAU = Math.PI * 2;
 export const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 export const lerp = (a, b, t) => a + (b - a) * t;
@@ -27,6 +30,12 @@ export const PR = 0.32;    // post radius
 export const GRAV = 13;
 export const H0 = 0.72;    // car centre above the surface it drives on
 export const SONIC = 23.5; // supersonic: a bump at this speed knocks a rival out
+// Hoops: a ring over each end, the goals closed. Puck: a heavy disc on ice.
+export const HOOP = { r: 7.4, tube: 0.42, y: 9.0, off: 8.4, grav: 0.82 };
+export const PUCK = { r: 2.4, h: 0.55, grav: 1.7, max: 52 };
+// What arena and ball this match uses; set by newMatch, read by the physics and both renderers.
+export const RULE = { variant: 'soccar', hoops: false, puck: false, goals: true, ice: false, hoopR: 7.4, pull: 0 };
+function setRules(v) { RULE.hoopR = HOOP.r; RULE.pull = 0; RULE.variant = v; RULE.hoops = v === 'hoops'; RULE.puck = v === 'puck'; RULE.goals = v !== 'hoops'; RULE.ice = v === 'puck'; }
 const VDRIVE = 17, VBOOST = 28, VMAX = 30, VREV = 9;
 const ACC = 26, ACCREV = 14, BRAKE = 40, COAST = 4, BOOSTA = 19, STICK = 6;
 const JUMPV = 6.2, JUMPHOLD = 15, DJUMPV = 5.6, FLIPT = 0.62;
@@ -37,12 +46,18 @@ export const TEAM = [
   { name: 'Saffron', col: '#ff7a1a', glow: '#ffb15c', dark: '#5a2200', soft: 'rgba(255,122,26,' },
   { name: 'Monsoon', col: '#2ab8ff', glow: '#8be3ff', dark: '#00304f', soft: 'rgba(42,184,255,' }
 ];
+const TEAM_DEF = ['Saffron', 'Monsoon'];
 const NAMES = [['You', 'Kabir', 'Meera'], ['Zoya', 'Arjun', 'Ishaan']];
+const DIFF_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard', pro: 'Pro' };
+const VARIANT_LABEL = { soccar: 'Nitro Goal', hoops: 'Hoops', puck: 'Snow Puck' };
 const MODES = { '3v3': 3, '2v2': 2, '1v1': 1 };
+// whiff: chance a planned jump or flip is mistimed; chase: chance a bot ignores rotation and goes for the ball;
+// shadow: how well it backs off and shadows an attacker instead of diving in
 export const DIFF = {
-  easy: { react: 0.42, vmul: 0.84, boost: 0.4, jump: 0.5, flip: 0.25, aerial: 0, aim: 0.55, keep: 30, hes: 0.25, save: 0.45 },
-  normal: { react: 0.2, vmul: 0.95, boost: 0.85, jump: 0.9, flip: 0.7, aerial: 0.2, aim: 0.24, keep: 12, hes: 0.06, save: 0.8 },
-  hard: { react: 0.09, vmul: 1.0, boost: 1, jump: 1, flip: 1, aerial: 0.75, aim: 0.08, keep: 0, hes: 0, save: 1 }
+  easy: { react: 0.42, vmul: 0.84, boost: 0.4, jump: 0.5, flip: 0.25, aerial: 0, aim: 0.55, keep: 30, hes: 0.25, save: 0.45, whiff: 0.35, chase: 0.45, shadow: 0.1 },
+  normal: { react: 0.2, vmul: 0.95, boost: 0.85, jump: 0.9, flip: 0.7, aerial: 0.2, aim: 0.24, keep: 12, hes: 0.06, save: 0.8, whiff: 0.16, chase: 0.15, shadow: 0.55 },
+  hard: { react: 0.09, vmul: 1.0, boost: 1, jump: 1, flip: 1, aerial: 0.75, aim: 0.08, keep: 0, hes: 0, save: 1, whiff: 0.06, chase: 0.04, shadow: 0.85 },
+  pro: { react: 0.06, vmul: 1.0, boost: 1, jump: 1, flip: 1, aerial: 1, aim: 0.04, keep: 0, hes: 0, save: 1, whiff: 0.03, chase: 0, shadow: 1 }
 };
 
 /* ------------------------------------------------------------ vectors */
@@ -91,7 +106,7 @@ function arenaSD(x, y, z, o) {
 // Distance from a point to the nearest solid surface (positive inside the play space) and the inward normal.
 export function surf(x, y, z, o) {
   const ax = Math.abs(x), az = Math.abs(z);
-  if (ax < GW && y < GH && az > HL - RC - 1) {
+  if (RULE.goals && ax < GW && y < GH && az > HL - RC - 1) {
     // In front of or inside a goal: the floor, the cut sides of the ramp, and the goal's own walls past the line.
     const sx = x < 0 ? -1 : 1, sz = z < 0 ? -1 : 1;
     let d = y; o.nx = 0; o.ny = 1; o.nz = 0; o.curv = 0;
@@ -122,7 +137,7 @@ export function collideSphere(p, r, o) {
   let best = 0;
   const d = surf(p.x, p.y, p.z, CQ);
   if (r - d > best) { best = r - d; o.nx = CQ.nx; o.ny = CQ.ny; o.nz = CQ.nz; o.post = false; }
-  if (Math.abs(Math.abs(p.z) - HL) < r + 1 && Math.abs(p.x) < GW + r + 1 && p.y < GH + r + 1) {
+  if (RULE.goals && Math.abs(Math.abs(p.z) - HL) < r + 1 && Math.abs(p.x) < GW + r + 1 && p.y < GH + r + 1) {
     for (let i = 0; i < SEGS.length; i++) {
       const s = SEGS[i], ex = s[3] - s[0], ey = s[4] - s[1], ez = s[5] - s[2];
       let t = ((p.x - s[0]) * ex + (p.y - s[1]) * ey + (p.z - s[2]) * ez) / (ex * ex + ey * ey + ez * ez);
@@ -135,6 +150,59 @@ export function collideSphere(p, r, o) {
   return best;
 }
 
+// The ball against the world, for each kind of ball: a sphere, a sphere and two hoop rims, or a flat puck that
+// stays level (its reach against a surface depends on the surface's tilt).
+const CQ2 = { nx: 0, ny: 1, nz: 0, curv: 0 };
+function collideBall(p, o) {
+  if (!RULE.puck) {
+    let best = collideSphere(p, BR, o);
+    if (RULE.hoops) {
+      for (let k = -1; k <= 1; k += 2) {
+        const cz = k * (HL - HOOP.off), qx = p.x, qy = p.y - HOOP.y, qz = p.z - cz, rho = Math.sqrt(qx * qx + qz * qz);
+        if (Math.abs(qy) > BR + HOOP.tube + 0.5 || Math.abs(rho - RULE.hoopR) > BR + HOOP.tube + 0.5) continue;
+        const dx = rho - RULE.hoopR, dl = Math.sqrt(dx * dx + qy * qy), pen = BR + HOOP.tube - dl;
+        if (pen > best && dl > 1e-6 && rho > 1e-6) { best = pen; const hx = qx / rho, hz = qz / rho; o.nx = hx * dx / dl; o.ny = qy / dl; o.nz = hz * dx / dl; o.post = true; }
+      }
+    }
+    return best;
+  }
+  // puck: radius r, half height h, always level; reach along a surface normal n is h|ny| + r sqrt(1 - ny^2)
+  let best = 0;
+  const d0 = surf(p.x, p.y, p.z, CQ2), ny0 = Math.abs(CQ2.ny), reach = PUCK.h * ny0 + PUCK.r * Math.sqrt(Math.max(0, 1 - ny0 * ny0));
+  if (reach - d0 > best) { best = reach - d0; o.nx = CQ2.nx; o.ny = CQ2.ny; o.nz = CQ2.nz; o.post = false; }
+  // the goal mouth's ramp sides and the inside of the goal: test the rim at a few points round the disc
+  if (Math.abs(p.z) > HL - RC - 3 && Math.abs(p.x) < GW + PUCK.r + 1 || Math.abs(p.x) > HW - RC - PUCK.r - 0.5 || Math.abs(p.z) > HL - RC - PUCK.r - 0.5) {
+    for (let k = 0; k < 8; k++) {
+      const a = k * Math.PI / 4, ex = Math.cos(a) * PUCK.r, ez = Math.sin(a) * PUCK.r;
+      const d = surf(p.x + ex, p.y, p.z + ez, CQ2);
+      if (-d > best) { best = -d; o.nx = CQ2.nx; o.ny = CQ2.ny; o.nz = CQ2.nz; o.post = false; }
+    }
+  }
+  if (RULE.goals && Math.abs(Math.abs(p.z) - HL) < PUCK.r + 1 && Math.abs(p.x) < GW + PUCK.r + 1 && p.y < GH + 1) {
+    for (let i = 0; i < SEGS.length; i++) {
+      const s = SEGS[i], ex = s[3] - s[0], ey = s[4] - s[1], ez = s[5] - s[2];
+      let t = ((p.x - s[0]) * ex + (p.y - s[1]) * ey + (p.z - s[2]) * ez) / (ex * ex + ey * ey + ez * ez);
+      t = clamp(t, 0, 1);
+      const cx = p.x - (s[0] + ex * t), cy = (p.y - (s[1] + ey * t)) * (PUCK.r / (PUCK.h + 0.3)), cz = p.z - (s[2] + ez * t);
+      const dl = Math.sqrt(cx * cx + cy * cy + cz * cz), pen = PUCK.r + PR - dl;
+      if (pen > best && dl > 1e-6) { best = pen; o.nx = cx / dl; o.ny = cy / dl * 0.3; o.nz = cz / dl; const nl = Math.hypot(o.nx, o.ny, o.nz); o.nx /= nl; o.ny /= nl; o.nz /= nl; o.post = true; }
+    }
+  }
+  return best;
+}
+// Has the ball scored, at p (and coming from prevY in Hoops)? Returns +1 / -1 for the end it went in, or 0.
+export function goalAt(x, y, z, prevY) {
+  if (RULE.hoops) {
+    if (prevY >= HOOP.y && y < HOOP.y) {
+      for (let k = -1; k <= 1; k += 2) { const cz = k * (HL - HOOP.off); if (Math.hypot(x, z - cz) < RULE.hoopR - 0.4) return k; }
+    }
+    return 0;
+  }
+  const R = RULE.puck ? PUCK.r : BR;
+  if (Math.abs(z) > HL + R && Math.abs(x) < GW + 0.5 && y < GH + 0.5) return z > 0 ? 1 : -1;
+  return 0;
+}
+
 /* ------------------------------------------------------------ cars and the ball */
 function mkCar(id, team, slot, name, isPlayer, level) {
   return {
@@ -142,9 +210,9 @@ function mkCar(id, team, slot, name, isPlayer, level) {
     p: new V(), v: new V(), f: new V(0, 0, 1), u: new V(0, 1, 0), r: new V(-1, 0, 0), n: new V(0, 1, 0), w: new V(),
     ground: true, boost: 33, boosting: false, holdT: 0, jumped: false, canSecond: false, secondT: 0, flipT: 0, flipAx: new V(),
     turtle: 0, rightT: 0, demoT: 0, hitCD: 0, steer: 0, spin: 0, airT: 0, sonic: false, vmul: 1, fellJump: false, lastShotT: -9,
-    susp: 0, suspV: 0, jumps: 0, flips: 0,
+    susp: 0, suspV: 0, jumps: 0, flips: 0, djumps: 0, body: 'comet', finish: 'gloss', boostCol: 'team', explosion: 'classic', sonicT: 0,
     stats: { goals: 0, assists: 0, saves: 0, shots: 0, demos: 0, touches: 0, points: 0 },
-    ai: { think: 0, mode: 'attack', tx: 0, ty: 0, tz: 0, bx: 0, by: 0, bz: 0, plan: null, pt: 0, p1: false, p2: false, flipX: 1, flipY: 0, stuck: 0, rev: 0, hes: 0, aerial: false, boostOK: true, form: isPlayer ? 1 : 0.88 + Math.random() * 0.24, mood: 0, D: null, cheer: 0 },
+    ai: { think: 0, mode: 'attack', tx: 0, ty: 0, tz: 0, bx: 0, by: 0, bz: 0, plan: null, pt: 0, p1: false, p2: false, flipX: 1, flipY: 0, stuck: 0, rev: 0, hes: 0, aerial: false, boostOK: true, form: isPlayer ? 1 : 0.88 + Math.random() * 0.24, mood: 0, D: null, cheer: 0, rotT: 0, chaseT: 0, style: 'press', chatT: 0, whiff: 0 },
     ctl: { thr: 0, steer: 0, pitch: 0, yaw: 0, roll: 0, boost: false, jumpPress: false, jumpHeld: false, flipX: 0, flipY: 0, slide: false }
   };
 }
@@ -155,23 +223,39 @@ const KICK = [[-20, -30], [20, -30], [-3, -44], [3, -44], [0, -50]];
 const KICK_SETS = { 1: [[0], [1], [4]], 2: [[0, 1], [2, 3], [0, 4]], 3: [[0, 1, 4], [2, 3, 4], [0, 1, 4]] };
 
 export function newMatch(cfg) {
-  const per = MODES[cfg.mode] || 3;
+  setRules(cfg.variant || 'soccar');
+  const train = cfg.training ? PACKS[cfg.training] : null;
+  const per = train ? 1 : (MODES[cfg.size] || 3);
   const G = {
     cfg, per, phase: cfg.attract ? 'live' : 'intro', pt: 0, time: 0, realT: 0, acc: 0, tick: 0,
     clock: cfg.len || 300, ot: false, otT: 0, zeroT: 0, score: [0, 0], frozen: !cfg.attract, kickT: 0, kickActive: !!cfg.attract,
     ball: mkBall(), cars: [], pads: [], player: null, cam: cfg.cam || 'ball', touches: [], feed: [], pops: [], goalInfo: null,
     pred: { pts: [], n: 0, goalSide: 0, goalT: 9 }, role: {}, ts: 1, rp: null, finished: false, decided: false, firstKick: true,
-    fade: cfg.attract ? 0 : 1, lb: cfg.attract ? 0 : 1, crowd: 0.2, shake: 0, cd: 3, events: 0, firstLive: -1, kickoffs: 0
+    fade: cfg.attract ? 0 : 1, lb: cfg.attract ? 0 : 1, crowd: 0.2, shake: 0, cd: 3, events: 0, firstLive: -1, kickoffs: 0,
+    cast: [], castT: -9, castNext: 0, names: ['', ''], train: null, mvp: null, prevBY: BR, lastLead: 0, said: {}
   };
+  // the two sides: a club each in the Season, the default pair otherwise
+  const c0 = cfg.club != null ? CLUBS[cfg.club] : null, c1 = cfg.opp != null ? CLUBS[cfg.opp] : null;
+  G.names = [c0 ? c0.short : TEAM_DEF[0], c1 ? c1.short : TEAM_DEF[1]];
+  G.abbr = [c0 ? c0.abbr : 'SAF', c1 ? c1.abbr : 'MON'];
+  TEAM[0].name = G.names[0]; TEAM[1].name = G.names[1];
   for (let i = 0; i <= 30; i++) G.pred.pts.push({ t: i * 0.1, x: 0, y: 0, z: 0 });
-  const mateLevel = cfg.diff === 'hard' ? 'hard' : 'normal';
+  const mateLevel = cfg.diff === 'hard' || cfg.diff === 'pro' ? 'hard' : 'normal';
   let id = 0;
-  for (let t = 0; t < 2; t++) {
+  const teams = train ? 1 : 2;
+  for (let t = 0; t < teams; t++) {
+    const club = t === 0 ? c0 : c1;
     for (let s = 0; s < per; s++) {
       const isPlayer = !cfg.attract && t === 0 && s === 0;
       const lvl = t === 0 ? (isPlayer ? 'normal' : mateLevel) : (cfg.attract ? 'normal' : cfg.diff);
-      const c = mkCar(id++, t, s, isPlayer ? 'You' : NAMES[t][s] || ('Bot ' + id), isPlayer, lvl);
+      const nm = isPlayer ? 'You' : club ? club.drivers[(s - (t === 0 ? 1 : 0) + club.drivers.length) % club.drivers.length] : NAMES[t][s] || ('Bot ' + id);
+      const c = mkCar(id++, t, s, nm, isPlayer, lvl);
       c.vmul = isPlayer ? 1 : DIFF[lvl].vmul;
+      // a club's form and style; a stronger club has a better day more often
+      if (club && !isPlayer) { c.ai.form = clamp(1.22 - club.rating * 0.5 + (Math.random() - 0.5) * 0.18, 0.78, 1.2); c.ai.style = club.style; }
+      // looks: the player's garage, the bots a car of their own
+      if ((isPlayer || (cfg.attract && t === 0 && s === 0)) && cfg.garage) { c.body = cfg.garage.body; c.finish = cfg.garage.finish; c.boostCol = cfg.garage.boost; c.explosion = cfg.garage.explosion; }
+      else { const h = (t * 7 + s * 3 + (cfg.club || 0) * 5 + (cfg.opp || 0) * 11) % 997; c.body = BODY_KEYS[(h + s) % 5]; c.finish = ['gloss', 'matte', 'metal'][h % 3]; c.explosion = ['classic', 'marigold', 'thunder', 'monsoon'][(h + t) % 4]; }
       G.cars.push(c);
       if (isPlayer) G.player = c;
     }
@@ -188,11 +272,32 @@ export function newMatch(cfg) {
       if (seen[k]) return; seen[k] = 1; G.pads.push({ x, z, big: false, t: 0 });
     });
   });
+  if (train) G.train = { key: cfg.training, pack: train, i: 0, n: train.drills.length, ok: 0, res: [], t: 0, step: 'set', timer: train.time, base: null, sonicT: 0, touched: false, flagT: 0, msg: '' };
   kickoffReset(G);
   return G;
 }
+export const ballRest = () => (RULE.puck ? PUCK.h : BR);
+// A training drill: the car and the ball where the drill puts them, everything still.
+function placeDrill(G) {
+  const T = G.train, d = T.pack.drills[T.i], c = G.player, B = G.ball;
+  c.p.set(d.car[0], H0, d.car[1]); c.v.set(0, 0, 0);
+  c.f.set(Math.sin(d.car[2] || 0), 0, Math.cos(d.car[2] || 0)); c.u.set(0, 1, 0); c.r.crossOf(c.f, c.u); c.n.set(0, 1, 0);
+  c.ground = true; c.boost = T.pack.boost || 60; c.demoT = 0; c.flipT = 0; c.holdT = 0; c.turtle = 0; c.rightT = 0; c.w.set(0, 0, 0);
+  c.jumped = false; c.canSecond = false; c.fellJump = false;
+  B.p.set(d.ball[0], Math.max(ballRest(), d.ball[1]), d.ball[2]); B.w.set(0, 0, 0); B.q = [0, 0, 0, 1]; B.vis = true;
+  if (d.aim) {
+    // a save drill: the velocity that carries the ball to the aim point in T seconds under gravity
+    const tt = d.T; B.v.set((d.aim[0] - B.p.x) / tt, (d.aim[1] - B.p.y) / tt + 0.5 * GRAV * tt, (d.aim[2] - B.p.z) / tt);
+  } else B.v.set(d.ball[3] || 0, d.ball[4] || 0, d.ball[5] || 0);
+  B.v.scale(1);
+  T.base = { jumps: c.jumps, djumps: c.djumps, flips: c.flips, touches: c.stats.touches };
+  T.touched = false; T.sonicT = 0; T.timer = T.pack.time; T.flagT = 0;
+  G.touches.length = 0; G.prevBY = B.p.y;
+  computePred(G);
+}
 export function kickoffReset(G) {
-  const B = G.ball; B.p.set(0, BR, 0); B.v.set(0, 0, 0); B.w.set(0, 0, 0); B.q = [0, 0, 0, 1]; B.vis = true;
+  if (G.train) { placeDrill(G); return; }
+  const B = G.ball; B.p.set(0, ballRest(), 0); B.v.set(0, 0, 0); B.w.set(0, 0, 0); B.q = [0, 0, 0, 1]; B.vis = true; G.prevBY = B.p.y;
   const set = KICK_SETS[G.per][Math.floor(Math.random() * 3)].slice();
   // the player takes a random spot of the set; teammates the rest
   for (let i = set.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = set[i]; set[i] = set[j]; set[j] = t; }
@@ -238,6 +343,20 @@ function sound(type, d) {
 }
 function pop(G, text, sub, col, big) { G.pops.push({ text, sub: sub || '', col: col || '#fbf5ec', t: 0, big: !!big }); if (G.pops.length > 4) G.pops.shift(); }
 function feed(G, text, col) { G.feed.push({ text, col: col || '#fbf5ec', t: 0 }); if (G.feed.length > 4) G.feed.shift(); }
+// A bot's quick chat line in the feed, now and then, never twice in a row from the same car.
+function chat(G, c, kind, prob) {
+  if (!c || c.isPlayer || G.cfg.attract || G.train || c.ai.chatT > 0 || Math.random() > prob) return;
+  c.ai.chatT = 7 + Math.random() * 5;
+  feed(G, c.name + ': ' + pickLine(CHAT[kind]), TEAM[c.team].glow);
+}
+// The commentary box: one line at a time, a big moment always gets through.
+function cast(G, kind, vars, prio) {
+  if (G.cfg.attract || !LINES[kind]) return;
+  if (!prio && G.realT < G.castNext) return;
+  const text = pickLine(LINES[kind], vars);
+  G.cast.push({ text, who: CASTERS[G.cast.length % 2 === 0 ? 0 : 1], t: 0 }); if (G.cast.length > 2) G.cast.shift();
+  G.castNext = G.realT + (prio ? 4.5 : 3.6);
+}
 function points(G, c, n, label) { c.stats.points += n; if (c.isPlayer && !G.cfg.attract) pop(G, '+' + n + ' ' + label, '', TEAM[c.team].glow); }
 
 /* ------------------------------------------------------------ one car, one step */
@@ -273,7 +392,7 @@ function jumpPress(G, c) {
     c.flipT = FLIPT; c.flipAx.set(0, 0, 0).addS(c.r, -fx).addS(c.f, fy).norm(); c.holdT = 0; c.flips++;
     emit('flip', { car: c });
   } else {
-    c.v.addS(c.u, DJUMPV); c.holdT = 0; emit('jump', { car: c, double: true });
+    c.v.addS(c.u, DJUMPV); c.holdT = 0; c.djumps++; emit('jump', { car: c, double: true });
   }
 }
 function driveStep(G, c, dt) {
@@ -282,15 +401,16 @@ function driveStep(G, c, dt) {
   let vF = c.v.dot(c.f), vR = c.v.dot(c.r);
   const vn = c.v.dot(c.u), vmax = VDRIVE * c.vmul;
   let acc;
-  if (k.thr > 0.05) acc = vF < -0.5 ? BRAKE * k.thr : (vF < vmax ? k.thr * (ACC * (1 - Math.max(0, vF) / vmax) + 2) : 0);
-  else if (k.thr < -0.05) acc = vF > 0.5 ? BRAKE * k.thr : (vF > -VREV ? k.thr * ACCREV : 0);
-  else acc = -Math.sign(vF) * Math.min(Math.abs(vF) / dt, COAST);
+  const grip = RULE.ice ? 0.62 : 1;
+  if (k.thr > 0.05) acc = vF < -0.5 ? BRAKE * grip * k.thr : (vF < vmax ? k.thr * (ACC * (1 - Math.max(0, vF) / vmax) + 2) * (RULE.ice ? 0.85 : 1) : 0);
+  else if (k.thr < -0.05) acc = vF > 0.5 ? BRAKE * grip * k.thr : (vF > -VREV ? k.thr * ACCREV : 0);
+  else acc = -Math.sign(vF) * Math.min(Math.abs(vF) / dt, COAST * grip);
   if (c.boosting && vF < VBOOST * (c.isPlayer ? 1 : 0.5 + 0.5 * c.vmul)) acc += BOOSTA;
   vF += acc * dt;
   const sp = Math.abs(vF), rad = (3.2 + sp * 0.5) * (k.slide ? 0.6 : 1);
   const yaw = -clamp(k.steer, -1, 1) * vF / rad * dt;
   c.f.rot(c.u, yaw); c.r.crossOf(c.f, c.u);
-  vR *= Math.exp(-dt * (k.slide ? 2.2 : 11));
+  vR *= Math.exp(-dt * (RULE.ice ? (k.slide ? 1.1 : 4.2) : (k.slide ? 2.2 : 11)));
   c.v.set(0, 0, 0).addS(c.f, vF).addS(c.r, vR).addS(c.u, vn);
   c.v.y -= GRAV * dt;
   c.spin += vF * dt / 0.42;
@@ -385,28 +505,52 @@ function stepCar(G, c, dt) {
 /* ------------------------------------------------------------ the ball */
 const CN = { nx: 0, ny: 1, nz: 0, post: false };
 function ballStep(G, B, dt, pred) {
-  B.v.y -= GRAV * dt;
-  const dr = Math.exp(-0.03 * dt); B.v.scale(dr);
+  const puck = RULE.puck;
+  B.v.y -= GRAV * (puck ? PUCK.grav : RULE.hoops ? HOOP.grav : 1) * dt;
+  const dr = Math.exp(-(puck ? 0.12 : 0.03) * dt); B.v.scale(dr);
   B.p.addS(B.v, dt);
   for (let it = 0; it < 3; it++) {
-    const pen = collideSphere(B.p, BR, CN);
+    const pen = collideBall(B.p, CN);
     if (pen <= 0) break;
     N.set(CN.nx, CN.ny, CN.nz);
     B.p.addS(N, pen);
     const vn = B.v.dot(N);
     if (vn < 0) {
-      const e = vn < -2.5 ? 0.62 : 0;
+      const e = puck ? (vn < -4 ? (N.y > 0.7 ? 0.12 : 0.45) : 0) : (vn < -2.5 ? 0.62 : 0);
       B.v.addS(N, -vn * (1 + e));
       if (pred) continue;
+      if (puck) {
+        // a puck on ice: no roll, a little spin about its axis from a glancing wall hit
+        if (Math.abs(N.y) < 0.6) B.w.y += (B.v.x * N.z - B.v.z * N.x) * 0.04;
+        if (vn < -6) emit(CN.post ? 'post' : 'bounce', { x: B.p.x - N.x * PUCK.r, y: B.p.y - N.y * PUCK.h, z: B.p.z - N.z * PUCK.r, nx: N.x, ny: N.y, nz: N.z, k: clamp(-vn / 30, 0, 1) });
+        continue;
+      }
       // friction and spin where it touches
       T1.copy(B.v).addS(N, -B.v.dot(N));                  // tangential velocity
       T2.crossOf(N, T1).scale(1 / BR);                     // the spin that would roll
       B.w.addS(T2.sub(B.w), clamp(-vn * 0.06 + 0.04, 0, 0.6));
       B.v.addS(T1, -clamp(-vn * 0.01, 0, 0.08));
       if (vn < -6) emit(CN.post ? 'post' : 'bounce', { x: B.p.x - N.x * BR, y: B.p.y - N.y * BR, z: B.p.z - N.z * BR, nx: N.x, ny: N.y, nz: N.z, k: clamp(-vn / 30, 0, 1) });
+      if (CN.post && vn < -9 && G.phase === 'live' && !G.train) cast(G, 'post', null, true);
     }
   }
   if (pred) return;
+  // the overtime squeeze: a ball up high near a rim drifts toward the middle of it
+  if (RULE.pull > 0 && B.p.y > HOOP.y - 1) {
+    for (let k = -1; k <= 1; k += 2) {
+      const cz = k * (HL - HOOP.off), dx = -B.p.x, dz = cz - B.p.z, dh = Math.hypot(dx, dz);
+      if (dh < RULE.hoopR * 2.2 && dh > 0.3) { B.v.x += dx / dh * RULE.pull * dt; B.v.z += dz / dh * RULE.pull * dt; }
+    }
+  }
+  if (puck) {
+    // ice: almost no friction, spin about the vertical only, keep the disc level
+    if (B.p.y < PUCK.h + 0.08) { T1.set(B.v.x, 0, B.v.z); const s2 = T1.len(); if (s2 > 0) { const ns = Math.max(0, s2 - 0.9 * dt); B.v.x *= ns / s2; B.v.z *= ns / s2; } }
+    B.w.x = 0; B.w.z = 0; B.w.y *= Math.exp(-0.6 * dt);
+    const sp2 = B.v.len(); if (sp2 > PUCK.max) B.v.scale(PUCK.max / sp2);
+    const h = B.w.y * dt * 0.5, q = B.q, ay = q[1], aw = q[3]; const cs = Math.cos(h), sn = Math.sin(h);
+    q[0] = 0; q[2] = 0; q[1] = cs * ay + sn * aw; q[3] = cs * aw - sn * ay; const l = Math.hypot(q[1], q[3]) || 1; q[1] /= l; q[3] /= l;
+    return;
+  }
   // rolling resistance on the floor
   if (B.p.y < BR + 0.05 && Math.abs(B.v.y) < 0.5) {
     T1.set(B.v.x, 0, B.v.z); const s = T1.len();
@@ -414,6 +558,8 @@ function ballStep(G, B, dt, pred) {
     T2.crossOf(UP, B.v).scale(1 / BR); B.w.addS(T2.sub(B.w), Math.min(1, dt * 6));
   }
   B.w.scale(Math.exp(-0.25 * dt));
+  // a ball wedged up high (on a rim against the wall, in a corner seam) is nudged back into play
+  if (B.p.y > 4.5 && B.v.lenSq() < 1.5) { B.wedge = (B.wedge || 0) + dt; if (B.wedge > 1.2) { B.v.x += -Math.sign(B.p.x) * 2.5; B.v.z += -Math.sign(B.p.z) * 4; B.v.y += 2; B.wedge = 0; } } else B.wedge = 0;
   const sp = B.v.len(); if (sp > 55) B.v.scale(55 / sp);
   // integrate the orientation
   const wl = B.w.len();
@@ -434,10 +580,14 @@ export function computePred(G) {
   PB.p.copy(B.p); PB.v.copy(B.v);
   P.goalSide = 0; P.goalT = 9;
   P.pts[0].x = B.p.x; P.pts[0].y = B.p.y; P.pts[0].z = B.p.z;
-  let n = 1;
+  let n = 1, py = B.p.y;
   for (let i = 1; i <= 90; i++) {
     ballStep(G, PB, 1 / 30, true);
-    if (!P.goalSide && Math.abs(PB.p.z) > HL + BR * 0.5 && Math.abs(PB.p.x) < GW && PB.p.y < GH) { P.goalSide = PB.p.z > 0 ? 1 : -1; P.goalT = i / 30; }
+    if (!P.goalSide) {
+      if (RULE.hoops) { const k = goalAt(PB.p.x, PB.p.y, PB.p.z, py); if (k) { P.goalSide = k; P.goalT = i / 30; } }
+      else if (Math.abs(PB.p.z) > HL + (RULE.puck ? PUCK.r : BR) * 0.5 && Math.abs(PB.p.x) < GW && PB.p.y < GH) { P.goalSide = PB.p.z > 0 ? 1 : -1; P.goalT = i / 30; }
+    }
+    py = PB.p.y;
     if (i % 3 === 0) { const q = P.pts[n++]; q.x = PB.p.x; q.y = PB.p.y; q.z = PB.p.z; }
   }
   P.n = n;
@@ -453,10 +603,13 @@ function carBall(G, c) {
   const lr = clamp(T2.dot(c.r), -1.08, 1.08), lu = clamp(T2.dot(c.u), -0.6, 0.6), lf = clamp(T2.dot(c.f), -2.05, 2.05);
   T3.copy(T1).addS(c.r, lr).addS(c.u, lu).addS(c.f, lf);  // closest point on the car
   N.copy(B.p).sub(T3);
+  // the puck is a flat disc: measure in a space squashed so it becomes a sphere of its radius
+  const R = RULE.puck ? PUCK.r : BR, sq = RULE.puck ? PUCK.r / (PUCK.h + 0.35) : 1;
+  N.y *= sq;
   let dist = N.len();
-  if (dist >= BR) return;
-  if (dist < 1e-4) { N.copy(T2).norm(); dist = 0; } else N.scale(1 / dist);
-  const pen = BR - dist;
+  if (dist >= R) return;
+  if (dist < 1e-4) { N.copy(T2).norm(); dist = 0; } else { N.scale(1 / dist); if (sq !== 1) { N.y *= sq; N.norm(); } }
+  const pen = (R - dist) / (sq !== 1 && Math.abs(N.y) > 0.5 ? sq : 1);
   B.p.addS(N, pen * 0.85); c.p.addS(N, -pen * 0.15);
   // contact velocity of the car, including the whip of a flip
   const vcx = c.v.x + (c.flipT > 0 ? c.f.x * 6 : 0), vcy = c.v.y + (c.flipT > 0 ? c.f.y * 6 : 0), vcz = c.v.z + (c.flipT > 0 ? c.f.z * 6 : 0);
@@ -469,13 +622,20 @@ function carBall(G, c) {
   }
   if (c.hitCD <= 0 && vn < 0.5) {
     c.hitCD = 0.12;
-    // the car-football push: aimed from the car's centre, flattened, scaled by the closing speed
-    T2.copy(B.p).sub(T1); T2.y *= 0.35; T2.norm();
-    const s = lerp(0.65, 0.55, clamp(rel / 45, 0, 1)) * 0.52;
+    // the car-football push: aimed from the car's centre, flattened, scaled by the closing speed.
+    // A puck stays low; the hoops ball is livelier and pops up off every hit.
+    T2.copy(B.p).sub(T1); T2.y *= RULE.puck ? 0.08 : RULE.hoops ? 0.8 : 0.35; T2.norm();
+    const s = lerp(0.65, 0.55, clamp(rel / 45, 0, 1)) * (RULE.puck ? 0.6 : 0.52);
     B.v.addS(T2, rel * s);
+    if (RULE.hoops) {
+      // a hit toward the rival hoop from near it lofts the ball higher, so it can come down through the rim
+      const hz = (c.team === 0 ? 1 : -1) * (HL - HOOP.off), dh = Math.hypot(B.p.x, B.p.z - hz), toward = (B.v.z * (c.team === 0 ? 1 : -1)) > 0;
+      B.v.y += 3 + clamp(rel / 30, 0, 1) * 3 + (toward && dh < 30 ? clamp((30 - dh) / 30, 0, 1) * 6 : 0);
+    }
+    if (RULE.puck) { if (B.v.y > 4) B.v.y = 4; B.w.y += (T2.x * c.v.z - T2.z * c.v.x) * 0.05; }
     // spin from a glancing hit
-    T3.set(rx, ry, rz).addS(N, -vn); T1.crossOf(N, T3).scale(-0.25 / BR); B.w.add(T1);
-    const sp = B.v.len(); if (sp > 55) B.v.scale(55 / sp);
+    if (!RULE.puck) { T3.set(rx, ry, rz).addS(N, -vn); T1.crossOf(N, T3).scale(-0.25 / BR); B.w.add(T1); }
+    const sp = B.v.len(), vm = RULE.puck ? PUCK.max : 55; if (sp > vm) B.v.scale(vm / sp);
     touch(G, c, rel);
   }
 }
@@ -483,17 +643,24 @@ function touch(G, c, rel) {
   const B = G.ball, s = c.team === 0 ? 1 : -1;
   B.hitT = 0;
   c.stats.touches++;
-  G.touches.push({ id: c.id, team: c.team, t: G.time }); if (G.touches.length > 10) G.touches.shift();
+  G.touches.push({ id: c.id, team: c.team, t: G.time, air: !c.ground, y: B.p.y, z: B.p.z }); if (G.touches.length > 10) G.touches.shift();
   const before = G.pred.goalSide, beforeT = G.pred.goalT;
   computePred(G);
   if (G.cfg.attract || G.phase !== 'live') { emit('hit', { car: c, k: clamp(rel / 40, 0, 1), x: B.p.x, y: B.p.y, z: B.p.z }); return; }
   const P = G.pred;
-  if (P.goalSide === s && P.goalT < 3 && G.time - c.lastShotT > 1.2) { c.lastShotT = G.time; c.stats.shots++; points(G, c, 20, 'Shot on goal'); }
+  if (P.goalSide === s && P.goalT < 3 && G.time - c.lastShotT > 1.2) { c.lastShotT = G.time; c.stats.shots++; points(G, c, 20, 'Shot on goal'); if (!G.train) cast(G, 'shot', { who: c.isPlayer ? 'you' : c.name }); }
   if (before === -s && beforeT < 2.2 && P.goalSide !== -s) {
     c.stats.saves++; points(G, c, 50, 'Save');
-    feed(G, c.name + ' saves', TEAM[c.team].glow);
+    if (!G.train) {
+      feed(G, c.name + ' saves', TEAM[c.team].glow);
+      cast(G, 'save', { who: c.isPlayer ? 'you' : c.name }, true);
+      G.cars.forEach((m) => { if (m.team === c.team && m !== c) chat(G, m, 'save', 0.4); });
+    } else G.train.saved = true;
     if (c.isPlayer) haptic(0.6, 0.4, 120);
   }
+  // a bot that has just played the ball rotates out and lets a team-mate take the next one
+  if (!c.isPlayer && G.per > 1) c.ai.rotT = 1.1 + Math.random() * 1.3;
+  if (G.train) G.train.touched = true;
   if (!c.ground && B.p.y > 6 && c.isPlayer) points(G, c, 10, 'Aerial hit');
   emit('hit', { car: c, k: clamp(rel / 40, 0, 1), x: B.p.x, y: B.p.y, z: B.p.z });
   if (c.isPlayer) haptic(clamp(rel / 40, 0.2, 1), clamp(rel / 50, 0.15, 0.8), Math.round(18 + rel * 1.2));
@@ -520,7 +687,7 @@ function knockout(G, att, vic) {
   vic.demoT = 3;
   emit('demo', { car: vic, by: att, x: vic.p.x, y: vic.p.y, z: vic.p.z, vx: att.v.x, vy: att.v.y, vz: att.v.z });
   att.stats.demos++;
-  if (!G.cfg.attract) { points(G, att, 25, 'Knockout'); feed(G, att.name + ' bumped out ' + vic.name, TEAM[att.team].glow); }
+  if (!G.cfg.attract) { points(G, att, 25, 'Knockout'); feed(G, att.name + ' bumped out ' + vic.name, TEAM[att.team].glow); cast(G, 'demo', { who: att.isPlayer ? 'you' : att.name, vic: vic.isPlayer ? 'you' : vic.name }); chat(G, vic, 'demoed', 0.4); }
   if (vic.isPlayer) { haptic(1, 1, 220); if (ARC) ARC.shake = Math.max(ARC.shake || 0, 10); }
   if (att.isPlayer) haptic(0.7, 0.5, 90);
   vic.v.set(0, 0, 0);
@@ -553,7 +720,8 @@ function roles(G) {
       const dx = B.p.x - c.p.x, dz = B.p.z - c.p.z, dist = Math.hypot(dx, dz);
       const behind = (B.p.z - c.p.z) * s > -4 ? 0 : 1.4;
       const facing = (dx * c.f.x + dz * c.f.z) / (dist || 1);
-      c._eta = dist / Math.max(10, c.v.len() + 6) + behind + (1 - facing) * 0.35 + (c.isPlayer ? -0.25 : 0);
+      // a bot rotating out after its touch hands the ball on; a ball-chaser thinks it is always first
+      c._eta = dist / Math.max(10, c.v.len() + 6) + behind + (1 - facing) * 0.35 + (c.isPlayer ? -0.25 : 0) + (c.ai.rotT > 0 ? 1.6 : 0) - (c.ai.chaseT > 0 ? 2.5 : 0);
     });
     list.sort((a, b) => a._eta - b._eta);
     list.forEach((c, i) => { G.role[c.id] = i; });
@@ -571,8 +739,36 @@ function aiDecide(G, c, D) {
   if (G.kickT < 2.4 && !G.kickActiveDone && role === 0) {
     A.mode = 'kickoff'; A.tx = 0; A.ty = BR; A.tz = 0; A.bx = 0; A.by = BR; A.bz = 0; return;
   }
-  if (role === 0 || (danger && role === 2) || G.per === 1) { intercept(G, c, D, danger || (B.p.z * s < -HL * 0.55)); return; }
+  if (Math.random() < D.chase * 0.12 && G.per > 1) A.chaseT = 1.5 + Math.random() * 1.5;
+  if (role === 0 || (danger && role === 2) || G.per === 1) {
+    // shadow defence: in our half, with a rival on the ball first, back off goal-side and wait for a mistake
+    // instead of diving in. A weaker bot dives in more often, which is how it gets beaten.
+    if (!danger && B.p.z * s < -4 && !G.train) {
+      let oe = 9, me = c._eta == null ? 9 : c._eta;
+      G.cars.forEach((o) => { if (o.team !== c.team && o.demoT <= 0 && o._eta != null && o._eta < oe) oe = o._eta; });
+      const goalSide = (c.p.z - B.p.z) * s < -3;
+      if (oe < me - 0.3 && goalSide && Math.hypot(B.p.x - c.p.x, B.p.z - c.p.z) > 9 && Math.random() < D.shadow) {
+        const gz = -s * HL; let dx = 0 - B.p.x, dz = gz - B.p.z; const dl = Math.hypot(dx, dz) || 1; dx /= dl; dz /= dl;
+        const back = clamp(dl * 0.45, 8, 16);
+        A.mode = 'shadow'; A.tx = clamp(B.p.x + dx * back, -HW + 5, HW - 5); A.ty = 0; A.tz = clamp(B.p.z + dz * back, -HL + 5, HL - 5);
+        if (A.mode !== A.lastMode) chat(G, c, 'defend', 0.15);
+        A.lastMode = A.mode; return;
+      }
+    }
+    intercept(G, c, D, danger || (B.p.z * s < -HL * 0.55));
+    if (A.lastMode !== 'hit' && A.mode === 'hit') chat(G, c, 'attack', 0.08);
+    A.lastMode = A.mode; return;
+  }
+  A.lastMode = role === 1 ? 'support' : 'post';
+  // after a touch: rotate out round the back post, picking up boost on the way
+  if (A.rotT > 0 && !danger) {
+    const big = G.pads.filter((p) => p.big && p.t <= 0 && p.z * s < 4).sort((a, b) => Math.hypot(a.x - c.p.x, a.z - c.p.z) - Math.hypot(b.x - c.p.x, b.z - c.p.z))[0];
+    if (big && c.boost < 50 && Math.hypot(big.x - c.p.x, big.z - c.p.z) < 40) { A.mode = 'boost'; A.tx = big.x; A.ty = 0; A.tz = big.z; return; }
+    A.mode = 'support'; A.tx = clamp(-Math.sign(B.p.x || 1) * 16, -HW + 6, HW - 6); A.ty = 0; A.tz = clamp(B.p.z - s * 34, -HL + 10, HL - 10);
+    return;
+  }
   if (role === 1) {
+    if (c.boost < 20 && Math.random() < 0.2) chat(G, c, 'boost', 0.1);
     // support: hang back behind the play, on the far side from the attacker, and top up boost
     if (c.boost < 30) {
       let best = null, bd = 1e9;
@@ -581,7 +777,8 @@ function aiDecide(G, c, D) {
     }
     const att = G.cars.find((o) => o.team === c.team && G.role[o.id] === 0);
     const side = att && att.p.x > B.p.x ? -1 : 1;
-    A.mode = 'support'; A.tx = clamp(B.p.x * 0.5 + side * 13, -HW + 6, HW - 6); A.ty = 0; A.tz = clamp(B.p.z - s * 26, -HL + 8, HL - 8);
+    const depth = A.style === 'press' ? 19 : A.style === 'sit' ? 32 : 26;
+    A.mode = 'support'; A.tx = clamp(B.p.x * 0.5 + side * 13, -HW + 6, HW - 6); A.ty = 0; A.tz = clamp(B.p.z - s * depth, -HL + 8, HL - 8);
     return;
   }
   // defend: sit in front of our own goal, shading toward the ball
@@ -594,7 +791,7 @@ function aiDecide(G, c, D) {
 }
 function intercept(G, c, D, clear) {
   const A = c.ai, P = G.pred, s = c.team === 0 ? 1 : -1;
-  const canAerial = D.aerial > 0 && Math.random() < D.aerial && c.boost > 30 && c.ground;
+  const canAerial = D.aerial > 0 && Math.random() < Math.min(1, D.aerial + (c.ai.style === 'air' ? 0.2 : 0)) && c.boost > 30 && c.ground;
   const reachY = c.ground ? (D.jump > 0.6 ? 6.4 : 3.8) : 30;
   const spd = Math.max(c.v.len(), 8), top = VDRIVE * c.vmul + (c.boost > 15 && A.boostOK ? 8 : 0);
   let best = null;
@@ -608,6 +805,7 @@ function intercept(G, c, D, clear) {
   }
   if (!best) best = P.pts[Math.min(P.n - 1, 12)];
   let gx = clamp(best.x * 0.3, -GW * 0.55, GW * 0.55), gz = s * (HL + 4);
+  if (RULE.hoops) { gx = 0; gz = s * (HL - HOOP.off); }
   if (clear) { gx = best.x < 0 ? -HW : HW; gz = best.z + s * 40; }
   let dx = gx - best.x, dz = gz - best.z; const dl = Math.hypot(dx, dz) || 1; dx /= dl; dz /= dl;
   const err = (Math.random() - 0.5) * D.aim; const ce = Math.cos(err), se = Math.sin(err);
@@ -658,8 +856,10 @@ function aiStep(G, c, dt) {
   const D = botDiff(c);
   k.thr = 0; k.steer = 0; k.pitch = 0; k.yaw = 0; k.roll = 0; k.boost = false; k.slide = false; k.jumpHeld = false; k.flipX = 0; k.flipY = 0;
   if (c.demoT > 0 || G.frozen) return;
+  if (G.showcase && c === G.cars[0]) { if (!c.ground) orientCtl(c, null, UP, k, 2); return; }
   A.think -= dt;
-  if (A.think <= 0) { A.think = D.react * (0.6 + Math.random() * 0.8); aiDecide(G, c, D); }
+  if (A.rotT > 0) A.rotT -= dt; if (A.chaseT > 0) A.chaseT -= dt; if (A.chatT > 0) A.chatT -= dt;
+  if (A.think <= 0) { A.think = D.react * (0.6 + Math.random() * 0.8); A.whiff = Math.random() < D.whiff ? (Math.random() - 0.5) * 0.5 : 0; aiDecide(G, c, D); }
   if (A.hes > 0) { A.hes -= dt; k.thr = 0.2; }
   // the scorers let off a little celebratory hop once the ball is in
   if (G.phase === 'goal' && A.cheer > 0) { A.cheer -= dt; if (A.cheer <= 0 && c.ground && !A.plan && A.mood > 0.4) aiPlan(c, 'single'); }
@@ -691,7 +891,7 @@ function aiStep(G, c, dt) {
     const dxb = A.bx - c.p.x, dzb = A.bz - c.p.z;
     if (Math.hypot(dxb, dzb) < 7 || A.mode === 'kickoff') { tx = A.bx; tz = A.bz; }
   }
-  if (A.mode === 'post' && Math.hypot(tx - c.p.x, tz - c.p.z) < 3.5) { tx = B.p.x; tz = B.p.z; }
+  if ((A.mode === 'post' || A.mode === 'shadow') && Math.hypot(tx - c.p.x, tz - c.p.z) < 3.5) { tx = B.p.x; tz = B.p.z; }
   T1.set(tx - c.p.x, ty, tz - c.p.z);
   if (c.ground) {
     T1.y = H0 - c.p.y;
@@ -700,7 +900,7 @@ function aiStep(G, c, dt) {
     k.steer = clamp(ang * 2.6, -1, 1);
     k.thr = 1;
     if (Math.abs(ang) > 1.35 && sp > 7) k.slide = true;
-    if (A.mode === 'post' || A.mode === 'support') {
+    if (A.mode === 'post' || A.mode === 'support' || A.mode === 'shadow') {
       // arrive, do not overshoot: brake down to a speed that suits the distance left
       const dl = Math.hypot(A.tx - c.p.x, A.tz - c.p.z), want = clamp(dl * 1.1 + 1, 0, 18);
       if (dl < 3.5) k.thr = Math.abs(ang) > 0.5 ? 0.45 : 0;
@@ -708,19 +908,24 @@ function aiStep(G, c, dt) {
     }
     if (A.hes > 0) k.thr = 0.2;
     const far = dist > 20 || A.mode === 'kickoff';
-    if (A.boostOK && Math.abs(ang) < 0.28 && far && c.boost > D.keep && sp < 27 && A.mode !== 'support' && A.mode !== 'post') k.boost = true;
+    if (A.boostOK && Math.abs(ang) < 0.28 && far && c.boost > D.keep && sp < 27 && A.mode !== 'support' && A.mode !== 'post' && A.mode !== 'shadow') k.boost = true;
     if (A.mode === 'kickoff' && (Math.random() < D.boost || c.level !== 'easy') && Math.abs(ang) < 0.4) k.boost = true;
     // arriving early: ease off so the ball comes to the car
     if (A.mode === 'hit' && !A.plan) {
       const db = Math.hypot(A.bx - c.p.x, A.bz - c.p.z);
       const tArr = db / Math.max(sp, 6);
+      // Hoops: near the rival rim, pop a low ball up off the roof with a hop so it can drop in
+      const hz = (c.team === 0 ? 1 : -1) * (HL - HOOP.off);
+      if (RULE.hoops && A.by < 4.5 && db < 5.5 && Math.abs(ang) < 0.35 && Math.hypot(A.bx, A.bz - hz) < 24 && Math.random() < D.jump) aiPlan(c, A.by > 3 ? 'double' : 'single');
       // jump for a ball in the air
-      if (A.aerial && A.by > 7.5 && db < A.by * 2.4 && c.boost > 25 && Math.abs(ang) < 0.3) aiPlan(c, 'aerial');
+      else if (A.aerial && A.by > 7.5 && db < A.by * 2.4 && c.boost > 25 && Math.abs(ang) < 0.3) aiPlan(c, 'aerial');
       else if (A.by > 3.6 && Math.random() < D.jump && db < 10) {
+        // a mistimed jump is the classic whiff: too early and the ball passes under, too late and it is gone
         const h = A.by, tRise = h > 4.6 ? 0.6 : 0.36;
-        if (tArr < tRise + 0.05) aiPlan(c, h > 4.6 ? 'double' : 'single');
+        if (tArr < tRise + 0.05 + A.whiff) aiPlan(c, h > 4.6 ? 'double' : 'single');
       } else if (A.by < 3.4 && db < 6.5 && db > 3 && Math.abs(ang) < 0.3 && sp > 9 && Math.random() < D.flip * 0.5) {
-        aiPlan(c, 'flip', Math.cos(ang), Math.sin(ang));
+        const wob = A.whiff ? A.whiff * 2 : 0;
+        aiPlan(c, 'flip', Math.cos(ang + wob), Math.sin(ang + wob));
       }
     }
     if (A.mode === 'kickoff' && !A.plan && Math.hypot(c.p.x, c.p.z) < 8.5 && D.flip > 0.3) aiPlan(c, 'flip', 1, 0);
@@ -755,6 +960,8 @@ function playerCtl(G, c, a, dt) {
   k.pitch = clamp(keyPitch - (st.active ? st.y : 0) - (pd.active ? pd.y : 0), -1, 1);
   k.yaw = gest ? 0 : ax.x;
   k.roll = (inp.down('KeyE') ? 1 : 0) - (inp.down('KeyQ') ? 1 : 0);
+  // a controller's bumpers roll the car in the air (the shell maps face buttons and triggers only)
+  if (a.gamepad && navigator.getGamepads) { try { const l = navigator.getGamepads(); for (let i = 0; i < l.length; i++) { const g = l[i]; if (g && g.connected) { const bb = (n) => !!(g.buttons[n] && g.buttons[n].pressed); k.roll += (bb(5) ? 1 : 0) - (bb(4) ? 1 : 0); break; } } } catch (e) { /* no pad */ } }
   k.slide = inp.down('KeyX');
   if (TOUCH.boostT > 0) TOUCH.boostT -= dt;
   if (TOUCH.brakeT > 0) TOUCH.brakeT -= dt;
@@ -933,15 +1140,16 @@ function tick(G, h) {
     stepCar(G, c, h);
   }
   const B = G.ball;
-  if (B.vis && G.phase !== 'goal') {
+  if (B.vis && G.phase !== 'goal' && G.phase !== 'trainSet') {
+    G.prevBY = B.p.y;
     ballStep(G, B, h, false); B.hitT += h;
     for (let i = 0; i < G.cars.length; i++) carBall(G, G.cars[i]);
   } else if (G.phase === 'goal') { B.v.scale(0.9); }
   for (let i = 0; i < G.cars.length; i++) for (let j = i + 1; j < G.cars.length; j++) carCar(G, G.cars[i], G.cars[j]);
   pads(G, h);
   if ((G.tick & 3) === 0 && !G.cfg.attract) record(G);
-  // a goal: the whole ball over the line, between the posts, under the bar
-  if (G.phase === 'live' && B.vis && Math.abs(B.p.z) > HL + BR && Math.abs(B.p.x) < GW + 0.5 && B.p.y < GH + 0.5) scored(G, B.p.z > 0 ? 0 : 1);
+  // a goal: the whole ball over the line, between the posts, under the bar (or down through a hoop)
+  if (G.phase === 'live' && B.vis) { const k = goalAt(B.p.x, B.p.y, B.p.z, G.prevBY); if (k) { if (G.train) trainGoal(G, k > 0 ? 0 : 1); else scored(G, k > 0 ? 0 : 1); } }
 }
 function scored(G, team) {
   const B = G.ball;
@@ -950,9 +1158,20 @@ function scored(G, team) {
   for (let i = G.touches.length - 1; i >= 0; i--) { const t = G.touches[i]; if (t.team === team) { scorer = G.cars[t.id]; for (let j = i - 1; j >= 0; j--) { const u = G.touches[j]; if (u.team === team && u.id !== t.id && t.t - u.t < 6) { assist = G.cars[u.id]; break; } } break; } }
   const kmh = Math.round(B.v.len() * 3.6);
   G.goalInfo = { team, scorer, assist, kmh, t: G.time, x: B.p.x, y: B.p.y, z: B.p.z, side: B.p.z > 0 ? 1 : -1, own: !scorer };
-  if (scorer) { scorer.stats.goals++; points(G, scorer, 100, 'Goal'); }
+  if (scorer) { scorer.stats.goals++; points(G, scorer, 100, 'Goal'); if (G.time - scorer.lastShotT > 4) { scorer.stats.shots++; scorer.lastShotT = G.time; } }
   if (assist) { assist.stats.assists++; points(G, assist, 50, 'Assist'); }
   feed(G, (scorer ? scorer.name : 'Own goal') + (assist ? ', assist ' + assist.name : '') + ', ' + kmh + ' km/h', TEAM[team].glow);
+  // the call: what kind of goal it was
+  const lt = G.touches.length ? G.touches[G.touches.length - 1] : null, who = scorer ? (scorer.isPlayer ? 'you' : scorer.name) : '';
+  G.goalInfo.explosion = scorer ? scorer.explosion : 'classic';
+  G.goalInfo.air = !!(lt && lt.team === team && lt.air && lt.y > 5);
+  const far = lt && lt.team === team && Math.abs(lt.z - B.p.z) > 45;
+  const kind = !scorer ? 'goalOwn' : G.ot ? 'goalOT' : RULE.hoops ? 'goalHoop' : RULE.puck ? 'goalPuck' : G.goalInfo.air ? 'goalAir' : far ? 'goalFar' : 'goal';
+  cast(G, kind, { who, kmh, team: TEAM[team].name }, true);
+  const diff = G.score[team] - G.score[1 - team];
+  if ((diff === 0 || diff === -1) && G.score[team] > 1) G.pending = { at: G.realT + 2.2, kind: 'comeback', vars: { team: TEAM[team].name } };
+  G.cars.forEach((m) => { if (m.team === team && m !== scorer) chat(G, m, 'goalMate', 0.45); if (m.team !== team) chat(G, m, 'conceded', 0.25); });
+  if (scorer && !scorer.isPlayer) chat(G, scorer, 'goalSelf', 0.2);
   G.phase = 'goal'; G.pt = 0; G.ts = 0.25; G.crowd = 1;
   G.cars.forEach((c) => { if (c.isPlayer && !c.bot) return; c.ai.mood = c.team === team ? 0.9 : -0.8; c.ai.cheer = c.team === team ? 0.6 + Math.random() * 0.9 : 0; });
   emit('goal', G.goalInfo);
@@ -972,7 +1191,11 @@ function toCountdown(G) {
   kickoffReset(G); G.phase = 'countdown'; G.pt = 0; G.frozen = true; G.cd = 3; G.lastBeep = 4; G.ts = 1;
   G.kickoffs++;
 }
-function goLive(G) { G.phase = 'live'; G.pt = 0; G.frozen = false; G.kickT = 0; G.kickActive = true; G.kickActiveDone = false; if (G.firstLive < 0) G.firstLive = G.realT; G.cars.forEach((c) => { c.ai.think = 0; }); computePred(G); roles(G); }
+function goLive(G) {
+  G.phase = 'live'; G.pt = 0; G.frozen = false; G.kickT = 0; G.kickActive = true; G.kickActiveDone = false; if (G.firstLive < 0) G.firstLive = G.realT; G.cars.forEach((c) => { c.ai.think = 0; c.ai.rotT = 0; }); computePred(G); roles(G);
+  if (!G.train) { if (G.kickoffs <= 1) cast(G, 'kickoff', { home: TEAM[0].name, away: TEAM[1].name, arena: ARENA_NAME[RULE.variant] }, true); else cast(G, 'kickoffAgain', { n: G.kickoffs }); }
+}
+const ARENA_NAME = { soccar: 'the Floodlit Bowl', hoops: 'the Skyhoop Dome', puck: 'the Frostline Rink' };
 function startReplay(G) {
   const gi = G.goalInfo;
   if (!gi || G.cfg.attract || !G.rec.count) { afterGoal(G); return; }
@@ -991,37 +1214,142 @@ function endMatch(G) {
   G.phase = 'over'; G.pt = 0; G.frozen = true;
   const P = G.player, wt = G.score[0] === G.score[1] ? P.team : (G.score[0] > G.score[1] ? 0 : 1);
   G.winner = wt;
-  // the winners line up at centre field for the podium
-  const W = G.cars.filter((c) => c.team === wt);
+  // the match MVP: the best player on the winning side by points, goals breaking a tie
+  G.mvp = G.cars.filter((c) => c.team === wt).sort((x, y) => y.stats.points - x.stats.points || y.stats.goals - x.stats.goals)[0] || null;
+  // the winners line up at centre field for the podium, the MVP in the middle
+  const W = G.cars.filter((c) => c.team === wt).sort((x, y) => (x === G.mvp ? -1 : y === G.mvp ? 1 : 0));
+  const order = W.length === 3 ? [1, 0, 2] : W.length === 2 ? [0, 1] : [0];
   W.forEach((c, i) => {
-    const x = (i - (W.length - 1) / 2) * 6.5;
+    const x = (order[i] - (W.length - 1) / 2) * 6.5;
     c.p.set(x, H0, 0); c.v.set(0, 0, 0); c.f.set(0, 0, -1); c.u.set(0, 1, 0); c.r.crossOf(c.f, c.u); c.ground = true; c.demoT = 0; c.flipT = 0; c.boosting = false;
   });
   G.cars.filter((c) => c.team !== wt).forEach((c, i) => {
     c.p.set((i - 1) * 7, H0, wt === 0 ? -34 : 34); c.v.set(0, 0, 0); c.f.set(0, 0, wt === 0 ? 1 : -1); c.u.set(0, 1, 0); c.r.crossOf(c.f, c.u); c.ground = true; c.demoT = 0; c.boosting = false;
   });
   G.ball.vis = false;
-  emit('end', { team: wt });
+  emit('end', { team: wt, mvp: G.mvp });
   if (AU) AU.roarK = 1;
+  if (!G.cfg.attract) {
+    const win = G.score[P.team] > G.score[1 - P.team];
+    cast(G, win ? 'win' : 'lose', { team: TEAM[wt].name }, true);
+    G.cars.forEach((c) => chat(G, c, c.team === wt ? 'win' : 'lose', 0.35));
+  }
   if (!G.cfg.attract && ARC) { const win = G.score[P.team] > G.score[1 - P.team]; [0, 0.15, 0.3, 0.5].forEach((dl, i) => sfx((win ? [262, 330, 392, 523] : [262, 247, 220, 196])[i], 0.35, { type: 'triangle', vol: 0.12, delay: dl })); haptic(win ? 0.8 : 0.4, 0.5, 300); }
 }
+const DIFF_MUL = { easy: 0.65, normal: 1, hard: 1.35, pro: 1.7 };
+// Full time: the box score, the MVP, rank points, XP and levels, unlocks, and the season moving on.
 function finish(G, a) {
   if (G.finished) return;
   G.finished = true;
   const P = G.player, my = G.score[P.team], their = G.score[1 - P.team], win = my > their;
-  const pts = P.stats.points + (win ? 100 : 0);
+  const pts = P.stats.points + (win ? 100 : 0), mvpMe = G.mvp === P;
+  // profile: rank points, XP, career numbers
+  const prof = loadProfile(), before = Object.assign({}, prof), rk0 = rankOf(prof.rp);
+  const dm = DIFF_MUL[G.cfg.diff] || 1;
+  const drp = win ? Math.round((16 + Math.min(3, my - their) * 3) * dm) : -Math.round(15 / dm + Math.min(3, their - my) * 2);
+  prof.rp = Math.max(0, prof.rp + drp);
+  const xp = 40 + Math.round(P.stats.points * 0.4) + (win ? 60 : 0) + (mvpMe ? 30 : 0);
+  prof.xp += xp; let lvlUp = 0;
+  while (prof.xp >= xpFor(prof.level)) { prof.xp -= xpFor(prof.level); prof.level++; lvlUp++; }
+  prof.played++; if (win) { prof.wins++; prof.streak = Math.max(0, prof.streak) + 1; } else { prof.losses++; prof.streak = Math.min(0, prof.streak) - 1; }
+  prof.goals += P.stats.goals; prof.saves += P.stats.saves; prof.assists += P.stats.assists; prof.demos += P.stats.demos; if (mvpMe) prof.mvps++;
+  if (win && RULE.hoops) prof.hoops++; if (win && RULE.puck) prof.puck++;
+  prof.best = Math.max(prof.best, pts);
+  // the season
+  let sres = null, S = null;
+  if (G.cfg.mode === 'season') { S = loadSeason(); if (S) { sres = seasonResult(S, my, their, G.ot); if (sres && sres.champion) prof.titles++; saveSeason(S); } }
+  saveProfile(prof);
+  const rk1 = rankOf(prof.rp), unl = newUnlocks(before, prof);
   const rows = G.cars.slice().sort((x, y) => x.team - y.team || y.stats.points - x.stats.points).map((c) =>
-    '<tr class="' + (c.isPlayer ? 'me' : '') + '"><td><i style="background:' + TEAM[c.team].col + '"></i>' + a.esc(c.name) + '</td><td>' + c.stats.goals + '</td><td>' + c.stats.assists + '</td><td>' + c.stats.saves + '</td><td>' + c.stats.shots + '</td><td>' + c.stats.points + '</td></tr>').join('');
-  const html = '<p class="ng-final"><b style="color:' + TEAM[0].col + '">' + TEAM[0].name + ' ' + G.score[0] + '</b> <span>-</span> <b style="color:' + TEAM[1].col + '">' + G.score[1] + ' ' + TEAM[1].name + '</b>' + (G.ot ? ' <small>after overtime</small>' : '') + '</p>' +
-    '<table class="ng-res"><tr><th>Player</th><th>G</th><th>A</th><th>Sv</th><th>Sh</th><th>Pts</th></tr>' + rows + '</table>' +
-    (win ? '<p class="ng-note">Win bonus +100 points.</p>' : '');
-  a.over({ eyebrow: win ? 'Full time' : 'Full time', title: win ? 'You <em>win</em>' : my === their ? 'All <em>square</em>' : 'Close, <em>not quite</em>', html, score: pts, scoreLabel: 'Your points', again: 'Play again' });
+    '<tr class="' + (c.isPlayer ? 'me' : '') + '"><td><i style="background:' + TEAM[c.team].col + '"></i>' + esc(c.name) + (c === G.mvp ? ' <b class="ng-mvp">MVP</b>' : '') + '</td><td>' + c.stats.goals + '</td><td>' + c.stats.assists + '</td><td>' + c.stats.saves + '</td><td>' + c.stats.shots + '</td><td>' + c.stats.demos + '</td><td>' + c.stats.points + '</td></tr>').join('');
+  let html = '<p class="ng-final"><b style="color:' + TEAM[0].col + '">' + esc(TEAM[0].name) + ' ' + G.score[0] + '</b> <span>-</span> <b style="color:' + TEAM[1].col + '">' + G.score[1] + ' ' + esc(TEAM[1].name) + '</b>' + (G.ot ? ' <small>after overtime</small>' : '') + '</p>' +
+    (G.mvp ? '<p class="ng-note">Match MVP: <b>' + esc(G.mvp.isPlayer ? 'You' : G.mvp.name) + '</b>, ' + G.mvp.stats.points + ' points.</p>' : '') +
+    '<table class="ng-res"><tr><th>Player</th><th>G</th><th>A</th><th>Sv</th><th>Sh</th><th>KO</th><th>Pts</th></tr>' + rows + '</table>';
+  const pct = Math.round(prof.xp / xpFor(prof.level) * 100);
+  html += '<div class="ng-prog"><div><span>Rank</span><b>' + esc(rk1.label) + '</b><small>' + (drp >= 0 ? '+' : '') + drp + ' RP, ' + prof.rp + ' RP' + (rk1.tier !== rk0.tier || rk1.div !== rk0.div ? (prof.rp > before.rp ? ', promoted' : ', dropped a division') : '') + '</small></div>' +
+    '<div><span>Level ' + prof.level + '</span><b>+' + xp + ' XP</b><small><i style="width:' + pct + '%"></i></small></div></div>';
+  if (lvlUp) html += '<p class="ng-note">Level up! You are now level ' + prof.level + '.</p>';
+  if (unl.length) html += '<p class="ng-unlock">Unlocked in the Garage: ' + unl.map(esc).join(', ') + '.</p>';
+  let again = 'Play again', title = win ? 'You <em>win</em>' : 'Close, <em>not quite</em>', eyebrow = 'Full time';
+  if (sres && S) {
+    eyebrow = LEAGUE + ', ' + sres.label;
+    html += '<p class="ng-note">' + esc(sres.line) + (sres.others.length ? '. Elsewhere: ' + sres.others.map(esc).join(', ') : '') + '.</p>';
+    if (S.done) {
+      title = sres.champion ? 'League <em>champions</em>' : esc(S.finish || 'Season over');
+      html += (S.bracket ? bracketHtml(S) : '') + tableHtml(S) + (sres.champion ? '<p class="ng-unlock">Trophy won. The Jugnu car and the Festival boost are yours.</p>' : '');
+      again = 'New season';
+    } else {
+      const nx = nextFixture(S);
+      if (S.stage !== 'regular') html += bracketHtml(S);
+      html += tableHtml(S);
+      if (nx) html += '<p class="ng-note">Next: <b>' + esc(nx.label) + '</b>, ' + esc(CLUBS[nx.home].short) + ' v ' + esc(CLUBS[nx.away].short) + '.</p>';
+      again = sres.stageBefore === 'regular' && S.stage === 'semi' ? 'Play the semi-final' : S.stage === 'final' ? 'Play the final' : 'Next match';
+      if (sres.stageBefore === 'regular' && S.stage === 'semi') title = win ? 'Into the <em>playoffs</em>' : 'Playoffs <em>reached</em>';
+      else if (sres.stageBefore === 'semi') title = 'Through to the <em>final</em>';
+      else title = win ? (G.ot ? 'Two points in <em>overtime</em>' : 'Three <em>points</em>') : G.ot ? 'A point in <em>overtime</em>' : 'No points <em>today</em>';
+    }
+  }
+  a.over({ eyebrow, title, html, score: pts, scoreLabel: 'Your points', again });
+}
+
+/* ------------------------------------------------------------ training */
+function trainGoal(G, team) {
+  const T = G.train, d = T.pack.drills[T.i], P = G.player;
+  G.ball.vis = false;
+  emit('goal', { team, scorer: team === 0 ? P : null, assist: null, kmh: Math.round(G.ball.v.len() * 3.6), t: G.time, x: G.ball.p.x, y: G.ball.p.y, z: G.ball.p.z, side: G.ball.p.z > 0 ? 1 : -1, own: false, explosion: P.explosion, train: true });
+  const ok = T.pack.kind === 'save' ? false : (team === 0 && (T.pack.kind !== 'basics' || d.goal === 'score'));
+  trainDone(G, ok, ok ? 'Goal!' : (T.pack.kind === 'save' ? 'It went in' : 'Wrong end'));
+}
+function trainDone(G, ok, msg) {
+  const T = G.train; if (G.phase !== 'live') return;
+  T.res[T.i] = ok; if (ok) T.ok++;
+  T.msg = msg; T.okNow = ok; G.phase = 'trainEnd'; G.pt = 0; G.ts = 0.4;
+  if (ok) { haptic(0.6, 0.4, 120); sfx(660, 0.12, { type: 'triangle', vol: 0.1 }); sfx(990, 0.18, { type: 'triangle', vol: 0.09, delay: 0.1 }); }
+  else { sfx(220, 0.25, { type: 'sawtooth', vol: 0.06, slide: 140 }); }
+}
+// Check the drill's goal each frame while it runs.
+function trainLive(G, dt) {
+  const T = G.train, d = T.pack.drills[T.i], P = G.player, b = T.base, kind = T.pack.kind;
+  T.timer -= dt;
+  if (P.sonic) T.sonicT += dt;
+  if (kind === 'basics') {
+    const g = d.goal;
+    if ((g === 'touch' && P.stats.touches > b.touches) || (g === 'jump' && P.jumps > b.jumps) || (g === 'double' && P.djumps > b.djumps) ||
+      (g === 'boost' && T.sonicT > 0.25) || (g === 'flip' && P.flips > b.flips && P.stats.touches > b.touches)) { trainDone(G, true, 'Nice!'); return; }
+    if (T.timer <= 0) trainDone(G, false, 'Out of time');
+    return;
+  }
+  if (kind === 'save') {
+    const pr = G.pred, heading = pr.goalSide === -1 && pr.goalT < 3;
+    if (T.touched && !heading) { T.flagT += dt; if (T.flagT > 0.5) { trainDone(G, true, 'Saved!'); return; } }
+    if (T.timer <= 0) { trainDone(G, !heading, heading ? 'Too late' : 'Kept out'); return; }
+    return;
+  }
+  // a shot or aerial: score before the timer; a ball that has stopped dead (or rolled back) after a touch fails early
+  if (T.timer <= 0) { trainDone(G, false, 'Out of time'); return; }
+  if (T.touched && G.ball.v.len() < 1.5 && G.ball.p.y < BR + 0.3) { T.flagT += dt; if (T.flagT > 1.2) trainDone(G, false, 'Missed'); }
+}
+function trainFinish(G, a) {
+  if (G.finished) return; G.finished = true;
+  const T = G.train, best = trainBest(T.key), isBest = trainSave(T.key, T.ok);
+  const stars = T.ok >= T.n ? 3 : T.ok >= Math.ceil(T.n * 0.66) ? 2 : T.ok >= Math.ceil(T.n * 0.33) ? 1 : 0;
+  const prof = loadProfile(), before = Object.assign({}, prof);
+  const xp = 10 + T.ok * 8; prof.xp += xp; let up = 0; while (prof.xp >= xpFor(prof.level)) { prof.xp -= xpFor(prof.level); prof.level++; up++; }
+  saveProfile(prof);
+  const unl = newUnlocks(before, prof);
+  const dots = T.pack.drills.map((d, i) => '<i class="' + (T.res[i] ? 'ok' : 'no') + '" title="' + esc(d.hint) + '"></i>').join('');
+  const html = '<p class="ng-final"><b>' + T.ok + ' / ' + T.n + '</b> ' + esc(T.pack.name.toLowerCase()) + ' drills</p><p class="ng-dots">' + dots + '</p>' +
+    '<p class="ng-note">' + ['No stars yet, the drills get easier with practice.', 'One star.', 'Two stars.', 'Three stars, a clean sweep.'][stars] + ' Best: ' + Math.max(best, T.ok) + ' / ' + T.n + (isBest && best ? ', a new best.' : '.') + ' +' + xp + ' XP' + (up ? ', level ' + prof.level + '!' : '.') + '</p>' +
+    (unl.length ? '<p class="ng-unlock">Unlocked: ' + unl.map(esc).join(', ') + '.</p>' : '');
+  a.over({ eyebrow: 'Training, ' + T.pack.name, title: stars === 3 ? 'Pack <em>cleared</em>' : 'Training <em>done</em>', html, again: 'Run it again' });
 }
 export function stepMatch(G, dt, a, skip) {
   G.realT += dt;
   for (let i = G.pops.length - 1; i >= 0; i--) { G.pops[i].t += dt; if (G.pops[i].t > 2.2) G.pops.splice(i, 1); }
   for (let i = G.feed.length - 1; i >= 0; i--) { G.feed[i].t += dt; if (G.feed[i].t > 6) G.feed.splice(i, 1); }
   G.crowd = Math.max(0.15, G.crowd - dt * 0.12);
+  for (let i = G.cast.length - 1; i >= 0; i--) { G.cast[i].t += dt; if (G.cast[i].t > 5) G.cast.splice(i, 1); }
+  if (G.pending && G.realT >= G.pending.at) { cast(G, G.pending.kind, G.pending.vars, true); G.pending = null; }
   const lbWant = G.phase === 'intro' || G.phase === 'replay' || G.phase === 'over' ? 1 : 0;
   G.lb += (lbWant - G.lb) * Math.min(1, dt * 3.5);
   const ph = G.phase;
@@ -1038,20 +1366,48 @@ export function stepMatch(G, dt, a, skip) {
     if (n < G.lastBeep && n > 0) { G.lastBeep = n; sfx(440, 0.14, { type: 'triangle', vol: 0.13 }); haptic(0.15, 0.1, 25); }
     if (G.pt >= 3) { goLive(G); sfx(880, 0.3, { type: 'triangle', vol: 0.15 }); sfx(1320, 0.3, { type: 'sine', vol: 0.08 }); haptic(0.4, 0.3, 60); }
     sim(G, dt);
+  } else if (ph === 'trainSet') {
+    // a drill card, everything frozen, then go
+    G.pt += dt; G.fade = Math.max(0, G.fade - dt * 2.5);
+    if (G.pt > 1.6 || (skip && G.pt > 0.35)) { G.phase = 'live'; G.pt = 0; G.frozen = false; G.kickT = 9; G.kickActiveDone = true; if (G.firstLive < 0) G.firstLive = G.realT; sfx(880, 0.16, { type: 'triangle', vol: 0.1 }); computePred(G); }
+    sim(G, dt);
+  } else if (ph === 'trainEnd') {
+    G.pt += dt; G.ts = Math.min(1, G.ts + dt);
+    sim(G, dt * G.ts);
+    if (G.pt > 1.5) {
+      G.fade = Math.min(1, G.fade + dt / 0.25);
+      if (G.fade >= 1) {
+        const T = G.train;
+        if (T.i + 1 >= T.n) { G.phase = 'over'; G.pt = 0; G.frozen = true; G.ball.vis = false; G.trainOver = true; }
+        else { T.i++; placeDrill(G); G.phase = 'trainSet'; G.pt = 0; G.frozen = true; }
+      }
+    }
+  } else if (ph === 'live' && G.train) {
+    sim(G, dt);
+    if (G.phase === 'live') trainLive(G, dt);
   } else if (ph === 'live') {
     sim(G, dt);
     if (G.phase === 'live' && !G.cfg.attract) {
-      if (G.ot) G.otT += dt;
+      if (G.ot) {
+        G.otT += dt;
+        // Hoops overtime that drags on: after a minute the rims start to widen, so sudden death really ends
+        if (RULE.hoops && G.otT > 60) {
+          const k = clamp((G.otT - 60) / 60, 0, 1);
+          if (RULE.hoopR === HOOP.r) { pop(G, 'The rims are widening', 'Sudden death squeeze', '#ffb736', true); cast(G, 'squeeze', null, true); }
+          RULE.hoopR = HOOP.r * (1 + k * 0.12); RULE.pull = k * 7 + clamp((G.otT - 120) / 60, 0, 1) * 7;
+        }
+      }
       else if (G.clock > 0) {
         const before = G.clock; G.clock = Math.max(0, G.clock - dt);
-        if (before > 30 && G.clock <= 30) pop(G, '30 seconds left', '', '#ffb736');
+        if (before > 30 && G.clock <= 30) { pop(G, '30 seconds left', '', '#ffb736'); cast(G, 'late', null, true); }
+        if (before > 10 && G.clock <= 10) cast(G, 'final10', null, true);
         if (Math.ceil(before) !== Math.ceil(G.clock) && G.clock <= 10 && G.clock > 0) sfx(660, 0.06, { type: 'square', vol: 0.05 });
       } else {
         // time is up: the match ends when the ball next touches the ground
         G.zeroT += dt;
-        if (G.ball.p.y < BR + 0.3 || G.zeroT > 4) {
+        if (G.ball.p.y < ballRest() + 0.3 || G.zeroT > 4) {
           if (G.score[0] !== G.score[1]) { G.phase = 'cut'; G.after = 'end'; G.pt = 0; }
-          else { G.ot = true; G.otT = 0; pop(G, 'Overtime', 'Next goal wins', '#ffb736', true); sfx(330, 0.5, { type: 'sawtooth', vol: 0.1 }); G.phase = 'cut'; G.after = 'kick'; G.pt = 0; }
+          else { G.ot = true; G.otT = 0; pop(G, 'Overtime', 'Next goal wins', '#ffb736', true); cast(G, 'ot', null, true); sfx(330, 0.5, { type: 'sawtooth', vol: 0.1 }); G.phase = 'cut'; G.after = 'kick'; G.pt = 0; }
         }
       }
     }
@@ -1078,7 +1434,8 @@ export function stepMatch(G, dt, a, skip) {
     if (G.fade >= 1) { if (G.after === 'end') endMatch(G); else toCountdown(G); }
   } else if (ph === 'over') {
     G.pt += dt; G.fade = Math.max(0, G.fade - dt * 2);
-    if (G.pt > 5 && !G.finished && !G.cfg.attract) finish(G, a);
+    if (G.trainOver) { if (G.pt > 0.6 && !G.finished) trainFinish(G, a); }
+    else if (G.pt > 5 && !G.finished && !G.cfg.attract) finish(G, a);
   }
   if (G.phase === 'replay' || G.phase === 'replayOut') poseReplay(G, G.rp.t); else poseLive(G);
 }
@@ -1088,6 +1445,37 @@ function sim(G, dt) {
   while (G.acc >= STEP && n < 10) { G.acc -= STEP; n++; tick(G, STEP); }
   if (n >= 10) G.acc = 0;
 }
+
+/* ------------------------------------------------------------ state in and out (for networking later) */
+// The simulation is driven only by each car's ctl (its input: throttle, steer, pitch, yaw, roll, boost,
+// jump press and hold, flip direction, slide) stepped at a fixed 120 Hz in tick(). Everything a client needs
+// to draw or resume a match is plain numbers, read by exportState() and written back by applyState(), the
+// one place outside the simulation that sets car and ball state. A networked match sends inputs up and
+// snapshots down through these two, and a remote player's car is a car whose ctl comes from the wire.
+const CAR_KEYS = ['boost', 'ground', 'jumped', 'canSecond', 'secondT', 'flipT', 'holdT', 'turtle', 'rightT', 'demoT', 'airT', 'fellJump', 'boosting', 'sonic', 'steer', 'spin'];
+const v3 = (v) => [v.x, v.y, v.z];
+export function exportState(G) {
+  const B = G.ball;
+  return {
+    t: G.time, tick: G.tick, phase: G.phase, clock: G.clock, ot: G.ot, otT: G.otT, score: G.score.slice(), kickT: G.kickT,
+    ball: { p: v3(B.p), v: v3(B.v), w: v3(B.w), q: B.q.slice(), vis: B.vis },
+    cars: G.cars.map((c) => { const o = { id: c.id, team: c.team, p: v3(c.p), v: v3(c.v), f: v3(c.f), u: v3(c.u), w: v3(c.w), n: v3(c.n), flipAx: v3(c.flipAx) }; CAR_KEYS.forEach((k) => { o[k] = c[k]; }); return o; }),
+    pads: G.pads.map((p) => p.t)
+  };
+}
+export function applyState(G, s) {
+  if (!s) return;
+  const set = (v, a) => v.set(a[0], a[1], a[2]);
+  G.time = s.t; G.tick = s.tick; G.clock = s.clock; G.ot = s.ot; G.otT = s.otT; G.score[0] = s.score[0]; G.score[1] = s.score[1]; G.kickT = s.kickT;
+  const B = G.ball; set(B.p, s.ball.p); set(B.v, s.ball.v); set(B.w, s.ball.w); B.q = s.ball.q.slice(); B.vis = s.ball.vis;
+  s.cars.forEach((o) => { const c = G.cars[o.id]; if (!c) return; set(c.p, o.p); set(c.v, o.v); set(c.f, o.f); set(c.u, o.u); set(c.w, o.w); set(c.n, o.n); set(c.flipAx, o.flipAx); c.r.crossOf(c.f, c.u); CAR_KEYS.forEach((k) => { c[k] = o[k]; }); });
+  s.pads.forEach((t, i) => { if (G.pads[i]) G.pads[i].t = t; });
+  computePred(G);
+}
+// One car's input, as plain numbers, in and out.
+const CTL_KEYS = ['thr', 'steer', 'pitch', 'yaw', 'roll', 'boost', 'jumpPress', 'jumpHeld', 'flipX', 'flipY', 'slide'];
+export function exportInput(c) { const o = {}; CTL_KEYS.forEach((k) => { o[k] = c.ctl[k]; }); return o; }
+export function applyInput(c, o) { CTL_KEYS.forEach((k) => { if (o[k] != null) c.ctl[k] = o[k]; }); }
 
 /* ------------------------------------------------------------ HUD */
 export const F_MONO = '"JetBrains Mono", ui-monospace, monospace', F_DISP = 'Fraunces, "Times New Roman", serif', F_BODY = 'Inter, -apple-system, sans-serif';
@@ -1101,7 +1489,7 @@ const fmtClock = (s) => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 6
 const PJ = { x: 0, y: 0, on: false };
 function drawHUD(ctx, a, G) {
   const W = a.w, H = a.h, pad = a.hudPad(), small = W < 520, P = G.player;
-  const ph = G.phase, inPlay = ph === 'countdown' || ph === 'live' || ph === 'goal';
+  const ph = G.phase, inPlay = ph === 'countdown' || ph === 'live' || ph === 'goal' || ph === 'trainSet' || ph === 'trainEnd';
   // letterbox bars for cutaways
   if (G.lb > 0.01) {
     const bh = Math.round(H * 0.085 * G.lb);
@@ -1136,6 +1524,7 @@ function drawHUD(ctx, a, G) {
   }
   // scoreboard
   if (cine) { drawCine(ctx, a, G, small, pad); fadeOver(ctx, a, G); return; }
+  if (G.train) { drawTrainHUD(ctx, a, G, small, pad); fadeOver(ctx, a, G); return; }
   const sbW = small ? 210 : 280, sbH = small ? 40 : 46, sbX = W / 2 - sbW / 2, sbY = pad.top + 2;
   plate(ctx, sbX, sbY, sbW, sbH, 12, 0.66);
   const bw = small ? 62 : 82;
@@ -1149,6 +1538,7 @@ function drawHUD(ctx, a, G) {
   const low = !G.ot && G.clock <= 30 && G.clock > 0;
   txt(ctx, clk, W / 2, sbY + sbH / 2 - (G.ot ? 5 : 0), small ? 17 : 20, low && Math.floor(G.realT * 2) % 2 ? GOLD : INK, 'center', '700');
   if (G.ot) txt(ctx, 'OVERTIME', W / 2, sbY + sbH / 2 + 11, 8, GOLD, 'center', '700');
+  if (G.cfg.label && !small) txt(ctx, G.cfg.label.toUpperCase(), W / 2, sbY + sbH + 10, 9, DIM, 'center', '700');
   // camera badge (tap to switch on touch)
   const cw = small ? 76 : 86, ch = 24, cx0 = W - pad.right - cw, cy0 = sbY + (sbH - ch) / 2;
   plate(ctx, cx0, cy0, cw, ch, 8, 0.55);
@@ -1245,7 +1635,58 @@ function drawHUD(ctx, a, G) {
     lines.forEach((l, i) => txt(ctx, l, W / 2, by + i * 18 + 2, 11, INK, 'center', '600', F_BODY));
     ctx.globalAlpha = 1;
   }
+  drawCast(ctx, a, G, small, pad);
   fadeOver(ctx, a, G);
+}
+// The commentary lower third: the caster's name in a tab and their line, sliding in and fading out.
+function drawCast(ctx, a, G, small, pad) {
+  const c = G.cast[G.cast.length - 1]; if (!c) return;
+  const ph = G.phase; if (ph === 'replay' || ph === 'replayOut') return;
+  const W = a.w, H = a.h, al = clamp(c.t * 5, 0, 1) * clamp((5 - c.t) * 2, 0, 1); if (al <= 0) return;
+  ctx.font = '600 ' + (small ? 11 : 13) + 'px ' + F_BODY;
+  const tw = Math.min(W - 40, ctx.measureText(c.text).width + 24), x = W / 2 - tw / 2;
+  const y = a.touchMode ? H - pad.bottom - (a.touchStyle === 'pads' ? 210 : 128) : H - pad.bottom - (small ? 70 : 54), slide = (1 - clamp(c.t * 4, 0, 1)) * 12;
+  ctx.globalAlpha = al;
+  plate(ctx, x, y + slide, tw, small ? 24 : 28, 8, 0.62);
+  rr(ctx, x, y - 13 + slide, 44, 14, 4); ctx.fillStyle = GOLD; ctx.fill();
+  txt(ctx, c.who.toUpperCase(), x + 22, y - 6 + slide, 8, '#1a0d02', 'center', '700');
+  ctx.save(); ctx.beginPath(); ctx.rect(x + 6, y + slide, tw - 12, 30); ctx.clip();
+  txt(ctx, c.text, W / 2, y + (small ? 12 : 14) + slide, small ? 11 : 13, INK, 'center', '600', F_BODY);
+  ctx.restore(); ctx.globalAlpha = 1;
+}
+// Training: the drill counter, a timer bar, the hint, and the result of each attempt.
+function drawTrainHUD(ctx, a, G, small, pad) {
+  const W = a.w, H = a.h, T = G.train, ph = G.phase, d = T.pack.drills[T.i], P = G.player;
+  const bw = small ? 230 : 300, bh = small ? 44 : 50, bx = W / 2 - bw / 2, by = pad.top + 2;
+  plate(ctx, bx, by, bw, bh, 12, 0.66);
+  txt(ctx, T.pack.name.toUpperCase() + '  ' + (T.i + 1) + ' / ' + T.n, W / 2, by + 15, small ? 12 : 14, INK, 'center', '700');
+  const f = clamp(T.timer / T.pack.time, 0, 1);
+  ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fillRect(bx + 14, by + bh - 14, bw - 28, 5);
+  ctx.fillStyle = f < 0.3 ? '#ff5a3a' : GOLD; ctx.fillRect(bx + 14, by + bh - 14, (bw - 28) * f, 5);
+  for (let i = 0; i < T.n; i++) { ctx.beginPath(); ctx.arc(W / 2 - (T.n - 1) * 7 + i * 14, by + bh + 12, 4, 0, TAU); ctx.fillStyle = T.res[i] === true ? '#3dff9a' : T.res[i] === false ? '#ff5a3a' : i === T.i ? INK : 'rgba(255,255,255,.25)'; ctx.fill(); }
+  if (ph === 'trainSet') {
+    const al = clamp(G.pt * 4, 0, 1);
+    ctx.globalAlpha = al;
+    txt(ctx, 'Drill ' + (T.i + 1), W / 2, H * 0.36, small ? 34 : 46, INK, 'center', '600', F_DISP);
+    txt(ctx, d.hint, W / 2, H * 0.36 + (small ? 34 : 44), small ? 13 : 16, GOLD, 'center', '600', F_BODY);
+    ctx.globalAlpha = 1;
+  } else if (ph === 'live') {
+    txt(ctx, d.hint, W / 2, by + bh + 32, small ? 11 : 12, DIM, 'center', '600', F_BODY);
+  } else if (ph === 'trainEnd') {
+    const al = clamp(G.pt * 5, 0, 1) * clamp((1.7 - G.pt) * 3, 0, 1);
+    ctx.globalAlpha = al;
+    txt(ctx, T.msg, W / 2, H * 0.38, small ? 36 : 52, T.okNow ? '#3dff9a' : '#ff7a5a', 'center', '600', F_DISP);
+    ctx.globalAlpha = 1;
+  }
+  // the boost gauge, as in a match
+  const R = small ? 30 : 38, gx = a.touchMode ? pad.left + R + 8 : W - pad.right - R - 6, gy = H - pad.bottom - R - (a.touchMode ? 10 : 6);
+  ctx.beginPath(); ctx.arc(gx, gy, R + 4, 0, TAU); ctx.fillStyle = 'rgba(10,9,12,0.58)'; ctx.fill();
+  ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.beginPath(); ctx.arc(gx, gy, R - 3, Math.PI * 0.75, Math.PI * 2.25); ctx.stroke();
+  if (P.boost > 0.5) { ctx.strokeStyle = GOLD; ctx.beginPath(); ctx.arc(gx, gy, R - 3, Math.PI * 0.75, Math.PI * (0.75 + 1.5 * P.boost / 100)); ctx.stroke(); }
+  ctx.lineCap = 'butt';
+  txt(ctx, String(Math.round(P.boost)), gx, gy - 2, small ? 18 : 22, P.boosting ? GOLD : INK, 'center', '700', F_DISP);
+  txt(ctx, 'BOOST', gx, gy + R * 0.48, 8, DIM, 'center', '700');
+  if (a.touchMode && ph === 'live' && G.realT - G.firstLive < 6) txt(ctx, 'Drag to drive, tap to jump, swipe up to boost', W / 2, by + bh + 50, 11, INK, 'center', '600', F_BODY);
 }
 // The intro title card and the podium: no scoreboard, just the moment.
 function drawCine(ctx, a, G, small, pad) {
@@ -1254,7 +1695,8 @@ function drawCine(ctx, a, G, small, pad) {
     const t = G.pt, al = clamp((t - 0.5) * 2, 0, 1) * clamp((4.2 - t) * 2, 0, 1);
     ctx.globalAlpha = al;
     txt(ctx, 'NITRO GOAL', W / 2, H - bh - (small ? 74 : 92), small ? 34 : 52, INK, 'center', '600', F_DISP);
-    txt(ctx, TEAM[0].name + '  vs  ' + TEAM[1].name + '   ·   ' + G.cfg.mode + '   ·   ' + fmtClock(G.cfg.len), W / 2, H - bh - (small ? 44 : 54), small ? 10 : 12, GOLD, 'center', '700');
+    txt(ctx, TEAM[0].name + '  vs  ' + TEAM[1].name, W / 2, H - bh - (small ? 46 : 58), small ? 12 : 15, GOLD, 'center', '700');
+    txt(ctx, (G.cfg.label ? G.cfg.label + '   ·   ' : '') + VARIANT_LABEL[RULE.variant] + '   ·   ' + G.cfg.size + '   ·   ' + fmtClock(G.cfg.len) + '   ·   ' + DIFF_LABEL[G.cfg.diff], W / 2, H - bh - (small ? 30 : 38), small ? 9 : 11, DIM, 'center', '700');
     ctx.globalAlpha = al * 0.8;
     txt(ctx, a.touchMode ? 'Tap to skip' : 'Space to skip', W / 2, H - bh - 18, 10, DIM, 'center', '600');
     ctx.globalAlpha = 1;
@@ -1266,6 +1708,12 @@ function drawCine(ctx, a, G, small, pad) {
     ctx.fillStyle = gy; ctx.fillRect(0, bh, W, small ? 170 : 220);
     txt(ctx, G.score[0] === G.score[1] ? 'FULL TIME' : (mine ? 'VICTORY' : TEAM[G.winner].name.toUpperCase() + ' WIN'), W / 2, bh + (small ? 60 : 84), small ? 34 : 52, mine ? GOLD : TEAM[G.winner].glow, 'center', '600', F_DISP);
     txt(ctx, TEAM[0].name + '  ' + G.score[0] + '  -  ' + G.score[1] + '  ' + TEAM[1].name, W / 2, bh + (small ? 100 : 136), small ? 14 : 18, INK, 'center', '700');
+    if (G.mvp) {
+      const m = G.mvp, mm = clamp(G.pt - 1.2, 0, 1); ctx.globalAlpha = mm;
+      plate(ctx, W / 2 - 90, H - bh - (small ? 74 : 86), 180, 44, 10, 0.6);
+      txt(ctx, 'MATCH MVP', W / 2, H - bh - (small ? 62 : 74), 9, GOLD, 'center', '700');
+      txt(ctx, (m.isPlayer ? 'You' : m.name) + '  ·  ' + m.stats.points + ' pts', W / 2, H - bh - (small ? 46 : 58), small ? 13 : 15, INK, 'center', '700', F_BODY);
+    }
     ctx.globalAlpha = 1;
   }
 }
@@ -1293,32 +1741,119 @@ const MENU_CSS =
   '.ng-res tr.me td{background:var(--primary-soft);color:var(--ink)}.ng-res td i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:0}' +
   '.ng-note{font-size:13px;color:var(--ink-mute);margin:0 0 6px}.arc-card:has(.ng-intro) p{font-size:14px}';
 let cssDone = false;
-function injectCss() { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = MENU_CSS; document.head.appendChild(s); }
+function injectCss() { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = MENU_CSS + MORE_CSS; document.head.appendChild(s); document.addEventListener('click', onPanelClick); }
+const MORE_CSS =
+  '.ng-mvp{display:inline-block;font-size:9px;letter-spacing:.08em;padding:1px 5px;border-radius:4px;background:var(--primary);color:#1a0d02;vertical-align:1px}' +
+  '.ng-prog{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}.ng-prog>div{background:var(--primary-soft);border-radius:10px;padding:8px 10px}.ng-prog span{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}' +
+  '.ng-prog b{display:block;font-size:15px;color:var(--ink);margin:2px 0}.ng-prog small{display:block;font-size:11px;color:var(--ink-mute)}.ng-prog small i{display:block;height:5px;border-radius:3px;background:var(--primary);margin-top:5px}' +
+  '.ng-unlock{font-size:13px;color:var(--ink);background:var(--primary-soft);border-radius:8px;padding:8px 10px;margin:0 0 8px}.ng-dots i{display:inline-block;width:14px;height:14px;border-radius:50%;margin:0 4px 0 0;background:#ff5a3a}.ng-dots i.ok{background:#3dff9a}' +
+  '.ng-btns{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}.ng-btns .arc-btn{min-height:36px;padding:0 12px;font-size:13px}.ng-tab td,.ng-tab th{padding:4px 5px}.ng-tab td:nth-child(2),.ng-tab th:nth-child(2){text-align:left}.ng-ctl td,.ng-ctl th{text-align:left!important;font-size:12px}' +
+  '.ng-gar{margin:0 0 10px}.ng-gar h3{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);font-weight:500;margin:10px 0 6px}' +
+  '.ng-gar .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}.ng-gar button{font:inherit;font-size:12px;text-align:left;padding:7px 9px;border-radius:9px;border:1px solid var(--rule);background:transparent;color:var(--ink-dim);cursor:pointer;min-height:44px}' +
+  '.ng-gar button[aria-pressed="true"]{border-color:var(--primary);color:var(--ink);background:var(--primary-soft)}.ng-gar button[disabled]{opacity:.45;cursor:not-allowed}.ng-gar button small{display:block;font-size:10px;color:var(--ink-mute)}' +
+  '.ng-sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}';
+function profileLine(prof) {
+  const rk = rankOf(prof.rp);
+  return 'Level ' + prof.level + ' &middot; ' + esc(rk.label) + ' (' + prof.rp + ' RP) &middot; ' + prof.played + ' played, ' + prof.wins + ' won' + (prof.titles ? ' &middot; ' + prof.titles + ' title' + (prof.titles > 1 ? 's' : '') : '');
+}
+function seasonLine() {
+  const S = loadSeason(); if (!S || S.done) return '';
+  const nx = nextFixture(S); if (!nx) return '';
+  const pos = standings(S).indexOf(S.club) + 1, opp = nx.home === S.club ? nx.away : nx.home;
+  return '<p class="ng-note"><b>' + LEAGUE + '</b>: ' + esc(CLUBS[S.club].short) + ', ' + ordinal(pos) + '. Next: ' + esc(nx.label) + ' v ' + esc(CLUBS[opp].short) + ' (choose Season and press Play).</p>';
+}
+function ordinal(n) { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
 function menuProps() {
+  const prof = loadProfile();
+  const packChoices = PACK_KEYS.map((k) => ({ v: k, label: PACKS[k].name + (trainBest(k) ? ' ' + trainBest(k) + '/' + PACKS[k].drills.length : '') }));
   return {
     eyebrow: 'Rocket car football', title: 'Nitro <em>Goal</em>',
-    html: '<p class="ng-intro">Drive, boost, jump and flip a rocket car to smash a giant ball into the net. Play three a side with two AI teammates, two a side, or a one on one duel. Drive up the curved walls, fly with boost, and bump a rival out at supersonic speed.</p>',
+    html: '<p class="ng-intro">Drive, boost, jump, flip and fly a rocket car to smash a giant ball into the net. Quick matches one on one up to three a side, a full ' + LEAGUE + ' season with playoffs, the Hoops and Snow Puck arenas, and training packs for shooting, saving and aerials.</p>' +
+      '<p class="ng-note">' + profileLine(prof) + '</p>' + seasonLine() +
+      '<div class="ng-btns"><button type="button" class="arc-btn" data-ng="garage">Garage</button><button type="button" class="arc-btn" data-ng="season">Season</button><button type="button" class="arc-btn" data-ng="rules">Rules</button><button type="button" class="arc-btn" data-ng="controls">Controls</button><button type="button" class="arc-btn" data-ng="arena">Arena and camera</button></div>',
     options: [
-      { id: 'mode', label: 'Mode', value: '3v3', choices: [{ v: '3v3', label: 'Standard 3v3' }, { v: '2v2', label: 'Doubles 2v2' }, { v: '1v1', label: 'Duel 1v1' }] },
-      { id: 'len', label: 'Match length', value: '300', choices: [{ v: '300', label: '5 minutes' }, { v: '180', label: '3 minutes' }] },
-      { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
-      { id: 'sky', label: 'Kickoff time', value: 'dusk', choices: [{ v: 'dusk', label: 'Dusk' }, { v: 'night', label: 'Night' }] },
-      { id: 'cam', label: 'Camera', value: 'ball', choices: [{ v: 'ball', label: 'Ball cam' }, { v: 'car', label: 'Car cam' }], note: 'Switch any time with C, Y on a controller, or by tapping the camera badge.' }
+      { id: 'mode', label: 'Mode', value: 'quick', choices: [{ v: 'quick', label: 'Quick match' }, { v: 'season', label: 'Season' }, { v: 'hoops', label: 'Hoops' }, { v: 'puck', label: 'Snow Puck' }, { v: 'training', label: 'Training' }] },
+      { id: 'size', label: 'Team size', value: '3v3', choices: [{ v: '3v3', label: '3v3' }, { v: '2v2', label: '2v2' }, { v: '1v1', label: '1v1' }], note: 'A new season keeps the size it starts with.' },
+      { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }, { v: 'pro', label: 'Pro' }] },
+      { id: 'len', label: 'Match length', value: '300', choices: [{ v: '300', label: '5 min' }, { v: '180', label: '3 min' }, { v: '120', label: '2 min' }] },
+      { id: 'pack', label: 'Training pack', value: 'basics', choices: packChoices, note: 'Used when the mode is Training.' }
     ]
   };
+}
+// Panels opened from the menu (and the pause menu): Garage, Season, Rules, Controls, Arena.
+let PANEL_FROM = 'menu';
+function back(a) { if (MG) MG.showcase = false; if (PANEL_FROM === 'pause') a.resume(); else a.menu(); }
+function garageHtml() {
+  const prof = loadProfile(), g = loadGarage(prof), rk = rankOf(prof.rp), pct = Math.round(prof.xp / xpFor(prof.level) * 100);
+  const sec = (k, title) => '<h3>' + title + '</h3><div class="g">' + GARAGE[k].map((it) => {
+    const ok = unlocked(it, prof), sw = k === 'boost' ? '<span class="ng-sw" style="background:' + (BOOST_COL[it.v] || TEAM[0].col) + '"></span>' : '';
+    return '<button type="button" data-gar="' + k + ':' + it.v + '" aria-pressed="' + (g[k] === it.v) + '"' + (ok ? '' : ' disabled') + '>' + sw + esc(it.label) + '<small>' + esc(ok ? (it.note || 'Unlocked') : 'Locked: ' + needText(it)) + '</small></button>';
+  }).join('') + '</div>';
+  return '<div class="ng-prog"><div><span>Level ' + prof.level + '</span><b>' + prof.xp + ' / ' + xpFor(prof.level) + ' XP</b><small><i style="width:' + pct + '%"></i></small></div><div><span>Rank</span><b>' + esc(rk.label) + '</b><small>' + prof.rp + ' RP' + (rk.next ? ', next at ' + rk.next : '') + '</small></div></div>' +
+    '<p class="ng-note">' + prof.goals + ' goals, ' + prof.assists + ' assists, ' + prof.saves + ' saves, ' + prof.demos + ' knockouts, ' + prof.mvps + ' MVPs.</p>' +
+    '<div class="ng-gar">' + sec('body', 'Car') + sec('finish', 'Paint finish') + sec('boost', 'Boost trail') + sec('explosion', 'Goal explosion') + '</div>';
+}
+function showGarage(a) {
+  if (MG && MG.cfg.attract) MG.showcase = true;
+  a.panel({ eyebrow: 'Garage', title: 'Your <em>car</em>', html: garageHtml() + '<p class="ng-note">Your car keeps your team colour on the pitch; the shape, finish, boost and goal explosion are yours.</p>', actions: [{ label: 'Done', primary: true, on: () => back(a) }] });
+}
+function showSeason(a) {
+  const S = loadSeason();
+  if (S && !S.done) {
+    const nx = nextFixture(S);
+    a.panel({ eyebrow: LEAGUE, title: esc(CLUBS[S.club].name), html: (nx ? '<p class="ng-note">Next: <b>' + esc(nx.label) + '</b>, ' + esc(CLUBS[nx.home].short) + ' v ' + esc(CLUBS[nx.away].short) + '. ' + S.size + ', ' + DIFF_LABEL[S.diff] + '.</p>' : '') + (S.stage !== 'regular' ? bracketHtml(S) : '') + tableHtml(S) + (S.results.length ? '<p class="ng-note">' + S.results.map((r) => 'MD' + (r.round + 1) + ': ' + esc(r.line)).join('<br>') + '</p>' : ''),
+      actions: [{ label: 'Play the next match', primary: true, on: () => { a.choices.mode = 'season'; a.store.set('arcade.nitro-goal.mode', 'season'); a.start(); } }, { label: 'Abandon season', on: () => { clearSeason(); showSeason(a); } }, { label: 'Back', on: () => back(a) }] });
+    return;
+  }
+  const last = S && S.done ? '<p class="ng-note">Last season: ' + esc(CLUBS[S.club].short) + ', ' + esc(S.finish || 'finished') + '.</p>' + bracketHtml(S) : '';
+  a.panel({ eyebrow: LEAGUE, title: 'A new <em>season</em>', html: '<p>Pick your club. Seven matchdays against every other club, then the top four play a semi-final and a grand final. The team size, difficulty and match length are the ones chosen on the menu.</p>' + last,
+    options: [{ id: 'club', label: 'Your club', value: 0, choices: CLUBS.map((c, i) => ({ v: i, label: c.short })) }],
+    actions: [{ label: 'Start the season', primary: true, on: () => { clearSeason(); a.choices.mode = 'season'; a.store.set('arcade.nitro-goal.mode', 'season'); a.start(); } }, { label: 'Back', on: () => back(a) }] });
+}
+function showRules(a) { a.panel({ eyebrow: 'How it works', title: 'The <em>rules</em>', html: RULES_HTML, actions: [{ label: PANEL_FROM === 'pause' ? 'Back to the match' : 'Done', primary: true, on: () => back(a) }] }); }
+function showControls(a) { a.panel({ eyebrow: 'Controls', title: 'Every <em>input</em>', html: CONTROLS_HTML, showKeys: false, actions: [{ label: PANEL_FROM === 'pause' ? 'Back to the match' : 'Done', primary: true, on: () => back(a) }] }); }
+function showArena(a) {
+  a.panel({ eyebrow: 'Arena and camera', title: 'Set the <em>scene</em>', html: '<p>Snow Puck always plays on the night rink.</p>',
+    options: [
+      { id: 'sky', label: 'Kickoff time', value: 'dusk', choices: [{ v: 'dusk', label: 'Dusk' }, { v: 'night', label: 'Night' }] },
+      { id: 'cam', label: 'Camera', value: 'ball', choices: [{ v: 'ball', label: 'Ball cam' }, { v: 'car', label: 'Car cam' }], note: 'Switch any time with C, Y on a controller, or by tapping the camera badge.' }
+    ], actions: [{ label: 'Done', primary: true, on: () => back(a) }] });
+}
+function onPanelClick(e) {
+  const a = ARC; if (!a) return;
+  const g = e.target && e.target.closest ? e.target.closest('[data-gar]') : null;
+  if (g && !g.disabled) {
+    const parts = g.getAttribute('data-gar').split(':'), prof = loadProfile(), gar = loadGarage(prof);
+    const it = GARAGE[parts[0]] && GARAGE[parts[0]].find((x) => x.v === parts[1]);
+    if (it && unlocked(it, prof)) {
+      gar[parts[0]] = parts[1]; saveGarage(gar); g.parentNode.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === g))); a.sfx.tone(660, 0.05, { type: 'triangle', vol: 0.05 });
+      // the menu's own match shows your car: dress it at once
+      if (MG && MG.cfg.attract) { const c = MG.cars[0]; c.body = gar.body; c.finish = gar.finish; c.boostCol = gar.boost; c.explosion = gar.explosion; if (VIEW && VIEW.newMatch) VIEW.newMatch(MG, a); }
+    }
+    return;
+  }
+  const b = e.target && e.target.closest ? e.target.closest('[data-ng]') : null;
+  if (!b) return;
+  PANEL_FROM = a.state === 'pause' ? 'pause' : 'menu';
+  const k = b.getAttribute('data-ng');
+  if (k === 'garage') showGarage(a); else if (k === 'season') showSeason(a); else if (k === 'rules') showRules(a); else if (k === 'controls') showControls(a); else if (k === 'arena') showArena(a);
 }
 function debugState() {
   const G = MG, a = ARC;
   if (!G) return { state: a.state, phase: 'none' };
-  const P = G.player, B = G.ball;
+  const P = G.player, B = G.ball, prof = loadProfile();
   return {
-    state: a.state, phase: G.cfg.attract ? 'attract' : G.phase, mode: G.cfg.mode, diff: G.cfg.diff, len: G.cfg.len, sky: G.cfg.sky, renderer: VIEW ? VIEW.name : 'none',
-    clock: +G.clock.toFixed(2), ot: G.ot, score: G.score.slice(), alive: G.phase !== 'over',
+    state: a.state, phase: G.cfg.attract ? 'attract' : G.phase, mode: G.cfg.mode, size: G.cfg.size, variant: RULE.variant, diff: G.cfg.diff, len: G.cfg.len, sky: G.cfg.sky, renderer: VIEW ? VIEW.name : 'none',
+    clock: +G.clock.toFixed(2), ot: G.ot, score: G.score.slice(), alive: G.phase !== 'over', teams: G.names.slice(), label: G.cfg.label || '',
     ball: { x: +B.p.x.toFixed(2), y: +B.p.y.toFixed(2), z: +B.p.z.toFixed(2), speed: +B.v.len().toFixed(2), vis: B.vis },
     x: +P.p.x.toFixed(2), y: +P.p.y.toFixed(2), z: +P.p.z.toFixed(2), speed: Math.round(P.v.len() * 3.6), boost: Math.round(P.boost), boosting: P.boosting,
     onGround: P.ground, onWall: P.ground && P.n.y < 0.5, jumps: P.jumps, flips: P.flips, knockedOut: P.demoT > 0, steer: +P.ctl.steer.toFixed(2), throttle: +P.ctl.thr.toFixed(2),
     touches: P.stats.touches, goals: P.stats.goals, shots: P.stats.shots, saves: P.stats.saves, demos: P.stats.demos, points: P.stats.points,
     cam: G.cam, cars: G.cars.length, pads: G.pads.filter((p) => p.t <= 0).length, kickoffs: G.kickoffs, time: +G.time.toFixed(2),
+    mvp: G.mvp ? G.mvp.name : null, cast: G.cast.length ? G.cast[G.cast.length - 1].text : '', body: P.body,
+    train: G.train ? { pack: G.train.key, drill: G.train.i + 1, of: G.train.n, ok: G.train.ok, timer: +G.train.timer.toFixed(1) } : null,
+    bots: G.cars.filter((c) => !c.isPlayer).map((c) => c.ai.mode),
+    profile: { level: prof.level, rp: prof.rp, rank: rankOf(prof.rp).label },
     gfx: VIEW && VIEW.debug ? VIEW.debug() : null
   };
 }
@@ -1344,14 +1879,17 @@ export function boot(view) {
       keys: [['Drag', 'Drive that way'], ['Tap', 'Jump'], ['Tap again in the air', 'Flip toward your drag'], ['Swipe up / hold Boost', 'Boost'], ['Second finger tap', 'Jump while you drive'], ['Tap the camera badge', 'Ball cam on or off']]
     },
     formatScore: (v) => Math.round(v) + ' pts',
+    pauseHtml: () => { injectCss(); const G = MG; return (G && G.cfg.label ? '<p class="ng-note">' + esc(LEAGUE + ', ' + G.cfg.label) + '</p>' : '') + '<div class="ng-btns"><button type="button" class="arc-btn" data-ng="rules">Rules</button><button type="button" class="arc-btn" data-ng="controls">Controls</button></div>'; },
     resize: (a) => { if (view.resize) view.resize(a); },
     init(a) {
       ARC = a;
+      // an earlier version stored the team size as the mode: carry it over to the new size option
+      try { const old = a.store.get('arcade.nitro-goal.mode', null); if (MODES[old]) { a.store.set('arcade.nitro-goal.size', old); a.store.set('arcade.nitro-goal.mode', 'quick'); } } catch (e) { /* fresh start */ }
       if (!view.init(a)) return;
       const origMenu = a.menu;
       a.menu = function (p) { return origMenu(Object.assign(menuProps(), p || {})); };
       a.debug = debugState;
-      a.dev = Object.assign({ match: () => MG, bot: (on) => { if (MG) MG.player.bot = on !== false; }, skip: () => { if (MG && MG.phase === 'intro') MG.pt = 9; } }, view.dev || {});
+      a.dev = Object.assign({ state: () => (MG ? exportState(MG) : null), applyState: (st) => { if (MG) { applyState(MG, st); poseLive(MG); } }, match: () => MG, bot: (on) => { if (MG) MG.player.bot = on !== false; }, skip: () => { if (MG && MG.phase === 'intro') MG.pt = 9; } }, view.dev || {});
       // a second finger tapping while the first drags is a jump; right mouse boosts; left click jumps
       // Taps and swipes are judged on the events' own timestamps, so a phone that drops a frame mid-swipe still boosts.
       a.canvas.addEventListener('pointerdown', (e) => {
@@ -1380,11 +1918,26 @@ export function boot(view) {
     onMenu() { injectCss(); },
     start(a, ch) {
       injectCss();
-      const cfg = { mode: MODES[ch.mode] ? ch.mode : '3v3', len: +(ch.len || 300) || 300, diff: DIFF[ch.diff] ? ch.diff : 'normal', sky: ch.sky === 'night' ? 'night' : 'dusk', cam: ch.cam === 'car' ? 'car' : 'ball', attract: false };
+      const mode = ['quick', 'season', 'hoops', 'puck', 'training'].indexOf(ch.mode) >= 0 ? ch.mode : 'quick';
+      const prof = loadProfile();
+      const cfg = { mode, size: MODES[ch.size] ? ch.size : '3v3', len: +(ch.len || 300) || 300, diff: DIFF[ch.diff] ? ch.diff : 'normal', sky: ch.sky === 'night' ? 'night' : 'dusk', cam: ch.cam === 'car' ? 'car' : 'ball', attract: false, variant: 'soccar', garage: loadGarage(prof) };
+      let toast = null;
+      if (mode === 'hoops') { cfg.variant = 'hoops'; toast = ['Hoops', 'Drop the ball down through the rival hoop']; }
+      else if (mode === 'puck') { cfg.variant = 'puck'; cfg.sky = 'snow'; toast = ['Snow Puck', 'The puck slides low and fast on the ice']; }
+      else if (mode === 'training') { cfg.training = PACKS[ch.pack] ? ch.pack : 'basics'; cfg.size = '1v1'; cfg.len = 0; toast = ['Training, ' + PACKS[cfg.training].name, PACKS[cfg.training].blurb]; }
+      else if (mode === 'season') {
+        let S = loadSeason();
+        if (!S || S.done) { S = newSeason(clamp(+(ch.club || 0) | 0, 0, CLUBS.length - 1), { size: cfg.size, diff: cfg.diff, len: cfg.len }); saveSeason(S); }
+        const fx = nextFixture(S);
+        cfg.size = S.size; cfg.diff = S.diff; cfg.len = S.len; cfg.club = S.club; cfg.opp = fx.home === S.club ? fx.away : fx.home; cfg.label = fx.label; cfg.playoff = fx.playoff;
+        toast = [LEAGUE + ', ' + fx.label, CLUBS[S.club].short + (fx.home === S.club ? ' v ' : ' at ') + CLUBS[cfg.opp].short];
+      }
       MG = newMatch(cfg); recInit(MG); MG.pose = makePose(MG.cars.length); poseLive(MG);
+      if (MG.train) { MG.phase = 'trainSet'; MG.pt = 0; MG.frozen = true; MG.lb = 0; }
       TOUCH.dirT = -9; TOUCH.boostT = 0; TOUCH.brakeT = 0; TOUCH.jump = false; TOUCH.tap = null; TOUCH.swipe = null; MOUSE.click = false;
       audioInit();
       if (view.newMatch) view.newMatch(MG, a);
+      if (toast) a.toast(toast[0], toast[1], 2600);
     },
     update(dt, a) {
       const G = MG; if (!G || G.cfg.attract) return;
@@ -1396,16 +1949,16 @@ export function boot(view) {
       if (tap) {
         const u = G.ui && G.ui.cam;
         if (u && tap.x >= u.x && tap.x <= u.x + u.w && tap.y >= u.y && tap.y <= u.y + u.h) { toggleCam(G, a); MOUSE.click = false; }
-        else { skip = true; if (G.phase === 'live' || G.phase === 'goal') { TOUCH.jump = true; TOUCH.holdJ = 0.18; } }
+        else { skip = true; if (G.phase === 'live' || G.phase === 'goal' || G.phase === 'trainEnd') { TOUCH.jump = true; TOUCH.holdJ = 0.18; } }
       }
       if (sw && (G.phase === 'live' || G.phase === 'goal')) {
         if (sw.dir === 'up') { TOUCH.boostT = 0.9 + 0.9 * sw.power; if (G.player.boost <= 0) a.toast('Out of boost', 'Drive over the glowing pads', 1000); }
         else if (sw.dir === 'down') TOUCH.brakeT = 0.45;
       } else if (sw) skip = true;
       const P = G.player;
-      if (G.phase === 'live' || G.phase === 'goal' || G.phase === 'countdown') {
+      if (G.phase === 'live' || G.phase === 'goal' || G.phase === 'countdown' || G.phase === 'trainSet' || G.phase === 'trainEnd') {
         playerCtl(G, P, a, dt);
-        if (inp.hit('Space') || MOUSE.click || TOUCH.jump) P.ctl.jumpPress = G.phase !== 'countdown';
+        if (inp.hit('Space') || MOUSE.click || TOUCH.jump) P.ctl.jumpPress = G.phase === 'live' || G.phase === 'goal' || G.phase === 'trainEnd';
       }
       MOUSE.click = false; TOUCH.jump = false;
       stepMatch(G, dt, a, skip);
@@ -1413,7 +1966,7 @@ export function boot(view) {
     },
     idle(dt, a) {
       if (a.state === 'menu') {
-        if (!MG || !MG.cfg.attract) { MG = newMatch({ mode: '3v3', len: 300, diff: 'normal', sky: a.choices.sky === 'night' ? 'night' : 'dusk', cam: 'ball', attract: true }); MG.pose = makePose(MG.cars.length); poseLive(MG); if (view.newMatch) view.newMatch(MG, a); }
+        if (!MG || !MG.cfg.attract) { MG = newMatch({ mode: 'quick', size: '3v3', len: 300, diff: 'normal', sky: a.choices.sky === 'night' ? 'night' : 'dusk', cam: 'ball', attract: true, variant: 'soccar', garage: loadGarage(loadProfile()) }); MG.pose = makePose(MG.cars.length); poseLive(MG); if (view.newMatch) view.newMatch(MG, a); }
         const want = a.choices.sky === 'night' ? 'night' : 'dusk';
         if (MG.cfg.sky !== want) { MG.cfg.sky = want; if (view.newMatch) view.newMatch(MG, a); }
         stepMatch(MG, dt, a, false);

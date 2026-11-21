@@ -1295,7 +1295,7 @@ function applyQuality() {
   const r = R3.renderer; if (!r) return;
   const f = (R3.soft ? [0.45, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
   // A software renderer pays for every pixel on the CPU, so at its lowest tier it gets a fixed
-  // budget, as Saffron City does, instead of filling every pixel of a 1440x900 window.
+  // budget, as Sultan Bay does, instead of filling every pixel of a 1440x900 window.
   const pr = Math.max(0.5, arc.dpr * f);
   r.setPixelRatio(R3.soft && R3.q === 0 ? Math.max(0.3, Math.min(pr, Math.sqrt(160000 / Math.max(1, arc.w * arc.h)))) : pr); r.setSize(arc.w, arc.h, false);
   // reflections cost the most on a software renderer, so the lightest level drops them for a brighter sky light
