@@ -308,34 +308,18 @@ const check = (ok, label, detail) => {
     await pg.close();
   }
 
-  // The reticle: brackets lock onto the block being read, in the views that
-  // are made of blocks, and move to the next one as the page scrolls.
-  for (const [name, width, height] of [['phone', 390, 844], ['desktop', 1440, 900]]) {
-    const pg = await browser.newPage({ viewport: { width, height } });
+  // The reading reticle (corner brackets and an "05 / 08" tag that followed
+  // the block being read) was removed at the owner's request: it drew the eye
+  // away from the content it framed. It must not come back by accident.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await pg.goto(BASE + '/', { waitUntil: 'load' });
-    await pg.waitForTimeout(3200);
-    const read = () => pg.evaluate(() => {
-      const el = document.querySelector('.fd-reticle'), c = el.querySelectorAll('i');
-      const a = c[0].getBoundingClientRect(), z = c[3].getBoundingClientRect();
-      const hit = [...document.querySelectorAll('.view.active .contact-card, .view.active .work-item, .view.active .study-card')]
-        .some(n => { const r = n.getBoundingClientRect(); return Math.abs(r.left - 6 - a.left) < 3 && Math.abs(r.top - 6 - a.top) < 3 && Math.abs(r.right + 6 - z.right) < 3 && Math.abs(r.bottom + 6 - z.bottom) < 3; });
-      return { on: el.classList.contains('is-on'), tag: el.querySelector('span').textContent, hit, overflow: document.documentElement.scrollWidth - innerWidth };
-    });
-    await pg.evaluate(() => window.switchView('contact'));
+    await pg.waitForTimeout(3000);
+    await pg.evaluate(() => window.switchView('now'));
     await pg.waitForTimeout(900);
-    await pg.mouse.wheel(0, 200);
+    await pg.mouse.wheel(0, 400);
     await pg.waitForTimeout(1500);
-    const one = await read();
-    check(one.on && one.hit, `${name}: the reticle frames a block exactly, 6px out`, JSON.stringify(one));
-    check(/^\d\d \/ \d\d$/.test(one.tag), `${name}: the reticle numbers the block`, one.tag);
-    check(one.overflow <= 1, `${name}: the reticle causes no horizontal overflow`, String(one.overflow));
-    await pg.mouse.wheel(0, 420);
-    await pg.waitForTimeout(1500);
-    const two = await read();
-    check(two.on && two.hit && two.tag !== one.tag, `${name}: scrolling moves the reticle to another block`, `${one.tag} -> ${two.tag}`);
-    await pg.evaluate(() => window.switchView('projects'));
-    await pg.waitForTimeout(1300);
-    check(!(await read()).on, `${name}: the reticle stands down on Projects, where the book has its own frame`);
+    check(await pg.evaluate(() => !document.querySelector('.fd-reticle')), 'no reading reticle: no brackets or block counter follow the content');
     await pg.close();
   }
 
