@@ -515,7 +515,9 @@ const check = (ok, label, detail) => {
     await pg.goto(BASE + '/', { waitUntil: 'load' });
     await pg.waitForTimeout(3200);
     await pg.evaluate(() => window.switchView('contact'));
-    await pg.waitForFunction(() => [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')].some(i => i.getAnimations().some(a => a.playState === 'running')), null, { timeout: 9000 }).catch(() => {});
+    // The cards light up one by one as they come into view, so waiting for the first one only measured a
+    // half-started page on a busy machine (moving 1 of 4). Wait for the bar the checks below hold it to.
+    await pg.waitForFunction(() => [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')].filter(i => i.getAnimations().some(a => a.playState === 'running')).length >= 2, null, { timeout: 9000 }).catch(() => {});
     const live = await pg.evaluate(() => {
       const on = [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')];
       const off = [...document.querySelectorAll('.is-lv:not(.is-live) > .lv-beam > i')];

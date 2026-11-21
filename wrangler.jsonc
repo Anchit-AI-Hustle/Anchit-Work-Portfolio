@@ -11,12 +11,33 @@
     "run_worker_first": [
       "/api/*", "/how-to/api/*", "/teleprompter", "/teleprompter/",
       "/linkedin-auto-pilot", "/linkedin-auto-pilot/*", "/money-minter", "/money-minter/*",
-      "/markets-pro", "/markets-pro/*"
+      "/markets-pro", "/markets-pro/*", "/net/*"
     ],
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
   "observability": { "enabled": true },
+  // The games' online layer (net/): one GameRoom per live match, one Lobby and one Board per game.
+  // SQLite-backed, the only kind the Workers Free plan allows. Deploys apply the migration once.
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOM", "class_name": "GameRoom" },
+      { "name": "LOBBY", "class_name": "Lobby" },
+      { "name": "BOARD", "class_name": "Board" }
+    ]
+  },
+  "migrations": [
+    { "tag": "net-v1", "new_sqlite_classes": ["GameRoom", "Lobby", "Board"] }
+  ],
   // Required by `wrangler preview`, which Workers Builds runs for non-production branches.
-  "previews": {}
+  // Each Preview gets its own Durable Object namespaces; the bindings are repeated so env.ROOM exists there too.
+  "previews": {
+    "durable_objects": {
+      "bindings": [
+        { "name": "ROOM", "class_name": "GameRoom" },
+        { "name": "LOBBY", "class_name": "Lobby" },
+        { "name": "BOARD", "class_name": "Board" }
+      ]
+    }
+  }
 }
