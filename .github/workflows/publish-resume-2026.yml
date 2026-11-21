@@ -10,11 +10,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Render current resume source
         run: python3 scripts/build_resume_site_pdf.py
+      - name: Build web resume from the same content
+        run: node scripts/resume/build-html.mjs
       - name: Publish updated resume
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/resume.pdf
+          git add assets/resume.pdf assets/resume.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Render current two-page resume'
+          git commit -m 'Render current two-page resume and web resume'
           git push
