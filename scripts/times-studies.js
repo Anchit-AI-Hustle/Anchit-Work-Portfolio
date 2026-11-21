@@ -561,7 +561,7 @@ async function protoTH(browser, vp) {
   o = await open(ctx, `${st.base}/model/business`); page = o.page;
   await protoNav(P('/business'), page, st, '/business');
   const members = norm(await page.textContent('[data-testid="th-members"]')).replace(/,/g, '');
-  check(`${P('/business')}: default funnel gives 1,200 members (15,000 x 4 x 40% x 20% x 25%)`, members === '1200', members);
+  check(`${P('/business')}: default funnel gives 1,440 members (18,000 x 4 x 40% x 20% x 25%)`, members === '1440', members);
   await common(P('/business'), page, o.bag, o.status); await page.close();
 
   o = await open(ctx, `${st.base}/model#race`);
