@@ -15211,8 +15211,14 @@
     var rot = -0.5, vel = 0, raf = 0, dragging = false, dragged = false, lastX = 0;
     function place() {
       var w = mark.offsetWidth, rx = w * 0.86, ry = w * 0.2;
-      // Keep the widest label on screen on a phone.
-      rx = Math.min(rx, (window.innerWidth - 110) / 2);
+      // Every label stays on screen at every point of the turn. A node sits
+      // centred on the ring, so the ring may reach the nearer screen edge less
+      // half the widest label. This used a fixed 110px guess, which held while
+      // the orbit rested in one place and failed once it turned on its own: on
+      // a phone a label swung past the edge and was cut off.
+      var mr = mark.getBoundingClientRect(), mid = mr.left + mr.width / 2, widest = 0;
+      for (var k = 0; k < nodes.length; k++) widest = Math.max(widest, nodes[k].offsetWidth);
+      rx = Math.max(40, Math.min(rx, Math.min(mid, window.innerWidth - mid) - widest / 2 - 8));
       track.style.width = (rx * 2) + 'px'; track.style.height = (ry * 2) + 'px';
       // The ring sits low on the portrait, so the nearest node crosses under
       // the chin line rather than across the face.

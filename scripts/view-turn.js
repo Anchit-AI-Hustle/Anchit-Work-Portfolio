@@ -213,6 +213,16 @@ const check = (ok, label, detail) => {
     });
     check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
     check(orbit.inside, `${name}: every orbit node is on screen`);
+    // The orbit turns on its own, so one sample proves nothing: watch it for
+    // most of a turn and require every label inside the screen every time.
+    const swept = await pg.evaluate(() => new Promise((resolve) => {
+      let worst = 0, n = 0;
+      const t = setInterval(() => {
+        for (const el of document.querySelectorAll('.fd-node')) { const r = el.getBoundingClientRect(); worst = Math.max(worst, -r.left, r.right - innerWidth); }
+        if (++n >= 60) { clearInterval(t); resolve(Math.round(worst)); }
+      }, 100);
+    }));
+    check(swept <= 0, `${name}: no orbit label leaves the screen at any point of the turn`, `${swept}px past the edge at worst`);
     check(orbit.clean, `${name}: orbit labels are the nav names, not name plus caption`);
     check(orbit.overflow <= 1, `${name}: the orbit causes no horizontal overflow`, String(orbit.overflow));
     const near = await pg.evaluate(() => {
