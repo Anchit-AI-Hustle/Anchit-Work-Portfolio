@@ -78,10 +78,10 @@
       '@keyframes crPulse{from{transform:scale(.7);opacity:.5}to{transform:scale(1.25);opacity:1}}',
       // veil: curtains of light
       '.cr-veil{top:-20vh;width:16vw;height:140vh;background:linear-gradient(90deg,transparent,' + mix(A, 9) + ' 50%,transparent)}',
-      '.cr-veil:nth-of-type(1){left:6%;animation:crV1 27s ease-in-out infinite alternate}',
-      '.cr-veil:nth-of-type(2){left:34%;animation:crV2 35s ease-in-out infinite alternate;background:linear-gradient(90deg,transparent,' + mix(B, 8) + ' 50%,transparent)}',
-      '.cr-veil:nth-of-type(3){left:62%;animation:crV1 43s ease-in-out infinite alternate-reverse}',
-      '.cr-veil:nth-of-type(4){left:84%;animation:crV2 31s ease-in-out infinite alternate-reverse}',
+      '.cr-v1{left:6%;animation:crV1 27s ease-in-out infinite alternate}',
+      '.cr-v2{left:34%;animation:crV2 35s ease-in-out infinite alternate;background:linear-gradient(90deg,transparent,' + mix(B, 8) + ' 50%,transparent)}',
+      '.cr-v3{left:62%;animation:crV1 43s ease-in-out infinite alternate-reverse}',
+      '.cr-v4{left:84%;animation:crV2 31s ease-in-out infinite alternate-reverse}',
       '@keyframes crV1{from{transform:translate3d(-8vw,0,0) skewX(-14deg) scaleX(.8)}to{transform:translate3d(10vw,0,0) skewX(9deg) scaleX(1.5)}}',
       '@keyframes crV2{from{transform:translate3d(9vw,0,0) skewX(11deg) scaleX(1.3)}to{transform:translate3d(-11vw,0,0) skewX(-12deg) scaleX(.7)}}',
       '@media (max-width:700px){.cr-gyro{right:-6%;top:12%;width:60vmin;height:60vmin}.cr-floor{height:34vh}}'
@@ -95,7 +95,10 @@
     var parts = '<i class="cr-g cr-g1"></i><i class="cr-g cr-g2"></i>';
     if (kind === 'horizon') parts += '<i class="cr-floor"><i></i></i><i class="cr-fade"></i>';
     if (kind === 'gyro') parts += '<i class="cr-gyro"><i></i><i></i><i></i><i></i></i>';
-    if (kind === 'veil') parts += '<i class="cr-veil"></i><i class="cr-veil"></i><i class="cr-veil"></i><i class="cr-veil"></i>';
+    // Explicit classes, not :nth-of-type: every child of the room is an <i>,
+    // so the two glows ahead of the curtains took positions 1 and 2 and only
+    // half the curtains were ever placed or moved.
+    if (kind === 'veil') parts += '<i class="cr-veil cr-v1"></i><i class="cr-veil cr-v2"></i><i class="cr-veil cr-v3"></i><i class="cr-veil cr-v4"></i>';
     room.innerHTML = parts + '<i class="cr-dust"></i><i class="cr-sheen"></i>';
     document.body.insertBefore(room, document.body.firstChild);
     // The page is moving: the room stands down until it stops.
@@ -106,14 +109,22 @@
       quiet = setTimeout(function () { room.classList.remove('is-quiet'); }, 220);
     }, { passive: true });
     document.addEventListener('visibilitychange', function () { room.classList.toggle('is-quiet', document.hidden); });
-    // Motion can be turned off after load (each page has its own switch).
-    if ('MutationObserver' in window) {
-      new MutationObserver(function () { room.style.display = isOff() ? 'none' : ''; })
-        .observe(root, { attributes: true, attributeFilter: ['class', 'data-motion'] });
-    }
   }
 
 
-  function start() { setTimeout(initRoom, 600); }
+  // Each page has its own Motion switch and it can be flipped at any time, in
+  // either direction. Watching it only from inside initRoom meant a page that
+  // LOADED with motion off never built a room when it was turned back on.
+  function sync() {
+    var room = document.querySelector('.cin-room');
+    if (room) room.style.display = isOff() ? 'none' : '';
+    else if (!isOff()) initRoom();
+  }
+  function start() {
+    setTimeout(initRoom, 600);
+    if ('MutationObserver' in window) {
+      new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['class', 'data-motion'] });
+    }
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

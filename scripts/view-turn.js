@@ -404,6 +404,33 @@ const check = (ok, label, detail) => {
       else check(!r.room, `${href}: is left without a room (a storefront or a full-screen app)`);
       await p2.close();
     }
+
+    // Curtains: all four placed and moving. A selector that counted siblings
+    // of the same tag left two of them unpositioned and still.
+    const pv = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pv.goto(BASE + '/hotel', { waitUntil: 'load' });
+    await pv.waitForTimeout(3000);
+    const veil = await pv.evaluate(() => [...document.querySelectorAll('.cin-room .cr-veil')].map(v => ({
+      x: Math.round(v.getBoundingClientRect().left), moving: v.getAnimations().some(a => a.playState === 'running') })));
+    check(veil.length === 4 && veil.every(v => v.moving) && new Set(veil.map(v => Math.round(v.x / 60))).size === 4, '/hotel: four curtains, four places, all moving', JSON.stringify(veil));
+    await pv.close();
+
+    // A page that loads with its own Motion switch off builds the room when
+    // the switch is turned on, and hides it again when turned off.
+    const cf = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const pf = await cf.newPage();
+    await pf.addInitScript(() => { try { localStorage.setItem('freelancer-motion', 'off'); } catch (e) {} });
+    await pf.goto(BASE + '/freelancer', { waitUntil: 'load' });
+    await pf.waitForTimeout(2500);
+    const before = await pf.evaluate(() => !!document.querySelector('.cin-room'));
+    await pf.locator('#motion-toggle').click();
+    await pf.waitForTimeout(1200);
+    const on = await pf.evaluate(() => { const r = document.querySelector('.cin-room'); return !!r && getComputedStyle(r).display !== 'none'; });
+    await pf.locator('#motion-toggle').click();
+    await pf.waitForTimeout(400);
+    const offAgain = await pf.evaluate(() => { const r = document.querySelector('.cin-room'); return !r || getComputedStyle(r).display === 'none'; });
+    check(!before && on && offAgain, '/freelancer: the room follows the Motion switch in both directions after load', JSON.stringify({ before, on, offAgain }));
+    await cf.close();
   }
 
   // Motion off, saved on the origin, must hold on the incoming page before its
