@@ -6,7 +6,7 @@ import {eventModel,subscriberModel,radioModel} from '../radio-mirchi/models.mjs'
 const root=fileURLToPath(new URL('../',import.meta.url));
 const dir=join(root,'radio-mirchi');
 const files=(await readdir(dir)).filter(f=>f.endsWith('.html'));
-assert.equal(files.length,18,'All study pages must exist');
+assert.equal(files.length,19,'All study pages must exist');
 const contents=Object.fromEntries(await Promise.all(files.map(async f=>[f,await readFile(join(dir,f),'utf8')])));
 for(const [file,html] of Object.entries(contents)){
  assert.equal((html.match(/<h1[>\s]/g)||[]).length,1,file+' needs one heading');
@@ -33,4 +33,4 @@ let r=radioModel({seconds:100000,utilisation:70,yield:100,newutil:80,discount:10
 assert.equal(r.baseline,7000000);assert.equal(r.alternative,7200000);
 assert.equal(radioModel({seconds:1,utilisation:70,yield:100,newutil:80,discount:100}).required,null);
 assert.equal(radioModel({seconds:1,utilisation:0,yield:100,newutil:0,discount:0}).change,null);
-console.log('Mirchi: 18 pages, internal destinations, metadata and economics invariants passed.');
+console.log('Mirchi: 19 pages, internal destinations, metadata and economics invariants passed.');
