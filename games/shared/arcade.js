@@ -633,6 +633,9 @@
         ch.push({ v: 'pads', label: 'Stick & buttons' });
         m.options = [{ id: 'touchStyle', label: 'Touch controls', choices: ch, value: 'gesture' }].concat(m.options || []);
       }
+      // the classic a game draws on, named on its own page (body data-inspired), on the start menu only
+      const insp = document.body && document.body.getAttribute('data-inspired');
+      if (insp) m.html = (m.html || '') + '<p class="arc-inspired">Inspired by ' + esc(insp) + '. An original game, not affiliated with its makers.</p>';
       const best = arc.best();
       if (best != null && m.html != null && !m.noBest) m.html += '<div class="stat"><div>Your best<b>' + esc(opts.formatScore ? opts.formatScore(best) : best) + '</b></div></div>';
       arc.panel(m);
