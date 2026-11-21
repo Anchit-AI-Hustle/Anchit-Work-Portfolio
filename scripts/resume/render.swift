@@ -80,9 +80,10 @@ bullet("Appointed Product Owner for Chatter (now DebatabL), a live football comm
 bullet("Built APIs and backend systems for consumer and hyperlocal commerce products.",&y,9.3)
 bullet("Supported growth initiatives through onboarding, distribution and early go-to-market efforts.",&y,9.3)
 section("CORE SKILLS",&y)
-y+=text("Product: Discovery, strategy, roadmaps, prioritisation, A/B experimentation, pricing, monetisation, Figma and Jira.",M,y,CW,9.1)+3
-y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, React, Node.js, Next.js, Supabase, Vercel.",M,y,CW,9.1)+3
+y+=text("Product: Discovery, strategy, roadmaps, prioritisation, A/B experimentation, pricing and monetisation.",M,y,CW,9.1)+3
+y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, Next.js, Supabase.",M,y,CW,9.1)+3
 y+=text("Growth & analytics: Funnels, subscriptions, lifecycle CRM, SQL, Klaviyo, WebEngage, Mixpanel and Shopify.",M,y,CW,9.1)+3
+y+=text("Tools & stack: React, Node.js, Vercel, Figma, Jira.",M,y,CW,9.1)+3
 section("EDUCATION",&y)
 let educationX:[CGFloat]=[M,M+176,M+399,M+471]
 let educationW:[CGFloat]=[170,217,66,54]
@@ -99,7 +100,7 @@ for row in educationRows{
  y+=height+3
 }
 section("COMPLETE PRODUCT PORTFOLIO | \(projectCount) BUILDS & CONCEPTS",&y)
-y+=text("AI systems, growth tooling, consumer products and creative workflows. Full project URLs are shown below.",M,y,CW,8,false,muted)+3
+y+=2
  let top=y, colW:CGFloat=(CW-22)/2
 let projects=content["projects"] as! [[String:String]]
 var ends:[CGFloat]=[]
@@ -109,10 +110,10 @@ for col in 0...1 {
  let x=M+CGFloat(col)*(colW+22);var cy=top
  for i in range{
   let p=projects[i]
-  cy+=text(p["name"]!,x,cy,colW,9.2,true,ink,p["url"]!)+2
-  cy+=text(p["text"]!,x,cy,colW,9.05)+1
+  cy+=text(p["name"]!,x,cy,colW,9.2,true,ink,p["url"]!)+0.5
+  cy+=text(p["text"]!,x,cy,colW,9.05)-0.5
   let visibleURL="URL: "+p["url"]!
-  cy+=text(visibleURL,x,cy,colW,7.5,false,teal,p["url"]!)+2
+  cy+=text(visibleURL,x,cy,colW,7.3,false,teal,p["url"]!)+1.5
  }
  ends.append(cy)
 }
