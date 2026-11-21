@@ -69,6 +69,12 @@ self.addEventListener('fetch', (e) => {
   // produces. Let the browser handle these requests natively.
   if (url.pathname.startsWith('/movies/')) return;
 
+  // Game models, textures and skies: about 70 MB in all, versioned and served
+  // immutable, so the browser's own HTTP cache keeps them and evicts them under
+  // storage pressure. Copying each into Cache Storage would only grow a store
+  // nothing ever trims.
+  if (url.pathname.startsWith('/games/assets/')) return;
+
   // Network-first for HTML so updates ship fast
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
