@@ -43,24 +43,23 @@ func heading(_ title:String,_ dates:String,_ y:inout CGFloat){y+=4;text(dates,W-
 start()
 var y:CGFloat=24
 func textWidth(_ s:String,_ size:CGFloat)->CGFloat{let f=NSFont(name:"ArialMT",size:size)!;return ceil(NSAttributedString(string:s,attributes:[.font:f]).size().width)}
-y+=text("Anchit Tandon",M,y,CW,29,true)+1
-y+=text("SENIOR PRODUCT MANAGER & AI BUILDER",M,y,CW,10.8,true,teal)+3
-y+=text("Technical Product Management · AI Agents · D2C Growth",M,y,CW,9.1,false,muted)+4
+y+=text("Anchit Tandon",M,y,CW,29,true)+3
+y+=text("SENIOR PRODUCT MANAGER & AI BUILDER",M,y,CW,10.8,true,teal)+4
+y+=text("Technical Product Management · AI Agents · D2C Growth",M,y,CW,9.1,false,muted)+7
 let contact="Delhi, India  |  +91 98739 45238  |  anchit.tandon@gmail.com  |  "
 text(contact,M,y,CW,8.7)
 var lx=M+textWidth(contact,8.7)
 text("anchit-tandon.com",lx,y,textWidth("anchit-tandon.com",8.7)+2,8.7,false,teal,"https://anchit-tandon.com")
 lx+=textWidth("anchit-tandon.com",8.7);text("  |  ",lx,y,30,8.7);lx+=textWidth("  |  ",8.7)
-y+=text("linkedin.com/in/anchit-tandon",lx,y,textWidth("linkedin.com/in/anchit-tandon",8.7)+2,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+2
-y+=text("Open to full-time Senior PM roles  ·  Remote or Delhi NCR  ·  Available to join immediately",M,y,CW,8.4,false,muted)+7
-let bandH:CGFloat=48
+y+=text("linkedin.com/in/anchit-tandon",lx,y,textWidth("linkedin.com/in/anchit-tandon",8.7)+2,8.7,false,teal,"https://linkedin.com/in/anchit-tandon")+12
+let bandH:CGFloat=58
 NSColor(calibratedRed:0.96,green:0.975,blue:0.975,alpha:1).setFill();NSBezierPath(rect:CGRect(x:M,y:y,width:CW,height:bandH)).fill()
 let projectCount=(content["projects"] as! [[String:String]]).count
 let metrics=[("5×","ET Prime revenue","₹15L to ₹80L/mo"),("400%+","ROI in 6 months","ET Prime"),("₹3Cr+","Annual revenue","ET Markets"),("+27%","Engagement","ET Markets"),("150+","Qualified leads/day","from ~30"),("18K+","Runners","Delhi Half Marathon"),("\(projectCount)","Products built","AI & consumer")]
 let colW7=CW/CGFloat(metrics.count)
-for col in 1..<metrics.count {let x=M+CGFloat(col)*colW7;line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+8));p.line(to:NSPoint(x:x,y:y+bandH-8));p.lineWidth=0.45;p.stroke()}
-for (i,m) in metrics.enumerated(){let cx=M+(CGFloat(i)+0.5)*colW7;metricText(m.0,cx,y+19,13.6,true,ink);metricText(m.1,cx,y+31,6.9,false,muted);metricText(m.2,cx,y+40,6.9,false,muted)}
-y+=bandH+3
+for col in 1..<metrics.count {let x=M+CGFloat(col)*colW7;line.setStroke();let p=NSBezierPath();p.move(to:NSPoint(x:x,y:y+10));p.line(to:NSPoint(x:x,y:y+bandH-10));p.lineWidth=0.45;p.stroke()}
+for (i,m) in metrics.enumerated(){let cx=M+(CGFloat(i)+0.5)*colW7;metricText(m.0,cx,y+24,13.6,true,ink);metricText(m.1,cx,y+37,6.9,false,muted);metricText(m.2,cx,y+47,6.9,false,muted)}
+y+=bandH+6
 section("PROFILE",&y)
 y+=text(content["profile"] as! String,M,y,CW,10.1)+2
 section("PROFESSIONAL EXPERIENCE",&y)
@@ -71,20 +70,28 @@ for r in content["roles"] as! [[String:Any]]{
  for b in r["bullets"] as! [String]{bullet(b,&y,9.8)}
  y+=2
 }
-print("Page 1 content ends:",y)
-precondition(y <= H-38, "Page 1 content overflows the footer: \(y) > \(H-38)")
-finish(1)
-
-start();y=29
-text("ANCHIT TANDON",M,y,300,12,true);text("EXPERIENCE & COMPLETE PORTFOLIO",M+240,y,285,8.3,true,teal);y+=23
+func measure(_ s:String,_ width:CGFloat,_ size:CGFloat,_ bold:Bool=false)->CGFloat{
+ let para=NSMutableParagraphStyle();para.lineSpacing=1.7;para.lineBreakMode = .byWordWrapping
+ let font=NSFont(name:bold ? "Arial-BoldMT":"ArialMT",size:size)!
+ return ceil(NSAttributedString(string:s,attributes:[.font:font,.paragraphStyle:para]).boundingRect(with:NSSize(width:width,height:2000),options:[.usesLineFragmentOrigin,.usesFontLeading]).height)}
+var page=1
+let limit=H-38
+func page2(_ y:inout CGFloat){
+ print("Page 1 content ends:",y);precondition(y <= limit, "Page 1 content overflows the footer: \(y) > \(limit)")
+ finish(1);start();y=29
+ text("ANCHIT TANDON",M,y,300,12,true);text("EXPERIENCE & COMPLETE PORTFOLIO",M+240,y,285,8.3,true,teal);y+=23;page=2}
+let earlier:[(String,String,[String])]=[
+ ("Citymall | Software Engineer (SDE II)","Mar 2022 - Jun 2022",["Built and scaled backend systems supporting high-frequency consumer transactions on a consumer-commerce platform.","Improved data pipelines and API performance to support growth and reliability."]),
+ ("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",["Appointed Product Owner for Chatter (now DebatabL), a live football commentary app; led the MVP from ideation to launch, driving early user engagement and adoption.","Built APIs and backend systems for consumer and hyperlocal commerce products.","Supported growth initiatives through onboarding, distribution and early go-to-market efforts."])]
+let bh={(b:String)->CGFloat in measure(b,CW-12,9.3)+4}
+if y+30+measure(earlier[0].0,CW-115,10.3,true)+6+bh(earlier[0].2[0]) > limit {page2(&y)}
 section("EARLIER TECHNICAL EXPERIENCE",&y)
-heading("Citymall | Software Engineer (SDE II)","Mar 2022 - Jun 2022",&y)
-bullet("Built and scaled backend systems supporting high-frequency consumer transactions on a consumer-commerce platform.",&y,9.3)
-bullet("Improved data pipelines and API performance to support growth and reliability.",&y,9.3)
-heading("Tuple Technologies | Software Engineer & Product Owner","Apr 2020 - Mar 2022",&y)
-bullet("Appointed Product Owner for Chatter (now DebatabL), a live football commentary app; led the MVP from ideation to launch, driving early user engagement and adoption.",&y,9.3)
-bullet("Built APIs and backend systems for consumer and hyperlocal commerce products.",&y,9.3)
-bullet("Supported growth initiatives through onboarding, distribution and early go-to-market efforts.",&y,9.3)
+for (title,dates,bullets) in earlier{
+ if page==1 && y+measure(title,CW-115,10.3,true)+6+bh(bullets[0]) > limit {page2(&y)}
+ heading(title,dates,&y)
+ for b in bullets{ if page==1 && y+bh(b) > limit {page2(&y)}; bullet(b,&y,9.3) }
+}
+if page==1 {page2(&y)}
 section("CORE SKILLS",&y)
 y+=text("Product: Discovery, strategy, roadmaps, prioritisation, A/B experimentation, pricing and monetisation.",M,y,CW,9.1)+3
 y+=text("AI & engineering: Agents, RAG/pgvector, tool calling, model routing, Python, TypeScript, Next.js, Supabase.",M,y,CW,9.1)+3
