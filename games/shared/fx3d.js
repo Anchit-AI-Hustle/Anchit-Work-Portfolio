@@ -9,6 +9,8 @@
  *   fx.setQuality(q, pinned);
  *   // on a big moment:
  *   fx.flash(0.5); fx.kick(6); fx.letterbox(1, 1.2);
+ *   // while the menu is up, the objects a round will add (hidden is fine):
+ *   fx.prewarm(scene, camera, [rig1, rig2]).then(onReady); // Play then has no compile hitch
  *
  * How it works. The scene is rendered to the screen exactly as before (the
  * canvas keeps its own antialiasing, tone mapping and colour space, so a game
@@ -333,6 +335,24 @@ export function createFX(renderer, o) {
     try { for (const m of [mPre, mDown, mBlur, mComp]) { quad.material = m; renderer.compile(qScene, qCam); } } catch (e) { /* post pass compiles on first use */ }
   };
 
+  // Background warm-up for what a round will add. A game builds the round's
+  // objects (people, vehicles, props, effects) while its menu is up, hidden is
+  // fine, and passes them here: they join the scene only for the compile, so
+  // their programs are built with the scene's own lights and fog, and the
+  // driver links them in parallel (KHR_parallel_shader_compile) while the menu
+  // stays smooth. Pressing Play then draws them with no compile hitch. Resolves
+  // when every program is linked; never rejects.
+  const prewarm = (scene, camera, extras) => new Promise((resolve) => {
+    const added = [];
+    const done = () => { for (const o of added) scene.remove(o); resolve(); };
+    try {
+      for (const o of extras || []) if (o && !o.parent) { scene.add(o); added.push(o); }
+      const p = renderer.compileAsync ? renderer.compileAsync(scene, camera) : (renderer.compile(scene, camera), Promise.resolve());
+      warmed.add(scene);
+      p.then(done, done);
+    } catch (e) { done(); }
+  });
+
   // Bars without the post pass: clear two strips with a scissor.
   const plainBars = (amount) => {
     if (amount <= 0.002) return;
@@ -377,6 +397,7 @@ export function createFX(renderer, o) {
       u.uBloomTint.value.fromArray(look.bloomTint); u.uShadowTint.value.fromArray(look.shadowTint); u.uHighTint.value.fromArray(look.highTint);
       mPre.uniforms.uThreshold.value = look.threshold; mPre.uniforms.uKnee.value = look.knee;
     },
+    prewarm,
     info() { return { enabled: active(), quality, pinned, soft, lost, failed, size: [W, H], bars: +st.bars.toFixed(2), intro: st.introOn, postCalls: st.postCalls, preset: o.preset || null, dof: +st.dof.toFixed(2), handheld: +st.hand.toFixed(2) }; },
     render(scene, camera) {
       const dt = tickState();
@@ -746,3 +767,43 @@ export function createParticles(scene, o) {
 }
 
 export default createFX;
+
+/*
+ * Dynamic resolution. Holds the frame rate by moving the render resolution in
+ * small steps instead of dropping a whole quality tier, so lighting, shadows
+ * and effects stay on and only sharpness gives way, by an amount a player on a
+ * phone does not notice. A game multiplies the pixel ratio it already computes
+ * by rs.scale, and calls its own resize when tick() returns true:
+ *   const rs = createResScale({ min: 0.6 });
+ *   // each frame:  if (rs.tick(dt)) resize();
+ *   // in resize:   renderer.setPixelRatio(pr * rs.scale);
+ *   // before dropping a quality tier for low fps:  if (!rs.atFloor()) return;
+ * Frame time is smoothed over many frames and the scale moves at most once a
+ * second (a pixel ratio change reallocates the canvas), down quickly when
+ * frames run long and up slowly when there is room, so it never oscillates.
+ * A paused or hidden game (frames over 0.25 s) is ignored.
+ */
+export function createResScale(o) {
+  o = o || {};
+  const min = o.min != null ? o.min : 0.6, max = o.max != null ? o.max : 1;
+  const target = o.target || 1 / 57;        // seconds per frame we hold to
+  let scale = max, avg = target, cool = 1.5, roomT = 0;
+  return {
+    get scale() { return scale; },
+    atFloor() { return scale <= min + 1e-3; },
+    atCeiling() { return scale >= max - 1e-3; },
+    reset() { scale = max; avg = target; cool = 1.5; roomT = 0; },
+    tick(dt) {
+      if (!(dt > 0) || dt > 0.25) return false;
+      avg += (dt - avg) * 0.06;
+      cool -= dt;
+      if (avg < target * 0.82) roomT += dt; else roomT = 0;
+      if (cool > 0) return false;
+      let next = scale;
+      if (avg > target * 1.12) next = Math.max(min, scale * (avg > target * 1.6 ? 0.85 : 0.93));
+      else if (roomT > 3) { next = Math.min(max, scale * 1.06); roomT = 0; }
+      if (Math.abs(next - scale) < 0.01) return false;
+      scale = next; cool = 1; return true;
+    },
+  };
+}

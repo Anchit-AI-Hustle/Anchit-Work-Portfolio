@@ -1013,6 +1013,8 @@ function initRenderer(a) {
     arc.canvas.addEventListener('webglcontextrestored', () => { R3.lost = false; });
     R3.q = R3.soft ? 0 : (window.matchMedia && matchMedia('(pointer: coarse)').matches ? 2 : 3);
     const qm = /[?&]q=(\d)/.exec(location.search); if (qm) { R3.q = clamp(+qm[1], 0, 3); R3.lock = true; }
+    // shadows on or off is decided before anything compiles: switching it later rebuilds every shader at once
+    r.shadowMap.enabled = R3.q >= 1;
     R3.scene = new THREE.Scene();
     R3.fogArena = new THREE.FogExp2(0x15131c, 0.012); R3.fogRoof = new THREE.FogExp2(0x3a2238, 0.0085);
     R3.scene.fog = R3.fogArena;
@@ -1038,16 +1040,24 @@ function applyQuality() {
   const f = (R3.soft ? [0.45, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
   const pr = Math.max(0.5, arc.dpr * f);
   r.setPixelRatio(R3.soft && R3.q === 0 ? Math.max(0.3, Math.min(pr, Math.sqrt(150000 / Math.max(1, arc.w * arc.h)))) : pr); r.setSize(arc.w, arc.h, false);
-  r.shadowMap.enabled = R3.q >= 1;
-  const want = R3.q >= 3 ? 2048 : 1024;
+  // Shadows on or off and the environment map rebuild every material's shader, so during play they wait for a
+  // moment with no play on screen (menu, pause, results); in play a lower tier only shrinks the shadow map and
+  // updates it less often. Resolution, crowd and effects change at once.
+  const playing = arc.state === 'play' && R3.progSet;
+  const want = R3.q >= 3 ? 2048 : R3.q >= 1 ? 1024 : 512;
   for (const key of [W.lights && W.lights.key, roofMod && roofMod.roofView.key]) {
     if (!key) continue;
-    key.castShadow = R3.q >= 1;
+    if (!playing) key.castShadow = R3.q >= 1;
     if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
+  }
+  if (playing) { R3.progPending = true; R3.shadowEvery = R3.q >= 1 || !R3.shadowCap ? 1 : 3; }
+  else {
+    R3.progSet = true; R3.progPending = false; R3.shadowCap = R3.q >= 1; R3.shadowEvery = 1;
+    r.shadowMap.enabled = R3.q >= 1;
+    if (R3.venue === 'arena' && R3.scene) R3.scene.environment = R3.q >= 1 ? W.env || null : null;
   }
   if (roofMod) roofMod.roofQuality();
   crowdQuality();
-  if (R3.venue === 'arena' && R3.scene) R3.scene.environment = R3.q >= 1 ? W.env || null : null;
   if (VFX) VFX.setQuality(R3.q);
 }
 function arenaFrame(dt) {
@@ -1082,6 +1092,8 @@ function render(c) {
   try {
     if (R3.venue === 'roof' && roofMod) { roofMod.roofFrame(fdt); }
     else { R3.time += fdt; arenaFrame(fdt); }
+    if (R3.progPending && arc.state !== 'play') applyQuality();
+    if (R3.shadowCap) { const sm = R3.renderer.shadowMap; if (R3.shadowEvery > 1) { sm.autoUpdate = false; if (((R3.shF = (R3.shF || 0) + 1) % R3.shadowEvery) === 0) sm.needsUpdate = true; } else sm.autoUpdate = true; }
     if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
   } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   if (R3.venue === 'roof' && roofMod) roofMod.roofHud(c);
