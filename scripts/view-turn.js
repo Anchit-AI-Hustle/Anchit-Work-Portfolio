@@ -152,7 +152,13 @@ const check = (ok, label, detail) => {
     await pg.keyboard.press('ArrowRight');
     await pg.waitForTimeout(1300);
     await pg.keyboard.press('ArrowRight');
-    await pg.waitForTimeout(220);
+    // Wait for the turn to be under way rather than for a fixed delay: on a
+    // loaded machine the first animation frame can land late, and a leaf at
+    // exactly 0deg reports a 2D matrix.
+    await pg.waitForFunction(() => {
+      const l = document.querySelector('.folio-leaf');
+      return l && getComputedStyle(l).transform.startsWith('matrix3d');
+    }, null, { timeout: 2000 }).catch(() => {});
     const mid = await pg.evaluate(() => {
       const st = document.querySelector('.folio-stage'), l = document.querySelector('.folio-leaf'), c = document.querySelector('.folio-cover');
       const g = document.querySelector('.builds-grid[data-folio]');
