@@ -219,7 +219,7 @@ function setup(arc) {
   let renderer;
   const soft0 = softProbe();
   try { renderer = new THREE.WebGLRenderer({ canvas: arc.canvas, antialias: !soft0, powerPreference: 'high-performance' }); } catch (e) { return false; }
-  if (!renderer || !renderer.getContext()) return false;
+  if (!renderer.getContext()) return false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
