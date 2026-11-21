@@ -46,10 +46,13 @@ export class Lobby extends DurableObject {
     if (!cfg || !cfg.rooms) return { ok: false, error: 'no_rooms' };
     const now = Date.now();
     this.prune(now);
+    // Only rooms with a free seat are candidates: limiting first let twenty full rooms hide every part-filled one.
     const rows = this.sql.exec(
       `SELECT id, code, players, CASE WHEN reserved_at > ? THEN reserved ELSE 0 END AS held FROM rooms
-       WHERE mode = ? AND max = ? AND public = 1 AND updated > ? ORDER BY players DESC, created ASC LIMIT 20`,
-      now - RESERVE_MS, mode, max, now - STALE_MS).toArray();
+       WHERE mode = ? AND max = ? AND public = 1 AND updated > ?
+         AND players + CASE WHEN reserved_at > ? THEN reserved ELSE 0 END < max
+       ORDER BY players DESC, created ASC LIMIT 20`,
+      now - RESERVE_MS, mode, max, now - STALE_MS, now - RESERVE_MS).toArray();
     const pick = rows.find((r) => r.players + r.held < max);
     if (pick) {
       this.sql.exec('UPDATE rooms SET reserved = ?, reserved_at = ? WHERE id = ?', pick.held + 1, now, pick.id);

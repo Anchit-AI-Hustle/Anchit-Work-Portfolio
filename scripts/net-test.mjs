@@ -112,6 +112,12 @@ async function main() {
   const wa = await A.wait((m) => m.t === 'welcome');
   const m2 = await post('/net/match/kart-mela', { mode, max: 4 });
   check('quick-match puts the second player in the same room', m1.j.room && m1.j.room === m2.j.room, m1.j.room + ' / ' + m2.j.room);
+  // Twenty-one full rooms (seats held by quick-match) must not hide a part-filled one.
+  const fm = 'full-' + rid(5);
+  for (let i = 0; i < 42; i++) await post('/net/match/kart-mela', { mode: fm, max: 2 });
+  const part = await post('/net/match/kart-mela', { mode: fm, max: 2 });
+  const join = await post('/net/match/kart-mela', { mode: fm, max: 2 });
+  check('quick-match still finds a free seat behind 21 full rooms', part.j && join.j && part.j.fresh && join.j.room === part.j.room, part.j && join.j && (part.j.room + ' / ' + join.j.room));
   const B = rawClient('kart-mela', m2.j.room, idB, 'Bilal');
   const wb = await B.wait((m) => m.t === 'welcome');
   check('both get a welcome with seats 0 and 1', wa && wb && wa.you.seat === 0 && wb.you.seat === 1, wa && wb && wa.you.uid + ',' + wb.you.uid);
@@ -244,6 +250,12 @@ async function main() {
   check('nor a board to read', bogusTop.j && bogusTop.j.error === 'unknown_mode', bogusTop.j && bogusTop.j.error);
   const sprint = await post(L + 'run', { id: rid(), mode: 'sprint' });
   check('the game\'s other real modes still get tokens after that', sprint.j && sprint.j.ok, sprint.j && sprint.j.error);
+  // Equal scores share a rank in the list and in each player's own rank.
+  const tieIds = [rid(), rid()];
+  for (const tid of tieIds) { const tk = await post(L + 'run', { id: tid, mode: 'blitz' }); await post(L + 'submit', { id: tid, mode: 'blitz', token: tk.j.token, score: 300, nick: 'Tie' }); }
+  const tieTop = await post(L + 'top', { id: tieIds[1], mode: 'blitz', period: 'all', n: 5 });
+  const tr = tieTop.j && tieTop.j.top.filter((r) => r.score === 300).map((r) => r.rank);
+  check('tied scores share a rank, and it matches the player\'s own rank', tr && tr.length === 2 && tr[0] === tr[1] && tieTop.j.me && tieTop.j.me.rank === tr[0], JSON.stringify(tr) + ' me ' + (tieTop.j.me && tieTop.j.me.rank));
   const big = await post(L + 'submit', { id: me, mode: 'marathon', token: t1.j.token, score: 90000, nick: 'Asha' });
   check('a big score from a run of a second is rejected', big.j && big.j.error === 'run_too_short', big.j && big.j.error);
   const reuse = await post(L + 'submit', { id: me, mode: 'marathon', token: t1.j.token, score: 10, nick: 'Asha' });

@@ -139,7 +139,12 @@ export class Board extends DurableObject {
     const rows = this.sql.exec(
       `SELECT pid, nick, score, at FROM scores WHERE mode = ? AND bucket = ? ORDER BY score ${order}, at ASC LIMIT ?`,
       mode, bk.key, lim).toArray();
-    const top = rows.map((r, i) => ({ rank: i + 1, nick: r.nick, score: r.score, at: r.at, me: !!id && r.pid === id }));
+    // Equal scores share a rank (1, 1, 3), the same rule rankOf uses for a player's own rank.
+    let rank = 0;
+    const top = rows.map((r, i) => {
+      if (i === 0 || r.score !== rows[i - 1].score) rank = i + 1;
+      return { rank, nick: r.nick, score: r.score, at: r.at, me: !!id && r.pid === id };
+    });
     const total = this.sql.exec('SELECT COUNT(*) AS n FROM scores WHERE mode = ? AND bucket = ?', mode, bk.key).one().n;
     let me = null;
     if (id) {
