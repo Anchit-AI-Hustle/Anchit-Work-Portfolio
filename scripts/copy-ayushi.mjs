@@ -3,6 +3,7 @@ import { cp, mkdir, rename, readdir, readFile, writeFile } from 'node:fs/promise
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deferGoogleFontsIn } from './defer-fonts.mjs';
+import { PAGE_TURN_MARKER, PAGE_TURN_GUARD_TAG, PAGE_TURN_PLAIN_TAG } from './page-turn.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const source = join(ROOT, 'ayushi-rawat');
@@ -38,14 +39,17 @@ for (const file of pages) {
 console.log(`[copy-ayushi] fonts no longer block first paint on ${deferred} page(s)`);
 
 // Same reason, different pass: build-www.mjs opts every page into the
-// cross-document page turn, and these arrive after it. Most of this sub-site
-// already declares the opt-in in its own head; any page that does not gets the
-// same bare declaration the others use, so no link here is a hard cut.
+// cross-document page turn, and these arrive after it. This sub-site keeps the
+// browser's default crossfade rather than the portfolio's styled turn, so a
+// page with its own declaration gets only the motion opt-outs and a page
+// without one gets the plain opt-in plus the same opt-outs. Both come from
+// page-turn.mjs: reduced motion and the Motion toggle hold here too.
 let turned = 0;
 for (const file of pages) {
   const html = await readFile(file, 'utf8');
-  if (html.includes('@view-transition') || !/<\/head>/i.test(html)) continue;
-  await writeFile(file, html.replace(/<\/head>/i, '<style>@view-transition{navigation:auto}</style>\n</head>'));
+  if (html.includes(PAGE_TURN_MARKER) || !/<\/head>/i.test(html)) continue;
+  const tag = html.includes('@view-transition') ? PAGE_TURN_GUARD_TAG : PAGE_TURN_PLAIN_TAG;
+  await writeFile(file, html.replace(/<\/head>/i, `${tag}\n</head>`));
   turned++;
 }
-console.log(`[copy-ayushi] page turn: opted in ${turned} page(s)`);
+console.log(`[copy-ayushi] page turn: motion opt-outs on ${turned} page(s)`);

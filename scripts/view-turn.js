@@ -42,6 +42,15 @@ const check = (ok, label, detail) => {
   const missing = top.filter(f => !/@view-transition/.test(fs.readFileSync(path.join(WWW, f), 'utf8')));
   check(missing.length === 0, `all ${top.length} top-level pages opt into the page turn`, missing.slice(0, 5).join(', '));
 
+  // Every page that turns must also be able to NOT turn: the reduced-motion
+  // rule and the Motion-toggle reader travel with the opt-in. A bare opt-in on
+  // the late-copied pages once gave reduced-motion visitors a crossfade.
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e =>
+    e.isDirectory() ? walk(path.join(d, e.name)) : e.name.endsWith('.html') ? [path.join(d, e.name)] : []);
+  const turning = walk(WWW).filter(f => /@view-transition/.test(fs.readFileSync(f, 'utf8')));
+  const unguarded = turning.filter(f => { const h = fs.readFileSync(f, 'utf8'); return !(h.includes('id="page-turn"') && h.includes('pt-off') && h.includes('prefers-reduced-motion')); });
+  check(unguarded.length === 0, `all ${turning.length} turning pages carry both motion opt-outs`, unguarded.slice(0, 4).map(f => path.relative(WWW, f)).join(', '));
+
   const browser = await chromium.launch();
   for (const [name, width, height] of [['phone', 390, 844], ['tablet', 820, 1180], ['desktop', 1440, 900]]) {
     const page = await browser.newPage({ viewport: { width, height } });
@@ -106,6 +115,17 @@ const check = (ok, label, detail) => {
     await nav.waitForTimeout(800);
     const got = await nav.evaluate(() => sessionStorage.getItem('vt:' + location.pathname));
     check(got === 'yes', `page turn runs on navigation to ${href}`, String(got));
+  }
+  // Motion off, saved on the origin, must hold on the incoming page before its
+  // first frame, including a page that never loads the shared motion runtime.
+  for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const pg = await ctx.newPage();
+    await pg.addInitScript(() => { try { localStorage.setItem('anchit-motion', 'off'); } catch (e) {} });
+    await pg.goto(BASE + href, { waitUntil: 'domcontentloaded' });
+    const off = await pg.evaluate(() => document.documentElement.classList.contains('pt-off'));
+    check(off, `Motion off is honoured on arrival at ${href}`);
+    await ctx.close();
   }
   await browser.close();
 

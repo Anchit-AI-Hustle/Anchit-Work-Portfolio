@@ -11,6 +11,7 @@ import { execSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deferGoogleFontsIn } from './defer-fonts.mjs';
+import { PAGE_TURN_MARKER, PAGE_TURN_TAG, PAGE_TURN_GUARD_TAG } from './page-turn.mjs';
 import { buildXazina } from './build-xazina.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -440,20 +441,7 @@ async function injectConsent() {
 // why it is a build-time <style> and not something a deferred script adds.
 // Browsers without cross-document transitions ignore the at-rule and cut, as
 // before. Reduced motion and the Motion toggle both turn it off.
-const PAGE_TURN_MARKER = 'id="page-turn"';
-const PAGE_TURN_TAG = `<style ${PAGE_TURN_MARKER}>
-@view-transition { navigation: auto; }
-@keyframes ptOut { to { opacity: 0; transform: translate3d(0, -8px, 0); } }
-@keyframes ptIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } }
-::view-transition-old(root) { animation: ptOut 200ms cubic-bezier(.4, 0, 1, 1) both; }
-::view-transition-new(root) { animation: ptIn 420ms cubic-bezier(.22, 1, .36, 1) both; }
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
-}
-html[data-motion="off"]::view-transition-group(*),
-html[data-motion="off"]::view-transition-old(*),
-html[data-motion="off"]::view-transition-new(*) { animation: none !important; }
-</style>`;
+// The tag itself lives in scripts/page-turn.mjs, shared with copy-ayushi.mjs.
 
 async function injectPageTurn() {
   const htmlFiles = await collectHtmlFiles(WWW);
@@ -462,11 +450,13 @@ async function injectPageTurn() {
   for (const file of htmlFiles) {
     const before = await readFile(file, 'utf8');
     // A page that already declares its own cross-document transition keeps it.
-    if (before.includes(PAGE_TURN_MARKER) || before.includes('@view-transition') || !/<\/head>/i.test(before)) {
+    if (before.includes(PAGE_TURN_MARKER) || !/<\/head>/i.test(before)) {
       skipped++;
       continue;
     }
-    await writeFile(file, before.replace(/<\/head>/i, `${PAGE_TURN_TAG}\n</head>`), 'utf8');
+    // Its own transition stays; it still gets the two motion opt-outs.
+    const tag = before.includes('@view-transition') ? PAGE_TURN_GUARD_TAG : PAGE_TURN_TAG;
+    await writeFile(file, before.replace(/<\/head>/i, `${tag}\n</head>`), 'utf8');
     injected++;
   }
   console.log(`[build-www] page turn: injected into ${injected} page(s)${skipped ? `; skipped ${skipped}` : ''}`);
