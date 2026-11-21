@@ -3837,6 +3837,8 @@ function resetGame() {
   HELI.on = false; REC.n = 0; REC.head = 0; G.rbCd = 0; G.saveT = 0; G.boatT = 0; G.dayClock = 0;
   SAVE = SB.loadSave();
   if (career) { G.cash = SAVE.cash; G.cash0 = SAVE.cash; }
+  // every session starts on the same evening (day 0), so the morning payout and the free wash count days from here
+  SAVE.lastDay = -1; SAVE.washDay = -1;
   RADIO.st = clamp(SAVE.radio | 0, 0, SB.STATIONS.length); RADIO.show = 0; RADIO.djT = 0;
   const wpin = arcRef.choices.weather || 'auto'; WX.pin = wpin; setWeather(wpin === 'auto' ? 'clear' : wpin); WX.rain = WX_STATES[WX.state].rain; WX.cloud = WX_STATES[WX.state].cloud; WX.wet = WX.rain;
   let sc0;
@@ -4431,9 +4433,15 @@ function passMission() {
   const after = () => { MS.m = null; MS.cd = 4; playCut(m.outro, m.finale ? storyFinale : null); };
   if (REC.n > 30 && !arcRef.reducedMotion) startReplay('Job done', after); else after();
 }
+// The garage holds five; when it is full the oldest goes, and cars already out keep the right slot.
+function garageRoom() {
+  if (SAVE.garage.length < 5) return;
+  SAVE.garage.shift();
+  for (const o of V) if (o.own != null) { o.own -= 1; if (o.own < 0) { o.own = null; o.mine = false; } }
+}
 function addToGarage(type) {
   if (SAVE.garage.some((c) => c.type === type)) return;
-  if (SAVE.garage.length >= 5) SAVE.garage.shift();
+  garageRoom();
   SAVE.garage.push({ type, col: VT[type].cols[0], up: {} });
 }
 // The festival over the bay: a wide shot from the promenade out to sea, and the sky full of fireworks.
@@ -4664,7 +4672,7 @@ function openTunePanel() {
 function keepInGarage(v) {
   const rec = { type: v.type, col: v.col, up: Object.assign({}, v.up || {}) };
   if (v.own != null && SAVE.garage[v.own]) SAVE.garage[v.own] = rec;
-  else { if (SAVE.garage.length >= 5) SAVE.garage.shift(); SAVE.garage.push(rec); v.own = SAVE.garage.length - 1; }
+  else { garageRoom(); SAVE.garage.push(rec); v.own = SAVE.garage.length - 1; }
   v.mine = true; saveNow();
 }
 function applyUpgrades(v) {
@@ -4672,12 +4680,13 @@ function applyUpgrades(v) {
   v.vmul = 1 + 0.07 * (u.eng | 0); v.accMul = 1 + 0.12 * (u.eng | 0); v.brkMul = 1 + 0.15 * (u.brk | 0); v.armor = 1 - 0.2 * (u.arm | 0); v.gripMul = 1 + 0.07 * (u.tyr | 0);
 }
 // Your own cars wait outside the home you wake up at.
+// Every car in the garage comes out: three along this side of the street, the rest across it.
 function parkGarageCars(s) {
-  const list = SAVE.garage.slice(0, 3);
-  list.forEach((c, k) => {
+  SAVE.garage.forEach((c, k) => {
     if (V.some((o) => o.own === k && !o.wreck && hyp(o.x - s.x, o.y - s.y) < 400)) return;
     const R = YR[s.j], off = R.blvd ? 76 : 41, type = VT[c.type] ? c.type : 'hatch';
-    const x = XC[s.i] + (s.sx ? 1 : -1) * (XR[s.i].hw + 84 + k * 62), y = YC[s.j] + (s.sy ? 1 : -1) * off;
+    const side = k < 3 ? 1 : -1, n = k < 3 ? k : k - 3;
+    const x = XC[s.i] + (s.sx ? 1 : -1) * (XR[s.i].hw + 84 + n * 62), y = YC[s.j] + side * (s.sy ? 1 : -1) * off;
     if (!freeSpot(x, y, 40)) return;
     const v = mkVeh(type, x, y, s.sy ? PI : 0, { parked: true, col: c.col });
     v.c.hb = true; v.driver = false; v.mine = true; v.own = k; v.up = Object.assign({}, c.up || {}); applyUpgrades(v);
