@@ -147,6 +147,34 @@ entirely by obeying this.
 - Every animation must be disabled under `@media (prefers-reduced-motion: reduce)`
   and under `html[data-motion="off"]`, which the Motion toggle sets.
 
+### The turn
+
+Moving between views, and between pages, is **one motion with one timing**:
+the incoming surface rises 14px and fades in over 420ms on
+`cubic-bezier(.22, 1, .36, 1)`. Nothing else starts on that frame.
+
+- **Views** (`index.html`): the single `viewIn` animation on `.view.active`.
+  The router calls `window.__quiet(440)`, which holds the scroll governor for
+  the length of the turn, so the aura, the canvases and the frosted chrome stand
+  down and light back up once it lands. One 22vw light band (`.view-wipe`)
+  crosses the frame and is `visibility: hidden` between jumps.
+- **Pages**: `scripts/build-www.mjs` writes a `<style id="page-turn">` into the
+  head of every built page, opting it into a cross-document view transition
+  with the same curve. It must be in the parsed head of both documents, so it
+  is build-time, never script-injected. Browsers without support cut, as before.
+- Both are off under `prefers-reduced-motion` and `html[data-motion="off"]`.
+
+Do not stack a second entrance on the view. This page once ran three at once
+(a fade-up, a perspective tilt and this one), a `filter: brightness()` tween
+on the whole view and a four-layer full-screen wipe, and a route change drew
+about 26 render passes a frame. Depth belongs to the blocks inside the view,
+which are small; a 3D transform on a page-tall layer is the most expensive
+thing a route change can ask for.
+
+**No `mix-blend-mode` on repeating surfaces.** A blend mode isolates its
+element into an offscreen surface that is composited every frame, at rest.
+Over a near-black panel `screen` and plain alpha are the same picture.
+
 ### Runtime budget
 
 The three concept storefronts were reported as "laggy" and "broken" on a laptop
