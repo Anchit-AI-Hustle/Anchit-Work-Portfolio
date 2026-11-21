@@ -243,27 +243,38 @@ const check = (ok, label, detail) => {
     if (near) {
       await pg.mouse.click(near.x, near.y);
       await pg.waitForTimeout(250);
-      const mid = await pg.evaluate(() => ({ view: document.querySelector('.view.active').id, warp: getComputedStyle(document.getElementById('fdWarp')).display }));
+      const mid = await pg.evaluate(() => ({ view: document.querySelector('.view.active').id }));
       check(mid.view !== 'view-home', `${name}: clicking an orbit node changes the route`, mid.view);
-      check(mid.warp === 'block', `${name}: the warp fires on the route change`, mid.warp);
-      await pg.waitForTimeout(900);
-      check(await pg.evaluate(() => getComputedStyle(document.getElementById('fdWarp')).display) === 'none', `${name}: the warp is gone once it has played`);
-      // The arrival: the destination's name is written in dust, then leaves
-      // nothing behind. Drawing is counted at the source (a WebGL canvas read
-      // back is blank), and a held frame is asked for, since a software
-      // renderer is too slow to catch one mid-air.
-      const form = await pg.evaluate(() => ({ ...window.__form }));
-      check(form.plays >= 1 && form.word.length > 1 && form.points >= 500, `${name}: the destination's name is written in dust on arrival`, JSON.stringify(form));
-      await pg.waitForTimeout(1300);
-      const after = await pg.evaluate(() => ({ cv: getComputedStyle(document.getElementById('fdForm')).display, dim: getComputedStyle(document.getElementById('fdFormDim')).display, draws: window.__form.draws }));
-      check(after.cv === 'none' && after.dim === 'none' && after.draws >= 2, `${name}: the word and its dimmer are gone once it has played`, JSON.stringify(after));
-      const held = await pg.evaluate(() => {
-        const ok = window.__formAt('now', 0.5), dim = document.getElementById('fdFormDim');
-        const r = { ok, word: window.__form.word, dim: +getComputedStyle(dim).opacity, hit: document.elementFromPoint(innerWidth / 2, innerHeight * 0.44).id };
-        window.__formStop();
-        return r;
+    }
+    // Arrival. The owner asked for the sections of a page to settle in
+    // smoothly, and for nothing to be drawn over the page to announce it: no
+    // burst of light, no heading written in sparkles. So: the blocks on screen
+    // arrive in order, composited only, and leave nothing behind.
+    {
+      await pg.evaluate(() => window.switchView('experience'));
+      await pg.waitForTimeout(120);
+      const arr = await pg.evaluate(() => {
+        const anims = document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest('#view-experience') && !a.animationName && !a.transitionProperty);
+        const props = new Set(); anims.forEach(a => a.effect.getKeyframes().forEach(k => Object.keys(k).forEach(p => { if (!['offset', 'easing', 'composite', 'computedOffset'].includes(p)) props.add(p); })));
+        const delays = anims.map(a => a.effect.getTiming().delay).sort((x, y) => x - y);
+        return { stat: { ...window.__arrival }, n: anims.length, props: [...props].sort(), first: delays[0], last: delays[delays.length - 1], dur: anims[0] && anims[0].effect.getTiming().duration,
+          overlay: !!document.querySelector('#fdForm, #fdFormDim, #fdWarp') };
       });
-      check(held.ok && /now/i.test(held.word) && held.dim > 0.9 && held.hit !== 'fdForm' && held.hit !== 'fdFormDim', `${name}: mid-flight the page is dimmed behind the word and still takes clicks`, JSON.stringify(held));
+      check(arr.stat.view === 'experience' && arr.n >= 2 && arr.n <= 12, `${name}: the sections on screen arrive as separate blocks`, JSON.stringify(arr));
+      check(arr.last > arr.first, `${name}: they arrive in order, not all at once`, `${arr.first}..${arr.last}`);
+      check(arr.props.join() === 'opacity,transform' && arr.dur <= 700, `${name}: the arrival moves transform and opacity only, and is brief`, JSON.stringify({ props: arr.props, dur: arr.dur }));
+      check(!arr.overlay, `${name}: nothing is drawn over the page to announce the arrival`);
+      await pg.waitForTimeout(1900);
+      const rest = await pg.evaluate(() => {
+        const v = document.getElementById('view-experience');
+        const running = document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest('#view-experience') && !a.animationName && !a.transitionProperty && a.playState !== 'finished').length;
+        let host = v; while (host.children.length === 1) host = host.children[0];
+        const top = [...host.children].filter(c => c.offsetHeight > 0 && c.getBoundingClientRect().top < innerHeight && c.getBoundingClientRect().bottom > 0);
+        return { running, hidden: top.filter(c => +getComputedStyle(c).opacity < 0.99 && !c.classList.contains('reveal')).length, shifted: top.filter(c => getComputedStyle(c).transform !== 'none' && !c.classList.contains('reveal')).length };
+      });
+      check(rest.running === 0 && rest.hidden === 0 && rest.shifted === 0, `${name}: once arrived, every block is fully there and nothing is left running`, JSON.stringify(rest));
+      await pg.evaluate(() => window.switchView('home'));
+      await pg.waitForTimeout(700);
     }
     await pg.keyboard.press('Control+k');
     await pg.waitForTimeout(300);
@@ -544,7 +555,7 @@ const check = (ok, label, detail) => {
     await po.evaluate(() => window.switchView('contact'));
     await po.waitForTimeout(3500);
     check(await po.evaluate(() => [...document.querySelectorAll('.lv-beam > i')].every(i => i.getAnimations().length === 0)), 'live edges: nothing animates with Motion off');
-    check(await po.evaluate(() => window.__form.plays === 0 && getComputedStyle(document.getElementById('fdForm')).display === 'none'), 'arrival word: never plays with Motion off');
+    check(await po.evaluate(() => window.__arrival.plays === 0), 'arrival: sections do not animate in with Motion off');
     await off.close();
     for (const [href, want] of [['/freelancer', true], ['/growth-school', true], ['/deli-chic/', false]]) {
       const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
