@@ -267,7 +267,9 @@
     setTimeout(syncLive, 900);
     // Pages reveal views and inject cards after load; look again when they do,
     // and stand the edges down while the page is being scrolled.
-    document.addEventListener('viewChanged', function () { setTimeout(window.__roomScan, 900); setTimeout(window.__roomScan, 2400); });
+    // After the arrival has finished (blocks are transparent until their turn,
+    // and a transparent block is read as not there yet).
+    document.addEventListener('viewChanged', function () { setTimeout(window.__roomScan, 1500); setTimeout(window.__roomScan, 2800); });
     setTimeout(window.__roomScan, 3200);
     var lq = 0;
     addEventListener('scroll', function () {
