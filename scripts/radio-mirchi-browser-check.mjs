@@ -21,6 +21,34 @@ try{
   assert.deepEqual(errors,[],route+' JavaScript page errors');
   await page.close();tested++;
  }
+ // Check the new visual case-study sections at desktop and mobile widths.
+ for(const width of [390,1280]){
+  for(const [route,selector] of [
+   ['/radio-mirchi/index.html','.reader-start'],
+   ['/radio-mirchi/plan.html','#gaana-90 .plan-timeline'],
+   ['/radio-mirchi/platforms.html','#gaana-ios-audit .phone-comparison'],
+   ['/radio-mirchi/digital.html','#india-own-app .moment-grid'],
+   ['/radio-mirchi/opportunities.html','#gaana-pilots .priority-cards'],
+   ['/radio-mirchi/metrics.html','#habit-metric-tree .success-grid']
+  ]){
+   const page=await browser.newPage({viewport:{width,height:844}});
+   const errors=[];page.on('pageerror',err=>errors.push(err.message));
+   const response=await page.goto(BASE+route,{waitUntil:'domcontentloaded',timeout:30000});
+   assert(response&&response.status()<400,'Reader-first page failed: '+route);
+   assert(await page.locator(selector).count()===1,'Missing visual section: '+route+' '+selector);
+   const geom=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth}));
+   assert(geom.width<=geom.viewport+2,'Horizontal overflow '+route+' @ '+width+': '+JSON.stringify(geom));
+   assert.deepEqual(errors,[],'JavaScript errors '+route+' @ '+width);
+   if(route.endsWith('/plan.html')){
+    assert.equal(await page.locator('#gaana-90 .plan-phase').count(),4,'Four phases should be visible');
+    const first=await page.locator('#gaana-90').boundingBox();
+    const station=await page.locator('#sequence').boundingBox();
+    assert(first&&station&&first.y<station.y,'Gaana-first visual order');
+   }
+   if(route.endsWith('/platforms.html'))assert.equal(await page.locator('#gaana-ios-audit .issue-card').count(),3,'Three urgent issue explanations');
+   await page.close();
+  }
+ }
  for(const width of [390,1280]){
   const page=await browser.newPage({viewport:{width,height:844}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));

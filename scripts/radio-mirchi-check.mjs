@@ -57,7 +57,7 @@ assert(lab.includes('Assumptions &amp; definitions'),'Assumption definitions mus
 assert(lab.includes('INTERACTIVE MODEL')&&!lab.includes('>Prepare</span>'),'Lab eyebrow and header');
 for(const id of ['gaana-ios-audit'])assert(platforms.includes('id="'+id+'"'),'Missing Gaana iOS evidence');
 for(const id of ['pricing-trust','india-own-app'])assert(digital.includes('id="'+id+'"'),'Missing Gaana strategy or pricing');
-for(const priority of ['P0','P1','P2'])assert(platforms.includes(priority),'Missing audit priority '+priority);
+for(const phrase of ['FIX FIRST','IMPROVE NEXT','POLISH'])assert(platforms.includes(phrase),'Missing plain-language issue priority '+phrase);
 assert(digital.includes('₹59.08')&&digital.includes('₹54.54')&&digital.includes('₹116.58'),'Displayed monthly arithmetic correction');
 assert(contents['metrics.html'].includes('id="habit-metric-tree"'),'Gaana metric tree');
 assert(contents['plan.html'].includes('id="gaana-90"'),'Gaana 90-day partner plan');
@@ -67,3 +67,23 @@ console.log('Mirchi: Gaana iOS audit, strategy, tabbed lab and interview prepara
 
 execFileSync(process.execPath,['--check',join(dir,'lab.20261123.js')],{stdio:'pipe'});
 console.log('Mirchi: lab module passes Node syntax check.');
+
+
+// Reader-first information design and accuracy checks.
+const plan=contents['plan.html'];
+assert(plan.includes('What I would do in the first 90 days'),'90-day plan headline must explain the purpose');
+assert(plan.indexOf('id="gaana-90"')<plan.indexOf('id="sequence"'),'Gaana plan must come before the separate station plan');
+assert(plan.includes('START HERE')&&plan.includes('THE IDEA IN ONE GLANCE'),'Reader should see context and an overview before technical detail');
+assert(plan.includes('Make listening easy')&&plan.includes('Make returning rewarding'),'Visual three-step listener journey must exist');
+assert(!plan.includes('Joint Gaana track: a gated 90-day experiment'),'Jargon-heavy heading must not return');
+assert(platforms.indexOf('id="gaana-ios-audit"')<platforms.indexOf('id="test-depth"'),'The Gaana app evidence should be presented before secondary research');
+assert(platforms.includes('phone-comparison')&&platforms.includes('SIMPLIFIED ILLUSTRATION'),'Before/after diagram must be clearly labelled');
+assert(digital.includes('moment-grid')&&digital.indexOf('id="india-own-app"')<digital.indexOf('id="live-products"'),'Introduce the value idea before deep background');
+assert(contents['opportunities.html'].indexOf('id="gaana-pilots"')<contents['opportunities.html'].indexOf('id="advertiser"'),'Priorities must precede unrelated business detail');
+assert(contents['metrics.html'].indexOf('id="habit-metric-tree"')<contents['metrics.html'].indexOf('id="tree"'),'Lead with the listener scorecard');
+assert(contents['index.html'].includes('reader-start'),'Case-study landing must orient new readers');
+assert(prep.includes('interview-orientation'),'Interview guide must explain the case before the scripts');
+for(const file of ['index.html','plan.html','digital.html','platforms.html','opportunities.html','metrics.html']){
+ assert(contents[file].includes('/radio-mirchi/clarity.20261123.css'),file+' must load reader-first styles');
+}
+console.log('Mirchi: reader context, visual evidence and navigation order verified.');
