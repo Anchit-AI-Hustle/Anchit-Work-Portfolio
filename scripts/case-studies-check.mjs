@@ -31,5 +31,5 @@ assert(hub.includes('independent research and product proposals'),'Studies must 
 const prep=await read('radio-mirchi-interview-prep.html');
 for(const id of ['executive-pitch','walkthrough','bar-raiser','metric-tree'])assert(prep.includes('id="'+id+'"'),'Interview prep missing '+id);
 const study=await read('radio-mirchi/plan.html');
-assert(study.includes('id="gaana-90"')&&study.includes('The first 90 days'),'Case study plan needs the four-stage work');
+assert(study.includes('id="gaana-90"')&&study.includes('What I would do in the first 90 days'),'Case study plan needs the four-stage work');
 console.log('PASS: six brand studies, independent-research disclaimer, sidebar routing, deep links and interview guide.');
