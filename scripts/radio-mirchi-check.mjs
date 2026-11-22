@@ -44,3 +44,22 @@ assert(prep.includes('noindex,nofollow'), 'Interview prep indexing');
 assert(Object.values(contents).every(s => !s.includes('/radio-mirchi-interview-prep')), 'Interview guide must stay unlinked');
 assert(contents['prototype.html'].includes('id="offer-select"'), 'Renewal offer control');
 assert(contents['initiatives.html'].includes('>FY25</th>'), 'FY25 timeline entry');
+
+
+// New evidence-led audit, partner strategy and lab interaction invariants.
+const lab=contents['lab.html'],platforms=contents['platforms.html'],digital=contents['digital.html'];
+assert(!lab.includes('Search this study')&&!lab.includes('search.20261122.js'),'Lab should not load study search UI or index');
+assert.equal((lab.match(/role="tab" /g)||[]).length,3,'Three accessible model tabs');
+for(const id of ['subscribers','inventory','events'])assert(lab.includes('role="tabpanel" id="'+id+'"'),'Missing lab panel '+id);
+for(const id of ['subscriber-model','radio-model','event-model'])assert(lab.includes('id="'+id+'"'),'Missing interactive form '+id);
+assert(lab.includes('Assumptions &amp; definitions'),'Assumption definitions must sit in an accordion');
+assert(lab.includes('INTERACTIVE MODEL')&&!lab.includes('>Prepare</span>'),'Lab eyebrow and header');
+for(const id of ['gaana-ios-audit'])assert(platforms.includes('id="'+id+'"'),'Missing Gaana iOS evidence');
+for(const id of ['pricing-trust','india-own-app'])assert(digital.includes('id="'+id+'"'),'Missing Gaana strategy or pricing');
+for(const priority of ['P0','P1','P2'])assert(platforms.includes(priority),'Missing audit priority '+priority);
+assert(digital.includes('₹59.08')&&digital.includes('₹54.54')&&digital.includes('₹116.58'),'Displayed monthly arithmetic correction');
+assert(contents['metrics.html'].includes('id="habit-metric-tree"'),'Gaana metric tree');
+assert(contents['plan.html'].includes('id="gaana-90"'),'Gaana 90-day partner plan');
+for(const id of ['executive-pitch','walkthrough','bar-raiser','metric-tree'])assert(prep.includes('id="'+id+'"'),'Interview preparation section missing '+id);
+assert(!Object.values(contents).some(s=>s.includes('href="/radio-mirchi-interview-prep"')),'Interview prep must not be linked from study');
+console.log('Mirchi: Gaana iOS audit, strategy, tabbed lab and interview preparation invariants passed.');
