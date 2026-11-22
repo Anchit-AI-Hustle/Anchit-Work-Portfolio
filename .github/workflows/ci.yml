@@ -85,6 +85,9 @@ jobs:
       - name: Exercise Radio Mirchi and Gaana models in Chromium
         run: npm run test:mirchi:browser
 
+      - name: Exercise Case Studies tab and links in Chromium
+        run: npm run test:case-studies:browser
+
       # Fail fast on content and the PW study's actual new UI invariants.
       # The exhaustive 85k-link scan remains last, after all other checks.
       - name: Structural suites
