@@ -49,6 +49,22 @@ async function watchErrors(page) {
     if (/fonts\.(googleapis|gstatic)\.com|ERR_NAME_NOT_RESOLVED|ERR_TUNNEL|ERR_PROXY|net::ERR_/.test(t)) return;
     errors.push('console: ' + t);
   });
+  // Third-party fonts may be unreachable in CI, but never ignore a broken
+  // first-party game script, poster, or stylesheet.
+  page.on('requestfailed', (req) => {
+    try {
+      const u = new URL(req.url());
+      if (u.origin === new URL(BASE).origin && u.pathname.startsWith('/games/'))
+        errors.push('request failed: ' + u.pathname + ' (' + (req.failure()?.errorText || 'unknown') + ')');
+    } catch (e) { /* malformed URL is already a console error */ }
+  });
+  page.on('response', (res) => {
+    try {
+      const u = new URL(res.url());
+      if (res.status() >= 400 && u.origin === new URL(BASE).origin && u.pathname.startsWith('/games/'))
+        errors.push('HTTP ' + res.status() + ': ' + u.pathname);
+    } catch (e) { /* ignore invalid URLs */ }
+  });
   return errors;
 }
 
@@ -82,7 +98,6 @@ async function hub(browser, vp) {
 
 async function hold(page, vp, ms) {
   if (!vp.hasTouch) {
-    // Drive like a player: forward plus a turn, tapping the main action.
     await page.keyboard.down('ArrowUp');
     await page.keyboard.down('ArrowRight');
     const end = Date.now() + ms;
@@ -96,27 +111,53 @@ async function hold(page, vp, ms) {
     await page.keyboard.up('ArrowUp');
     return;
   }
-  // Touch: push the stick up and to the right, and tap every pad in turn.
+
   const stick = await page.$('.arc-stick');
-  if (stick && await stick.isVisible()) {
+  const stickVisible = stick && await stick.isVisible();
+  if (stickVisible) {
     const b = await stick.boundingBox();
-    await page.dispatchEvent('.arc-stick', 'pointerdown', { pointerId: 11, pointerType: 'touch', isPrimary: true, clientX: b.x + b.width * 0.85, clientY: b.y + b.height * 0.2 });
+    await page.dispatchEvent('.arc-stick', 'pointerdown', {
+      pointerId: 11, pointerType: 'touch', isPrimary: true,
+      clientX: b.x + b.width * 0.85, clientY: b.y + b.height * 0.2,
+    });
   }
-  const pads = await page.$$('.arc-pad');
+
+  // Never trigger hidden buttons: gesture-mode games must really respond to
+  // taps and swipes on the playable canvas, as they do on a phone.
+  const pads = [];
+  for (const pad of await page.$$('.arc-pad')) if (await pad.isVisible()) pads.push(pad);
+  const canvas = page.locator('.arc-stage canvas').first();
   const end = Date.now() + ms;
   let i = 0;
   while (Date.now() < end) {
     if (pads.length) {
       const p = pads[i++ % pads.length];
-      await p.dispatchEvent('pointerdown', { pointerId: 20 + i, pointerType: 'touch', isPrimary: false });
+      await p.dispatchEvent('pointerdown', { pointerId: 20 + i, pointerType: 'touch', isPrimary: !stickVisible });
       await sleep(260);
-      await p.dispatchEvent('pointerup', { pointerId: 20 + i, pointerType: 'touch', isPrimary: false });
+      await p.dispatchEvent('pointerup', { pointerId: 20 + i, pointerType: 'touch', isPrimary: !stickVisible });
     } else {
-      await page.tap('canvas').catch(() => {});
+      const b = await canvas.boundingBox();
+      if (b) {
+        const id = 40 + i++, x = b.x + b.width * 0.45, y = b.y + b.height * 0.48;
+        const event = { pointerId: id, pointerType: 'touch', isPrimary: !stickVisible };
+        await canvas.dispatchEvent('pointerdown', { ...event, clientX: x, clientY: y });
+        await sleep(100);
+        await canvas.dispatchEvent('pointermove', {
+          ...event, clientX: x + b.width * 0.13, clientY: y - b.height * 0.10,
+        });
+        await sleep(100);
+        await canvas.dispatchEvent('pointerup', {
+          ...event, clientX: x + b.width * 0.13, clientY: y - b.height * 0.10,
+        });
+      } else {
+        await page.tap('canvas').catch(() => {});
+      }
     }
     await sleep(200);
   }
-  if (stick) await page.dispatchEvent('.arc-stick', 'pointerup', { pointerId: 11, pointerType: 'touch', isPrimary: true });
+  if (stickVisible) await page.dispatchEvent('.arc-stick', 'pointerup', {
+    pointerId: 11, pointerType: 'touch', isPrimary: true,
+  });
 }
 
 async function game(browser, vp, slug) {
