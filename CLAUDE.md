@@ -193,3 +193,17 @@ ships with:
   gain percentages or 3D/4D/5D labels on screen. One primary call to action per
   hero. The consent banner is neutral and asks after the first scroll there.
 
+## Browser game-studio workflow
+
+When working on any `/games` title, apply `.claude/skills/game-studio/SKILL.md`
+and `docs/GAME_STUDIO_PLAYBOOK.md`. A reference video demonstrated a 49-agent
+Claude Code studio structure; use the **director → lead → specialist → independent
+QA** division of responsibility without importing its entire agent catalogue,
+changing our browser engine, or requiring paid credits. Preserve the 24 existing
+games and use our actual Playwright suites as release gates. Distinguish a
+working menu, a moving frame counter, playable mechanics, human playtest, and
+a verified live deployment; they are different levels of evidence. Record
+first-player-minute experience, game-loop closure, touch/keyboard controls,
+forced 2D fallback, mobile performance, and screenshot evidence. Never announce
+"all games fixed" without passing game-specific checks and explaining what
+remains untested.
