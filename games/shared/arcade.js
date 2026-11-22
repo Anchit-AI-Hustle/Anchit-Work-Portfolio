@@ -236,6 +236,8 @@
       }
     });
     canvas.addEventListener('pointermove', (e) => {
+      // A second finger must not hijack the first finger's drag or aim.
+      if (pointer.down && pointer.id !== null && e.pointerId !== pointer.id) return;
       apply(e);
       if (gesture.active && e.pointerId === gesture.id) {
         gesture.x = pointer.x; gesture.y = pointer.y; gesture.dx = gesture.x - gesture.sx; gesture.dy = gesture.y - gesture.sy;
@@ -271,7 +273,7 @@
       if (Math.abs(tilt.x) < 0.06) tilt.x = 0;
       tilt.active = true;
     });
-    const up = () => { if (pointer.down) pointer.released = true; pointer.down = false; pointer.id = null; };
+    const up = (e) => { if (pointer.id !== null && e.pointerId !== pointer.id) return; if (pointer.down) pointer.released = true; pointer.down = false; pointer.id = null; };
     canvas.addEventListener('pointerup', up);
     canvas.addEventListener('pointercancel', up);
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -646,7 +648,8 @@
       if (opts.start) opts.start(arc, arc.choices);
     };
     arc.menu = (p) => {
-      arc.state = 'menu'; paintPause(); keepAwake(false);
+      // Never carry held steering/actions into a new run via the menu.
+      input.clear(); arc.state = 'menu'; paintPause(); keepAwake(false);
       const m = Object.assign({ actions: [{ label: 'Play', primary: true, on: arc.start }, { label: 'All games', href: '/games' }], showKeys: true }, opts.menu || {}, p || {});
       if (opts.gestures && arc.touchMode) {
         const ch = [{ v: 'gesture', label: 'Tap & swipe' }];
@@ -794,9 +797,10 @@
 
     /* scores */
     const bestKey = 'arcade.best.' + slug;
-    arc.best = () => { const b = store.get(bestKey, null); return b && typeof b.score === 'number' ? b.score : null; };
+    arc.best = () => { const b = store.get(bestKey, null); return b && typeof b.score === 'number' && Number.isFinite(b.score) ? b.score : null; };
     arc.record = (score, lowerIsBetter) => {
       const prev = arc.best();
+      if (typeof score !== 'number' || !Number.isFinite(score)) return { best: prev, isNew: false, first: false };
       const better = prev == null || (lowerIsBetter ? score < prev : score > prev);
       if (better) store.set(bestKey, { score, at: Date.now() });
       return { best: better ? score : prev, isNew: better && prev != null, first: prev == null };
@@ -807,8 +811,8 @@
       if (opts.onOver) opts.onOver(arc);
       let stats = '';
       const posted = typeof o.score === 'number' && isFinite(o.score) ? o.score : null;
-      if (typeof o.score === 'number') {
-        const r = arc.record(o.score, o.lowerIsBetter);
+      if (posted !== null) {
+        const r = arc.record(posted, o.lowerIsBetter);
         const f = opts.formatScore || ((v) => v);
         stats = '<div class="stat"><div>' + esc(o.scoreLabel || 'Score') + '<b>' + esc(f(o.score)) + '</b></div><div>Best<b>' + esc(f(r.best)) + '</b></div>' +
           (r.isNew ? '<div class="new">New best<b class="new">&#9733;</b></div>' : '') + '</div>';
