@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
 import {readFile,readdir} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
@@ -63,3 +64,6 @@ assert(contents['plan.html'].includes('id="gaana-90"'),'Gaana 90-day partner pla
 for(const id of ['executive-pitch','walkthrough','bar-raiser','metric-tree'])assert(prep.includes('id="'+id+'"'),'Interview preparation section missing '+id);
 assert(!Object.values(contents).some(s=>s.includes('href="/radio-mirchi-interview-prep"')),'Interview prep must not be linked from study');
 console.log('Mirchi: Gaana iOS audit, strategy, tabbed lab and interview preparation invariants passed.');
+
+execFileSync(process.execPath,['--check',join(dir,'lab.20261123.js')],{stdio:'pipe'});
+console.log('Mirchi: lab module passes Node syntax check.');
