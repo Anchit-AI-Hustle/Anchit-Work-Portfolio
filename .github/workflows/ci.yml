@@ -26,6 +26,9 @@ jobs:
       - name: Validate Mirchi study and economics
         run: npm run test:mirchi
 
+      - name: Check Case Studies portfolio navigation
+        run: npm run test:case-studies
+
       - name: HTML smoke test
         run: |
           test -f index.html
