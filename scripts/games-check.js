@@ -20,6 +20,7 @@ const sharp = require('sharp');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
+const RENDERER = process.env.RENDERER || 'auto';
 const ALL_GAMES = ['sultan-bay', 'last-ridge', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'ring-rajas', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
 const GAMES = (process.env.GAMES || ALL_GAMES.join(',')).split(',').map((s) => s.trim()).filter(Boolean);
 const ALL_VIEWPORTS = [
@@ -120,6 +121,13 @@ async function hold(page, vp, ms) {
 
 async function game(browser, vp, slug) {
   const ctx = await browser.newContext(vp);
+  // Probe the same 2D fallback users need when WebGL2 is unavailable.
+  if (RENDERER === '2d') await ctx.addInitScript(() => {
+    const get = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+      return kind === 'webgl2' ? null : get.call(this, kind, ...args);
+    };
+  });
   if (MUT === 'stall') await ctx.addInitScript(() => { window.requestAnimationFrame = () => 0; });
   if (MUT === 'error') await ctx.addInitScript(() => {
     const raf = window.requestAnimationFrame.bind(window);
@@ -222,6 +230,6 @@ let NET = null;
   } finally {
     await browser.close();
   }
-  console.log(`\n  ${pass}/${pass + fail} passed${MUT ? '   (mutant: ' + MUT + ')' : ''}`);
+  console.log(`\n  ${pass}/${pass + fail} passed${MUT ? '   (mutant: ' + MUT + ')' : ''}${RENDERER === '2d' ? '   (2D fallback)' : ''}`);
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
