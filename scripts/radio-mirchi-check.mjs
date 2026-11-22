@@ -81,7 +81,10 @@ assert(platforms.includes('phone-comparison')&&platforms.includes('SIMPLIFIED IL
 assert(digital.includes('moment-grid')&&digital.indexOf('id="india-own-app"')<digital.indexOf('id="live-products"'),'Introduce the value idea before deep background');
 assert(contents['opportunities.html'].indexOf('id="gaana-pilots"')<contents['opportunities.html'].indexOf('id="advertiser"'),'Priorities must precede unrelated business detail');
 assert(contents['metrics.html'].indexOf('id="habit-metric-tree"')<contents['metrics.html'].indexOf('id="tree"'),'Lead with the listener scorecard');
-assert(contents['index.html'].includes('reader-start'),'Case-study landing must orient new readers');
+assert(contents['index.html'].includes('reader-start')&&contents['index.html'].includes('context-pillars'),'Case-study landing must orient new readers with full context first');
+for(const [file,html] of Object.entries(contents)){
+ assert(html.includes('class="nav-appendix"'),file+' must group reference navigation inside collapsible appendix');
+}
 assert(prep.includes('interview-orientation'),'Interview guide must explain the case before the scripts');
 for(const file of ['index.html','plan.html','digital.html','platforms.html','opportunities.html','metrics.html']){
  assert(contents[file].includes('/radio-mirchi/clarity.20261123.css'),file+' must load reader-first styles');
