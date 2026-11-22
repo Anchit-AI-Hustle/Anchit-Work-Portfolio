@@ -1,0 +1,42 @@
+import {eventModel,subscriberModel,radioModel} from './models.mjs?v=2';
+const $=s=>document.querySelector(s);
+const toggle=$('#nav-toggle'),nav=$('#study-nav');
+toggle?.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('open',open)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav?.classList.remove('open');toggle?.setAttribute('aria-expanded','false');$('#search-results')?.replaceChildren()}});
+$('#print')?.addEventListener('click',()=>window.print());
+const search=$('#study-search'),results=$('#search-results');
+search?.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();results.replaceChildren();if(q.length<2)return;const matches=(window.MirchiSearch||[]).filter(r=>(r.title+' '+r.text).toLowerCase().includes(q)).slice(0,8);if(!matches.length){const p=document.createElement('p');p.textContent='No matches. Try a business, platform or source name.';results.append(p);return}for(const r of matches){const a=document.createElement('a'),small=document.createElement('small');a.href=r.url;a.textContent=r.title;const i=r.text.toLowerCase().indexOf(q);small.textContent=r.text.slice(Math.max(0,i-55),Math.max(0,i-55)+155)+'…';a.append(small);results.append(a)}});
+const filter=$('#initiative-filter');function updateInitiatives(){const cards=[...document.querySelectorAll('.initiative')];let n=0;for(const c of cards){c.hidden=filter.value!=='all'&&c.dataset.category!==filter.value;if(!c.hidden)n++}$('#filter-count').textContent=n+' initiatives shown'}if(filter){filter.addEventListener('change',updateInitiatives);updateInitiatives()}
+const sourceSearch=$('#source-search');function updateSources(){const q=sourceSearch.value.toLowerCase().trim();let n=0;for(const c of document.querySelectorAll('.source')){c.hidden=!c.textContent.toLowerCase().includes(q);if(!c.hidden)n++}$('#source-count').textContent=n+' sources shown'}if(sourceSearch){sourceSearch.addEventListener('input',updateSources);updateSources()}
+// A cited source remains reachable even after filtering.
+function showLinkedSource(){const id=location.hash.slice(1);if(/^S\d+$/.test(id)&&sourceSearch){sourceSearch.value='';updateSources();document.getElementById(id)?.scrollIntoView()}}window.addEventListener('hashchange',showLinkedSource);showLinkedSource();
+const answers=$('#toggle-answers');answers?.addEventListener('click',()=>{const expand=answers.getAttribute('aria-expanded')!=='true';document.querySelectorAll('.questions details').forEach(d=>d.open=expand);answers.setAttribute('aria-expanded',String(expand));answers.textContent=expand?'Collapse all answers':'Expand all answers'});
+$('#mock')?.addEventListener('click',()=>{const qs=[...document.querySelectorAll('.questions summary')];const q=qs[Math.floor(Math.random()*qs.length)];$('#mock-prompt').textContent='Practise aloud: '+q.textContent;q.parentElement.open=false;q.parentElement.scrollIntoView({behavior:'smooth',block:'center'})});
+const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
+const pct=n=>n===null?'Not defined':n.toFixed(1)+'%';
+const result=(label,value)=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>';
+const modelForms=[['event-model','event-result',eventModel,r=>'<div class="result-grid">'+result('Paid attendees',r.attendees.toLocaleString('en-IN'))+result('Profit after direct event costs',money(r.contribution))+result('Direct profit margin',pct(r.margin))+result('Break-even paid attendees',r.breakEven===null?'Not achievable':r.breakEven.toLocaleString('en-IN'))+'</div><p>Revenue '+money(r.revenue)+' · Direct costs '+money(r.cost)+'.</p><p class="warning">'+(r.unit<=0?'Ticket income does not cover the cost per attendee; extra attendance does not improve the result. ': '')+(r.breakEven===null?'More profit per ticket or more sponsorship is needed.':r.withinCapacity?'Break-even is within ticket capacity under these assumptions.':'Break-even exceeds ticket capacity: change costs, price or contracted income.')+'</p>'],['subscriber-model','subscriber-result',subscriberModel,r=>'<div class="result-grid">'+result('Annual profit per user before marketing',money(r.unit))+result('First-year user-group profit',money(r.firstYear))+result('Renewing users',r.renewed.toLocaleString('en-IN'))+result('Next-year renewal profit',money(r.renewalContribution))+'</div><p>First-year revenue from delivered service '+money(r.revenue)+'. Fixed corporate costs excluded.</p><p>'+ (r.paybackMonths===null?'The cost of getting users cannot be recovered with these inputs.':'Estimated time to recover marketing cost: '+r.paybackMonths.toFixed(1)+' months, assuming profit is earned evenly. This excludes cash timing and future renewals.')+'</p>'],['radio-model','radio-result',radioModel,r=>'<div class="result-grid">'+result('Revenue with starting inputs',money(r.baseline))+result('Alternative revenue',money(r.alternative))+result('Revenue change',money(r.delta)+' / '+pct(r.change))+result('Percentage of ad time needed to match starting revenue',r.required===null?'Not achievable':pct(r.required))+'</div><p class="warning">'+(r.required===null||r.required>100?'This price cut cannot match baseline within available capacity.':'Check profit after direct costs and listener experience before accepting the alternative.')+'</p>']];
+for(const [id,target,calculate,render] of modelForms){const form=document.getElementById(id);if(!form)continue;const output=document.getElementById(target);const run=()=>{const fields=[...form.querySelectorAll('input')];if(fields.some(i=>i.value===''||!i.checkValidity()||!Number.isFinite(Number(i.value)))){output.textContent='Enter valid assumptions within the displayed limits.';return}const values=Object.fromEntries(fields.map(i=>[i.name,Number(i.value)]));output.innerHTML=render(calculate(values))};form.addEventListener('input',run);form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('reset',()=>setTimeout(run,0));run()}
+
+const practiceItems = [...document.querySelectorAll('.questions details')];
+function syncAnswers() {
+  const allOpen = practiceItems.every(item => item.open);
+  answers.setAttribute('aria-expanded', String(allOpen));
+  answers.textContent = allOpen ? 'Collapse all answers' : 'Expand all answers';
+}
+practiceItems.forEach(item => item.addEventListener('toggle', syncAnswers));
+const offer = document.querySelector('#offer-select');
+function displayOffer() {
+  const discounted = offer.value === 'discount';
+  const fee = discounted ? 35000 : 50000;
+  const production = discounted ? 37000 : 25000;
+  const remaining = fee - production - 2000;
+  document.querySelector('#offer-result').textContent =
+    'Fee after discount ' + money(fee) + ' − delivery ' + money(production) +
+    ' − reporting ₹2,000 = ' + money(remaining) + '. ' +
+    (remaining < 0 ? 'Renegotiate the fee or reduce the delivery cost.' : 'The renewal covers direct costs. Resolve the two missed broadcasts first.');
+}
+if (offer) {
+  offer.addEventListener('change', displayOffer);
+  displayOffer();
+}

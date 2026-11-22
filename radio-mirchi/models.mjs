@@ -13,6 +13,6 @@ export function subscriberModel({people,price,retention,costshare,service,cac}){
 export function radioModel({seconds,utilisation,yield:rate,newutil,discount}){
  const baseline=seconds*utilisation/100*rate;
  const alternative=seconds*newutil/100*rate*(1-discount/100);
- const required=discount<100?utilisation/(1-discount/100):null;
+ const required = baseline === 0 ? 0 : discount < 100 ? utilisation / (1 - discount / 100) : null;
  return{baseline,alternative,delta:alternative-baseline,change:baseline>0?(alternative/baseline-1)*100:null,required};
 }
