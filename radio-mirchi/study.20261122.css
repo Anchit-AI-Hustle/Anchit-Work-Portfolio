@@ -14,3 +14,9 @@
  .table-wrap td:before{content:attr(data-heading);display:block;font-size:.78rem;font-weight:700;color:#47566c}
  .table-wrap th[scope=row]{background:#e8eef4}
 }
+
+@media (max-width: 640px) {
+  #listener-choice th, #listener-choice td, #digital-mix th, #digital-mix td { min-width: 0; padding: 8px 5px; }
+  #listener-choice meter { display: block; }
+  #listener-choice table, #digital-mix table { width: 100%; table-layout: fixed; }
+}
