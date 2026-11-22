@@ -3416,7 +3416,31 @@
 }
 </script>
 <!-- seo:auto:end -->
-</head>
+<style id="case-studies-hub-style">
+#view-case-studies .case-studies-hub{max-width:1200px}
+.case-studies-intro{max-width:900px;margin:8px 0 44px}.case-studies-intro h1{margin:16px 0}
+.case-studies-lead{font-size:clamp(18px,2.1vw,24px);line-height:1.53;color:var(--ink);max-width:840px}
+.case-studies-method{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 14px}
+.case-studies-method span{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);padding:8px 12px;border-radius:40px;border:1px solid var(--rule);background:var(--bg-elev)}
+.case-studies-note{font-size:13px;color:var(--ink-dim);line-height:1.65;max-width:790px}
+.case-studies-section-head{margin:28px 0 22px}.case-studies-section-head h2{font-family:var(--font-display);font-size:clamp(25px,3vw,34px);margin:8px 0;letter-spacing:-.02em;color:var(--ink)}
+.case-studies-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.case-studies-card{min-width:0;min-height:330px;display:flex;flex-direction:column;gap:14px;padding:clamp(20px,2.6vw,30px);text-decoration:none;color:var(--ink);border-radius:19px;border:1px solid var(--rule);background:var(--bg-elev);transition:border-color .2s,transform .2s,box-shadow .2s}
+.case-studies-card:hover,.case-studies-card:focus-visible{color:var(--ink);border-color:var(--primary);transform:translateY(-3px);box-shadow:0 15px 36px rgba(0,0,0,.13)}
+.case-studies-card-top{display:flex;align-items:start;justify-content:space-between;gap:12px}.case-studies-number{font-family:var(--font-display);font-weight:700;font-size:40px;line-height:1;color:var(--primary)}
+.case-studies-brand{font-family:var(--font-mono);text-align:right;text-transform:uppercase;font-size:10px;letter-spacing:.07em;color:var(--primary);line-height:1.5}
+.case-studies-card h3{font-family:var(--font-display);font-size:21px;line-height:1.25;letter-spacing:-.025em;color:var(--ink);font-weight:650;margin:7px 0 0}
+.case-studies-card p{font-size:14px;color:var(--ink-dim);line-height:1.65;margin:0}
+.case-studies-tags{display:flex;gap:6px;flex-wrap:wrap}.case-studies-tags span{font-family:var(--font-mono);font-size:10px;color:var(--ink-dim);background:var(--bg-deep);border-radius:6px;padding:4px 7px}
+.case-studies-action{margin-top:auto;display:flex;justify-content:space-between;gap:8px;padding-top:14px;border-top:1px solid var(--rule);font-size:13px;color:var(--primary);font-weight:700}
+.case-studies-route{display:flex;align-items:center;justify-content:space-between;gap:30px;border:1px solid var(--rule);background:var(--bg-elev);border-radius:18px;padding:clamp(22px,3vw,34px);margin:45px 0 24px}
+.case-studies-route h2{font-family:var(--font-display);font-size:23px;line-height:1.25;color:var(--ink);margin:0 0 10px}.case-studies-route p{color:var(--ink-dim);font-size:14px;line-height:1.6;max-width:510px}
+.case-studies-route nav{display:flex;flex-wrap:wrap;gap:9px;max-width:370px}.case-studies-route nav a{padding:9px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--bg-deep);font-size:12px;font-weight:650;color:var(--ink);text-decoration:none}
+.case-studies-route nav a:hover{border-color:var(--primary);color:var(--primary)}.case-studies-next{font-size:14px;line-height:1.6;color:var(--ink-dim)}.case-studies-next a{color:var(--primary)}
+@media(max-width:1050px){.case-studies-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.case-studies-route{align-items:start;flex-direction:column}}
+@media(max-width:640px){.case-studies-grid{grid-template-columns:1fr}.case-studies-card{min-height:260px}.case-studies-route{margin:28px 0;padding:18px}.case-studies-intro{margin-bottom:32px}.case-studies-intro h1{font-size:clamp(34px,10vw,52px)}}
+@media(prefers-reduced-motion:reduce){.case-studies-card{transition:none}.case-studies-card:hover{transform:none}}
+</style></head>
 <body>
 
 <!-- ───────── PAGE PRELOADER, DISABLED ─────────
@@ -3800,6 +3824,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">Experience</span><span class="ml-hover" aria-hidden="true">Where I have worked</span></span>
     </a>
+    <a class="sidebar-item" href="#case-studies" data-view="case-studies" aria-label="Case Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="sidebar-label morph-label"><span class="ml-default">Case Studies</span><span class="ml-hover" aria-hidden="true">6 brand studies</span></span></a>
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">Projects</span><span class="ml-hover" aria-hidden="true">19 builds</span></span>
@@ -4510,6 +4535,7 @@
           </div>
           <div class="nav-card-arrow">&rarr;</div>
         </a>
+        <a class="nav-card" href="#case-studies" data-view="case-studies"><div class="nav-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><div class="nav-card-content"><div class="nav-card-title">Case Studies</div><div class="nav-card-desc">Six independent brand audits and proposals, from user problems to measurable decisions.</div></div><div class="nav-card-arrow">&rarr;</div></a>
         <a class="nav-card" href="/assets/resume.pdf" target="_blank" rel="noopener">
           <div class="nav-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -4982,15 +5008,15 @@
            are independent studies, not work done for those companies. -->
       <div id="exp-studies" class="section-head reveal" style="margin-top: 72px; scroll-margin-top: 24px;">
         <div class="eyebrow">Company case studies · independent</div>
-        <h2 class="display-sm">Five products I studied <em>end to end</em></h2>
-        <p class="lede" style="margin-top: 16px;">Problem-first audits with evidence, the fixes I would ship, and a working model or prototype for each.</p>
+        <h2 class="display-sm">Six brand products I studied <em>end to end</em></h2>
+        <p class="lede" style="margin-top: 16px;">Problem-first audits with evidence, the fixes I would ship, and a working model or prototype for each.</p><p style="margin-top:12px"><a class="btn primary" href="#case-studies" data-view="case-studies">Explore all Case Studies &rarr;</a></p>
       </div>
       <div class="study-grid reveal-stagger">
         <a class="study-card" href="/ET_Study"><span class="study-kicker">The Economic Times · ET Markets · ET Prime</span><strong>ET Study: Why ET Prime Members Are Unhappy</strong><span class="study-line">Independent, problem-first study of The Economic Times, ET Markets and ET Prime: 8 problems with evidence and 14 fixes.</span><span class="study-go">Read the study &rarr;</span></a>
         <a class="study-card" href="/TimesHealth_Study"><span class="study-kicker">Times Health+ · Half Marathon</span><strong>Times Health Study: Why Users Stop</strong><span class="study-line">Independent, problem-first study of Times Health+ yoga, its diet plans and the Times Internet Half Marathon.</span><span class="study-go">Read the study &rarr;</span></a>
         <a class="study-card" href="/pw-study"><span class="study-kicker">PhysicsWallah</span><strong>Learner Retention Engine for PW</strong><span class="study-line">A PhysicsWallah platform audit and the Learner Retention Engine, an AI retention system with a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
         <a class="study-card" href="/lenskart-study"><span class="study-kicker">Lenskart</span><strong>Lenskart Case Study: the Eye Test Follow-up Engine</strong><span class="study-line">A Lenskart platform audit and the Eye Test Follow-up Engine, which follows up first-time eye test customers, with a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
-        <a class="study-card" href="/amar-ujala/study"><span class="study-kicker">Amar Ujala</span><strong>Amar Ujala Study: Result Day to Admission</strong><span class="study-line">An audit of Amar Ujala education, 14 upgrades, the six venture questions and a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
+        <a class="study-card" href="/amar-ujala/study"><span class="study-kicker">Amar Ujala</span><strong>Amar Ujala Study: Result Day to Admission</strong><span class="study-line">An audit of Amar Ujala education, 14 upgrades, the six venture questions and a working prototype.</span><span class="study-go">Read the study &rarr;</span></a><a class="study-card" href="/radio-mirchi"><span class="study-kicker">Radio Mirchi · Gaana</span><strong>How can Gaana make people want to return?</strong><span class="study-line">An independent Gaana iPhone audit, Indian listening strategy and step-by-step 90-day plan.</span><span class="study-go">Read the study &rarr;</span></a>
       </div>
 
       <!-- The "All products shipped" chip grid used to sit here: eleven chips,
@@ -5012,6 +5038,17 @@
   <!-- PROJECTS, Side Builds. Staged as an elite folio: two-page spreads,
        gold-stamped masthead, page-turn motion. Cards stay .build-card inside
        .builds-grid so the card, link and design-system suites still read them. -->
+  <section class="view" id="view-case-studies" aria-labelledby="case-studies-title"><div class="container case-studies-hub">
+    <header class="case-studies-intro"><div class="eyebrow">Independent research · Product decisions</div><h1 class="display-lg" id="case-studies-title">Case <em>Studies</em></h1><p class="case-studies-lead">Six brands, six customer problems. Each study examines what is happening, explains what I would fix, and shows how I would test whether it helps.</p><div class="case-studies-method"><span>Understand the user</span><span>Find the friction</span><span>Prioritise a fix</span><span>Measure the result</span></div><p class="case-studies-note">These are independent research and product proposals, not commissioned work or measured results for these brands. Observations and assumptions are distinguished within each study.</p></header>
+    <div class="case-studies-section-head"><div class="eyebrow">Explore the work</div><h2>Choose a problem worth solving</h2></div><div class="case-studies-grid"><a class="case-studies-card" href="/radio-mirchi" aria-label="Read Radio Mirchi + Gaana case study"><div class="case-studies-card-top"><span class="case-studies-number">01</span><span class="case-studies-brand">Radio Mirchi + Gaana</span></div><h3>Streaming, subscriptions & regional habits</h3><p>How do we make Gaana easier to listen to, then give people a reason to return?</p><div class="case-studies-tags"><span>User experience</span><span>Pricing clarity</span><span>Habit</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a>
+<a class="case-studies-card" href="/ET_Study" aria-label="Read The Economic Times case study"><div class="case-studies-card-top"><span class="case-studies-number">02</span><span class="case-studies-brand">The Economic Times</span></div><h3>ET Prime and ET Markets</h3><p>Where do paid members struggle to see value, and what would make the experience clearer?</p><div class="case-studies-tags"><span>Subscriptions</span><span>Discovery</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a>
+<a class="case-studies-card" href="/TimesHealth_Study" aria-label="Read Times Health+ case study"><div class="case-studies-card-top"><span class="case-studies-number">03</span><span class="case-studies-brand">Times Health+</span></div><h3>Wellness, plans & Half Marathon</h3><p>Why do users stop using wellness products, and what could help them return?</p><div class="case-studies-tags"><span>Retention</span><span>Motivation</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a>
+<a class="case-studies-card" href="/pw-study" aria-label="Read PhysicsWallah case study"><div class="case-studies-card-top"><span class="case-studies-number">04</span><span class="case-studies-brand">PhysicsWallah</span></div><h3>Learner Retention Engine</h3><p>When a learner falls behind, how could the product help them get back on track?</p><div class="case-studies-tags"><span>Education</span><span>Habit</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a>
+<a class="case-studies-card" href="/lenskart-study" aria-label="Read Lenskart case study"><div class="case-studies-card-top"><span class="case-studies-number">05</span><span class="case-studies-brand">Lenskart</span></div><h3>Eye Test Follow-up Engine</h3><p>After an eye test, what would help a customer take the right next step?</p><div class="case-studies-tags"><span>Retail</span><span>Conversion</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a>
+<a class="case-studies-card" href="/amar-ujala/study" aria-label="Read Amar Ujala case study"><div class="case-studies-card-top"><span class="case-studies-number">06</span><span class="case-studies-brand">Amar Ujala</span></div><h3>Result Day to Admission</h3><p>How could education users move from exam results to a confident admissions decision?</p><div class="case-studies-tags"><span>Education</span><span>Guidance</span></div><span class="case-studies-action">Explore case study <span aria-hidden="true">&rarr;</span></span></a></div>
+    <div class="case-studies-route"><div><h2>Radio Mirchi + Gaana: go deeper</h2><p>The latest study connects an iOS app audit to India-first listening habits and a clear 90-day improvement plan.</p></div><nav aria-label="Radio Mirchi study sections"><a href="/radio-mirchi/platforms#gaana-ios-audit">App audit</a><a href="/radio-mirchi/digital#india-own-app">Product strategy</a><a href="/radio-mirchi/plan#gaana-90">90-day plan</a><a href="/radio-mirchi/lab">Interactive model</a></nav></div>
+    <p class="case-studies-next">Interested in the products I built, rather than independent brand research? <a href="#projects" data-view="projects">Explore my projects &rarr;</a></p>
+  </div></section>
   <section class="view" id="view-projects">
     <div class="container folio" id="projectsFolio">
       <div class="section-head folio-masthead reveal">
@@ -7170,7 +7207,7 @@
     });
   })();
 
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-assisted-sales','project-parwah','project-ebooks','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','case-studies','projects','resume','contact','project-assisted-sales','project-parwah','project-ebooks','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   // project-* views that are case studies of a JOB, not a side build.
   const WORK_CASE_VIEWS = ['project-assisted-sales'];
   let audioModeEnabled = false; // true once user has clicked Play, gates page narration
@@ -9066,11 +9103,12 @@
       now:        "Right now I'm building Par-wah: one app for the whole family, with your parents at the centre. Daily check-in, S.O.S., booking anything for them, sending money safely. Reassurance, never surveillance. The website is live. Before this, from April to September twenty twenty six, I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, where I helped build a lifecycle and retention O.S. and lift U.K. marketing revenue.",
       chat:       "This is the part where you get to interrogate me. Ask about Vah-dahm, or Times Internet, or the numbers behind any of it. Ask why I left engineering for product, or what I'm building on weekends. The guide answers in my voice, using everything on this site. And if it doesn't know something, it will say so and point you straight at me.",
       experience: "Five years, one fairly clear arc. Backend engineer at Tuple Technologies and City Mall, then Times Internet from twenty twenty two to twenty twenty six, A.P.M. to P.M. to Senior P.M. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees in monthly recurring revenue, in eight to ten months. I rebuilt E.T. Markets for three crore plus in new annual revenue. And I took the Delhi Half Marathon from zero to one, eighteen thousand plus runners.",
+      'case-studies': "Six independent brand studies across The Economic Times, Times Health Plus, PhysicsWallah, Lenskart, Amar Ujala, and Radio Mirchi with Gaana. Each begins with a user problem, evidence, and a testable product proposal.",
       projects:   "I build on evenings and weekends because I can't sit still. They're all A.I. first, all consumer. LifeCycle O.S. is the big one, type in any D to C brand and it benchmarks the category, then designs the entire lifecycle live. The Third Eye is a personal A.I. operating system. Music Gen A.I. writes whole songs from a prompt. Job Hunt pulls live openings from four job boards. This portfolio counts too.",
       resume:     "The full resume is right here as a P.D.F. Open it, download it, send it on to whoever needs it. It's the two page version of everything on this site, Vah-dahm, Times Internet, the engineering years before that, and the numbers attached to each one. And if you'd rather ask than read, the chat knows all of it.",
       contact:    "If any of this is useful to you, just reach out. WhatsApp is fastest. A call works. Or book a thirty minute Google Meet if you want a proper conversation. Email me at anchit dot tandon at gmail dot com. I'm looking for my next full-time Senior Product Manager role, and always up for an honest conversation about funnels, subscriptions and consumer product. No pitch required."
     };
-    const VIEW_LABELS = { home: 'Home', about: 'About Me', now: 'Now', chat: 'Chat with me', experience: 'Experience', projects: 'Projects', resume: 'My Resume', contact: 'Contact' };
+    const VIEW_LABELS = { home: 'Home', about: 'About Me', now: 'Now', chat: 'Chat with me', experience: 'Experience', 'case-studies': 'Case Studies', projects: 'Projects', resume: 'My Resume', contact: 'Contact' };
 
 	    let progressTimer = null, utterStart = 0, utterDuration = 0;
 	    let currentViewName = 'home';
