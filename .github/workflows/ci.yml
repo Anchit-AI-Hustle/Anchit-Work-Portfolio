@@ -111,6 +111,9 @@ jobs:
       - name: Games suite
         run: npm run test:games
 
+      - name: Software renderer fallback across all games on phone
+        run: RENDERER=2d VP=phone npm run test:games
+
       - name: Kart Mela chase camera follows the kart in every direction
         run: npm run test:kartcam
 
