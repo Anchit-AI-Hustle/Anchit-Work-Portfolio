@@ -110,3 +110,9 @@ assert(contents['sources.html'].includes('id="app-audience-evidence"'),'Source l
 assert(prep.includes('id="four-app-interview"'),'Interview prep must include four-app pushback');
 assert(!users.includes('iOS MAU: 10')&&!users.includes('Android MAU: 10'),'Do not fabricate OS-level active users');
 console.log('Mirchi: four app audiences, 28 prioritized findings, data-quality limits and interview sync passed.');
+
+// The 28-item visual evidence experience must retain the full inspectable source table.
+assert.equal((platforms.match(/class="issue-visual-card"/g)||[]).length,28,'All ranked issues require a visual card');
+assert(platforms.includes('id="issue-filters"')&&platforms.includes('id="issue-visual-grid"'),'Visible issue filters and gallery required');
+assert(platforms.includes('DIAGNOSTIC VISUAL')&&platforms.includes('not an actual app screenshot'),'Diagram vs screenshot integrity');
+assert(platforms.includes('7 Gaana iOS screenshots')&&platforms.includes('1 iOS screen recording'),'Evidence inventory must be explicit');

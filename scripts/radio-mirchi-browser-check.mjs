@@ -97,7 +97,15 @@ try{
    const dimensions=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:innerWidth}));
    assert(dimensions.doc<=dimensions.viewport+2,'Mobile/desktop overflow '+route+' width '+width+' '+JSON.stringify(dimensions));
    assert.deepEqual(errors,[],'Four-app JavaScript page errors '+route);
-   if(route.includes('/platforms.html'))assert.equal(await page.locator('#ranked-mobile-issues tbody tr').count(),28,'All 28 issues should render');
+   if(route.includes('/platforms.html')){
+    assert.equal(await page.locator('#ranked-mobile-issues tbody tr').count(),28,'Full 28-row source table must remain');
+    assert.equal(await page.locator('.issue-visual-card').count(),28,'28 illustrated issue cards');
+    await page.locator('#issue-priority-filter').selectOption('P0');
+    assert.equal(await page.locator('.issue-visual-card:visible').count(),8,'P0 filter reveals eight highest-priority issues');
+    await page.locator('#issue-priority-filter').selectOption('all');
+    await page.locator('#issue-evidence-filter').selectOption('capture');
+    assert(await page.locator('.issue-visual-card:visible').count()>=8,'Photo-backed issue filter');
+   }
    if(route.includes('/users.html'))assert.equal(await page.locator('#four-app-userbase .card').count(),4,'Four distinct app-audience cards');
    await page.close();
   }
