@@ -18,5 +18,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   count.textContent='Showing '+shown+' of '+cards.length+' issues';
  };
  for(const el of [platform,priority,evidence])el.addEventListener('change',update);
+ grid.addEventListener('click',event=>{
+  const playButton=event.target.closest('.issue-play');
+  if(!playButton||!grid.contains(playButton))return;
+  const card=playButton.closest('.issue-visual-card');
+  const playing=card.dataset.issuePlaying!=='true';
+  card.dataset.issuePlaying=String(playing);
+  playButton.setAttribute('aria-pressed',String(playing));
+  playButton.textContent=playing?'Ⅱ Pause the illustration':'▶ Play the 3-step illustration';
+ });
  update();
 });
