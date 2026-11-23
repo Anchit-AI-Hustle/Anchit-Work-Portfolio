@@ -26,6 +26,9 @@ jobs:
       - name: Validate Mirchi study and economics
         run: npm run test:mirchi
 
+      - name: Check Case Studies portfolio navigation
+        run: npm run test:case-studies
+
       - name: HTML smoke test
         run: |
           test -f index.html
@@ -81,6 +84,9 @@ jobs:
 
       - name: Exercise Radio Mirchi and Gaana models in Chromium
         run: npm run test:mirchi:browser
+
+      - name: Exercise Case Studies tab and links in Chromium
+        run: npm run test:case-studies:browser
 
       # Fail fast on content and the PW study's actual new UI invariants.
       # The exhaustive 85k-link scan remains last, after all other checks.
