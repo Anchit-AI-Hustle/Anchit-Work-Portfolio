@@ -116,3 +116,17 @@ assert.equal((platforms.match(/class="issue-visual-card"/g)||[]).length,28,'All 
 assert(platforms.includes('id="issue-filters"')&&platforms.includes('id="issue-visual-grid"'),'Visible issue filters and gallery required');
 assert(platforms.includes('DIAGNOSTIC VISUAL')&&platforms.includes('not an actual app screenshot'),'Diagram vs screenshot integrity');
 assert(platforms.includes('7 Gaana iOS screenshots')&&platforms.includes('1 iOS screen recording'),'Evidence inventory must be explicit');
+
+
+// Q1 FY27 reach-extension and distinct Mirchi relationship-product invariants.
+assert(contents['initiatives.html'].includes('id="new-audience-segments"'),'Existing segment reach and Q1 sources required');
+for(const id of ['mirchi-product-separation','mirchi-relationship-experiences'])assert(contents['digital.html'].includes('id="'+id+'"'),'Distinct Mirchi product and safe expert proposal required');
+assert(contents['opportunities.html'].includes('id="relationship-priorities"'),'Ranked relationship pilot register required');
+assert(contents['plan.html'].includes('id="relationship-90"'),'90-day separated Mirchi pilot required');
+assert(contents['metrics.html'].includes('id="relationship-kpis"'),'Relationship and safe commercial measures required');
+assert(contents['sources.html'].includes('id="relationship-source-check"'),'Source verification for Q1 and independent wellbeing needs');
+assert(prep.includes('id="relationship-interview"'),'Staff interviewer pushbacks on app separation and expert services');
+assert(contents['digital.html'].includes('Tele-MANAS 14416')&&contents['digital.html'].includes('no diagnosis'),'Mental-health boundary and referral required');
+assert(contents['digital.html'].includes('age-gate paid personal consultations'),'Adult-only paid consultations required');
+assert(contents['index.html'].includes('/radio-mirchi/digital#mirchi-product-separation'),'Relationship thesis visible from homepage');
+console.log('Mirchi: Q1 sources, two-product architecture, safeguarding, ranked pilots and interview synchronization passed.');
