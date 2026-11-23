@@ -96,7 +96,7 @@ console.log('Mirchi: reader context, visual evidence and navigation order verifi
 const users=contents['users.html'];
 assert(users.includes('id="four-app-userbase"')&&users.includes('id="four-app-engagement"'),'Separate four-platform audience and engagement reviews required');
 for(const label of ['Gaana · iOS','Gaana · Android','Mirchi Plus · Android','Mirchi Plus · iOS'])assert(users.includes(label),'Audience missing '+label);
-for(const text of ['20.0M+','153.1M+','Missing:','No public'])assert(users.includes(text),'Audience limitations should be visible: '+text);
+for(const text of ['20.0M+','153.1M+','Missing:','not Mirchi Plus app MAU'])assert(users.includes(text),'Audience limitations should be visible: '+text);
 assert(platforms.includes('id="ranked-mobile-issues"')&&platforms.includes('id="mobile-issue-overview"'),'Priority issue register and four-OS overview required');
 assert.equal((platforms.match(/data-heading="Rank"/g)||[]).length,28,'Exactly 28 numbered issue rows required');
 for(const tier of ['P0','P1','P2'])assert(platforms.includes(' · '+tier+'</strong>'),'Missing rank tier '+tier);
