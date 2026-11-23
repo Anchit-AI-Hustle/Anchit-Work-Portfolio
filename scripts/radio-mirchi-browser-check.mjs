@@ -79,6 +79,29 @@ try{
   assert.deepEqual(errors,[],'Lab page errors at '+width);
   await page.close();
  }
+ // Review mobile and desktop geometry for the new OS-specific audience and issue pages.
+ for(const width of [390,1280]){
+  for(const [route,selector] of [
+   ['/radio-mirchi/users.html','#four-app-userbase'],
+   ['/radio-mirchi/platforms.html','#ranked-mobile-issues'],
+   ['/radio-mirchi/digital.html','#mobile-audience-strategy'],
+   ['/radio-mirchi/metrics.html','#four-app-measurement'],
+   ['/radio-mirchi/sources.html','#app-audience-evidence'],
+   ['/radio-mirchi-interview-prep.html','#four-app-interview']
+  ]){
+   const page=await browser.newPage({viewport:{width,height:844}});
+   const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   const response=await page.goto(BASE+route,{waitUntil:'domcontentloaded',timeout:30000});
+   assert(response&&response.status()<400,'Four-app chapter not served: '+route);
+   assert(await page.locator(selector).count()===1,'Missing four-app section '+route);
+   const dimensions=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:innerWidth}));
+   assert(dimensions.doc<=dimensions.viewport+2,'Mobile/desktop overflow '+route+' width '+width+' '+JSON.stringify(dimensions));
+   assert.deepEqual(errors,[],'Four-app JavaScript page errors '+route);
+   if(route.includes('/platforms.html'))assert.equal(await page.locator('#ranked-mobile-issues tbody tr').count(),28,'All 28 issues should render');
+   if(route.includes('/users.html'))assert.equal(await page.locator('#four-app-userbase .card').count(),4,'Four distinct app-audience cards');
+   await page.close();
+  }
+ }
  const prep=await browser.newPage({viewport:{width:390,height:844}});
  const response=await prep.goto(BASE+'/radio-mirchi-interview-prep.html');
  assert(response&&response.status()<400,'prep mobile response');

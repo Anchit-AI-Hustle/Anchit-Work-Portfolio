@@ -93,3 +93,20 @@ assert(contents['index.html'].includes('<a href="/radio-mirchi/platforms"><small
 assert(contents['platforms.html'].includes('<a href="/radio-mirchi/digital"><small>Next</small>'),'Platforms Next link must lead to strategy');
 assert(contents['digital.html'].includes('<a href="/radio-mirchi/opportunities"><small>Next</small>'),'Digital Next link must lead to priorities');
 console.log('Mirchi: reader context, visual evidence and navigation order verified.');
+
+
+// Four-platform audience, engagement, ranked issue and source integrity.
+const users=contents['users.html'];
+assert(users.includes('id="four-app-userbase"')&&users.includes('id="four-app-engagement"'),'Separate four-platform audience and engagement reviews required');
+for(const label of ['Gaana · iOS','Gaana · Android','Mirchi Plus · Android','Mirchi Plus · iOS'])assert(users.includes(label),'Audience missing '+label);
+for(const text of ['20.0M+','153.1M+','Missing:','not Mirchi Plus app MAU'])assert(users.includes(text),'Audience limitations should be visible: '+text);
+assert(platforms.includes('id="ranked-mobile-issues"')&&platforms.includes('id="mobile-issue-overview"'),'Priority issue register and four-OS overview required');
+assert.equal((platforms.match(/data-heading="Rank"/g)||[]).length,28,'Exactly 28 numbered issue rows required');
+for(const tier of ['P0','P1','P2'])assert(platforms.includes(' · '+tier+'</strong>'),'Missing rank tier '+tier);
+for(const label of ['Gaana iOS','Gaana Android','Mirchi Android','Mirchi iOS'])assert(platforms.includes(label),'Issue coverage missing '+label);
+assert(contents['digital.html'].includes('id="mobile-audience-strategy"'),'Digital strategy not synced to mobile users');
+assert(contents['metrics.html'].includes('id="four-app-measurement"'),'Four-platform scorecard missing');
+assert(contents['sources.html'].includes('id="app-audience-evidence"'),'Source limits missing');
+assert(prep.includes('id="four-app-interview"'),'Interview prep must include four-app pushback');
+assert(!users.includes('iOS MAU: 10')&&!users.includes('Android MAU: 10'),'Do not fabricate OS-level active users');
+console.log('Mirchi: four app audiences, 28 prioritized findings, data-quality limits and interview sync passed.');
