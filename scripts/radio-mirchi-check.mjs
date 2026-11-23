@@ -89,4 +89,7 @@ assert(prep.includes('interview-orientation'),'Interview guide must explain the 
 for(const file of ['index.html','plan.html','digital.html','platforms.html','opportunities.html','metrics.html']){
  assert(contents[file].includes('/radio-mirchi/clarity.20261123.css'),file+' must load reader-first styles');
 }
+assert(contents['index.html'].includes('<a href="/radio-mirchi/platforms"><small>Next</small>Gaana iPhone audit</a>'),'Index Next link must follow core reading order');
+assert(contents['platforms.html'].includes('<a href="/radio-mirchi/digital"><small>Next</small>'),'Platforms Next link must lead to strategy');
+assert(contents['digital.html'].includes('<a href="/radio-mirchi/opportunities"><small>Next</small>'),'Digital Next link must lead to priorities');
 console.log('Mirchi: reader context, visual evidence and navigation order verified.');
