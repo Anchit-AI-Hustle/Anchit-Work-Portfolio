@@ -45,8 +45,47 @@ try {
     await page.locator('#eligible').fill('10000');await page.locator('#lift').fill('3');
     await page.locator('#contribution').fill('800');await page.locator('#cost').fill('120000');
     assert.match(await page.locator('#economics').innerText(),/300 incremental visits.*1,20,000/);
+    assert.equal(await page.locator('#visit-companion .era-card').count(),10);
+    assert.equal(await page.locator('#visit-companion ol.visit-path li').count(),8);
+    assert.equal(await page.locator('#visit-new-out').innerText(),'300');
+    assert.equal(await page.locator('#visit-ret-out').innerText(),'250');
+    assert.equal(await page.locator('#visit-hours-out').innerText(),'133.3');
+    await page.locator('#visit-person').selectOption('caregiver');
+    assert.match(await page.locator('#visit-screen').innerText(),/not yet authorised/);
+    assert(await page.locator('#visit-next').isDisabled());
+    await page.locator('#visit-resolve').click();
+    assert(await page.locator('#visit-next').isEnabled());
+    await page.locator('#visit-payment').selectOption('pending');
+    await page.locator('#visit-resolve').click();
+    await page.locator('#visit-next').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/Do not pay again/);
+    assert(await page.locator('#visit-next').isDisabled(),'Identity resolution must not resolve payment');
+    await page.locator('#visit-resolve').click();
+    await page.locator('#visit-next').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/Digital visit pass/);
+    await page.locator('#visit-next').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/checked in/);
+    await page.locator('#visit-person').selectOption('new');
+    await page.locator('#visit-payment').selectOption('desk');
+    await page.locator('#visit-arrival').selectOption('desk');
+    await page.locator('#visit-plan').selectOption('unsigned');
+    assert.match(await page.locator('#visit-screen').innerText(),/No past appointments/);
+    await page.locator('#visit-next').click();
+    await page.locator('#visit-next').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/Assisted arrival/);
+    for(let i=0;i<4;i++)await page.locator('#visit-next').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/pending approval/);
+    assert(await page.locator('#visit-next').isDisabled());
+    assert(!/due in 4 weeks/.test(await page.locator('#visit-screen').innerText()));
+    await page.locator('#visit-resolve').click();
+    assert.match(await page.locator('#visit-screen').innerText(),/care timeline is up to date/);
+    await page.locator('#visit-reset').click();
+    assert.equal(await page.locator('#visit-progress').getAttribute('aria-valuenow'),'1');
+    await page.locator('#visit-lift').fill('4');
+    assert.equal(await page.locator('#visit-new-out').innerText(),'400');
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Visit companion overflows at '+width);
     assert.deepEqual(errors,[],'Uncaught JS errors at '+width);
     await page.close();
     console.log('PASS Medanta at '+width+'px: navigation, evidence, all demos, economics, no page overflow');
   }
-}finally{await browser.close()}
+}finally{await browser.close();}
