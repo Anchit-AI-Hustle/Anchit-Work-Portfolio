@@ -88,6 +88,9 @@ jobs:
       - name: Exercise Case Studies tab and links in Chromium
         run: npm run test:case-studies:browser
 
+      - name: Exercise Medanta study on mobile and desktop
+        run: node scripts/medanta-study-browser-check.mjs
+
       # Fail fast on content and the PW study's actual new UI invariants.
       # The exhaustive 85k-link scan remains last, after all other checks.
       - name: Structural suites
