@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import {readFile,access} from 'node:fs/promises';
+import {chromium} from 'playwright';
+const html=await readFile(new URL('../www/medanta-study/index.html',import.meta.url),'utf8');
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+assert.equal(new Set(ids).size,ids.length,'duplicate IDs');
+for(const [,anchor] of html.matchAll(/href="#([^"]+)"/g))assert(ids.includes(anchor),'Missing anchor: '+anchor);
+const config=JSON.parse(await readFile(new URL('../vercel.json',import.meta.url),'utf8'));
+assert(config.rewrites.some(r=>r.source==='/medanta-study'&&r.destination==='/medanta-study/index.html'));
+await access(new URL('../www/assets/og/og-default.png',import.meta.url));
+await access(new URL('../www/icons/favicon.svg',import.meta.url));
+const browser=await chromium.launch({headless:true});
+try {
+  for(const width of [320,390,768,1440]){
+    const page=await browser.newPage({viewport:{width,height:900}});
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const response=await page.goto('http://localhost:8099/medanta-study/',{waitUntil:'domcontentloaded'});
+    assert.equal(response.status(),200,'Case study route');
+    assert.match(await page.title(),/Medanta Digital/);
+    await page.locator('#economics').waitFor({state:'visible'});
+    assert.equal(await page.locator('h1').count(),1);
+    assert.equal(await page.locator('#executive .exec-card').count(),3);
+    assert.equal(await page.locator('#review-register tbody tr').count(),10);
+    assert.equal(await page.locator('#sources li[id^="s"]').count(),26);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Page overflows at '+width);
+    if(width<=900){
+      assert.equal(await page.locator('#chapter-menu').getAttribute('open'),null);
+      await page.locator('#chapter-menu summary').click();
+      await page.locator('.chapter-nav a[href="#findings"]').click();
+      assert.equal(await page.locator('#chapter-menu').getAttribute('open'),null);
+    }else assert.equal(await page.locator('#chapter-menu').evaluate(e=>e.open),true);
+    await page.locator('#review-register summary').click();
+    assert(await page.locator('#review-register').evaluate(e=>e.open));
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Review table overflows page at '+width);
+    await page.locator('#patient').selectOption('return');await page.locator('#link').click();
+    assert.match(await page.locator('#history').innerText(),/2 prior visits/);
+    await page.locator('#patient').selectOption('family');await page.locator('#link').click();
+    assert.match(await page.locator('#history').innerText(),/Access blocked/);
+    await page.locator('#patient').selectOption('new');await page.locator('#link').click();
+    assert.match(await page.locator('#history').innerText(),/No historical visits/);
+    await page.locator('#payment').selectOption('pending');await page.locator('#book').click();
+    assert.match(await page.locator('#booking').innerText(),/Do not pay again/);
+    await page.locator('#report').selectOption('error');await page.locator('#viewreport').click();
+    assert.match(await page.locator('#reportstatus').innerText(),/Publication delayed/);
+    await page.locator('#eligible').fill('10000');await page.locator('#lift').fill('3');
+    await page.locator('#contribution').fill('800');await page.locator('#cost').fill('120000');
+    assert.match(await page.locator('#economics').innerText(),/300 incremental visits.*1,20,000/);
+    assert.deepEqual(errors,[],'Uncaught JS errors at '+width);
+    await page.close();
+    console.log('PASS Medanta at '+width+'px: navigation, evidence, all demos, economics, no page overflow');
+  }
+}finally{await browser.close()}
