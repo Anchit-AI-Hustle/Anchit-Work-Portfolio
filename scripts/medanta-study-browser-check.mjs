@@ -18,6 +18,15 @@ try {
     assert.equal(response.status(),200,'Case study route');
     assert.match(await page.title(),/Medanta Digital/);
     assert.equal(await page.locator('#full-research').evaluate(e=>e.open),false,'Executive reading mode is default');
+    assert.equal(await page.locator('#executive-visuals svg[role="img"]').count(),1);
+    assert.equal(await page.locator('#journeys .visual-journey article').count(),8);
+    assert.equal(await page.locator('#concept-screens figure svg').count(),3);
+    await page.locator('#v-new').fill('6');
+    await page.locator('#v-ret').fill('4');
+    assert.equal(await page.locator('#v-new-result').innerText(),'600');
+    assert.equal(await page.locator('#v-ret-result').innerText(),'200');
+    assert.equal(await page.locator('#v-new-bar').evaluate(e=>e.style.width),'60%');
+    assert.equal(await page.locator('#v-ret-bar').evaluate(e=>e.style.width),'20%');
     await page.locator('#ai-scenario').selectOption('records');
     await page.locator('#ai-history').selectOption('verified');
     await page.locator('#ai-generate').click();
