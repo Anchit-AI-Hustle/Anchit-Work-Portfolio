@@ -165,18 +165,35 @@ try {
     assert.equal(await deck.locator('[data-deck-slide]').count(),9);
     assert.equal(await page.locator('#deck-count').innerText(),'1 / 9');
     assert(await page.locator('#deck-prev').isDisabled());
+    const assertSlideFit=async()=>{
+      const fit=await deck.locator('[data-deck-slide]:visible').evaluate(el=>{
+        const r=el.getBoundingClientRect(),heading=el.querySelector('h2'),footer=el.querySelector('.deck-footer');
+        return {ratio:r.width/r.height,inside:footer.getBoundingClientRect().bottom<=r.bottom+1,outline:getComputedStyle(heading).outlineStyle,overflow:el.scrollWidth>el.clientWidth+1};
+      });
+      assert(!fit.overflow,'Slide overflows horizontally at '+width);
+      assert(fit.inside,'Slide footer outside canvas at '+width);
+      assert.equal(fit.outline,'none','Presentation heading should not have a focus box');
+      if(width>700)assert(Math.abs(fit.ratio-16/9)<.03,'Slide is not 16:9 at '+width+': '+JSON.stringify(fit));
+    };
+    await assertSlideFit();
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-card-icon').count(),3);
     await page.locator('#deck-next').click();
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-evidence svg').count(),1);
     await page.locator('#deck-next').click();
     assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/Smart Hospital Visit/);
     await page.locator('#deck-next').click();
+    assert(await deck.locator('#physical-demo #phys-next').isHidden(),'Demo should not clutter the slide');
+    await assertSlideFit();
+    await page.locator('#deck-launch-physical').click();
     assert(await deck.locator('#physical-demo #phys-next').isVisible());
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-mini-screens figure').count(),3);
     await page.locator('#phys-reset').click();
     await page.locator('#phys-next').click();
     assert.match(await page.locator('#phys-screen').innerText(),/check|identity|payment/i);
     await page.locator('#deck-next').click();
+    assert(await deck.locator('#ai-consultation #ai-generate').isHidden());
+    await assertSlideFit();
+    await page.locator('#deck-launch-ai').click();
     assert(await deck.locator('#ai-consultation #ai-generate').isVisible());
     await page.locator('#ai-scenario').selectOption('urgent');
     await page.locator('#ai-generate').click();
@@ -193,6 +210,9 @@ try {
     await page.locator('#deck-next').click();
     assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/90-day/);
     assert(await page.locator('#deck-next').isDisabled());
+    await assertSlideFit();
+    for(let i=0;i<8;i++){await page.locator('#deck-prev').click();await assertSlideFit();}
+    assert(await page.locator('#deck-prev').isDisabled());
     assert(await deck.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Presentation overflows at '+width);
     await page.locator('#deck-close').click();
     await deck.waitFor({state:'hidden'});
