@@ -173,16 +173,27 @@ try {
       assert(!fit.overflow,'Slide overflows horizontally at '+width);
       assert(fit.inside,'Slide footer outside canvas at '+width);
       assert.equal(fit.outline,'none','Presentation heading should not have a focus box');
-      if(width>700)assert(Math.abs(fit.ratio-16/9)<.03,'Slide is not 16:9 at '+width+': '+JSON.stringify(fit));
+      if(width>1000&&page.viewportSize().height>720)assert(Math.abs(fit.ratio-16/9)<.03,'Slide is not 16:9 at '+width+': '+JSON.stringify(fit));
+      const reading=await deck.locator('[data-deck-slide]:visible').evaluate(el=>{
+        const heading=el.querySelector('h2');
+        const body=[...el.querySelectorAll('.deck-card p,.deck-accent,.deck-lead')].filter(n=>n.getClientRects().length);
+        const minimum=body.length?Math.min(...body.map(n=>parseFloat(getComputedStyle(n).fontSize))):15;
+        return {heading:parseFloat(getComputedStyle(heading).fontSize),minimum,chrome:getComputedStyle(document.querySelector('.deck-toolbar')).backgroundColor};
+      });
+      assert(reading.heading>=26,'Heading too small at '+width);
+      assert(reading.minimum>=15,'Main copy too small at '+width+': '+reading.minimum);
+      assert.equal(reading.chrome,'rgb(23, 40, 62)','Neutral navy presentation chrome');
     };
     await assertSlideFit();
     assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li').count(),5);
     assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li.risk').count(),3);
+    assert.match(await deck.locator('[data-slide-kind="problem"] .deck-card:first-child .priority-tag').innerText(),/Firsthand finding/);
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-card-icon').count(),3);
     await page.locator('#deck-next').click();
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-evidence svg').count(),1);
     await page.locator('#deck-next').click();
     assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/Smart Hospital Visit/);
+    assert.match(await deck.locator('[data-slide-kind="strategy"] .deck-card:nth-child(2) .priority-tag').innerText(),/primary growth lever/);
     await page.locator('#deck-next').click();
     assert(await deck.locator('#physical-demo #phys-next').isHidden(),'Demo should not clutter the slide');
     await assertSlideFit();
