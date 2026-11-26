@@ -176,6 +176,8 @@ try {
       if(width>700)assert(Math.abs(fit.ratio-16/9)<.03,'Slide is not 16:9 at '+width+': '+JSON.stringify(fit));
     };
     await assertSlideFit();
+    assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li').count(),5);
+    assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li.risk').count(),3);
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-card-icon').count(),3);
     await page.locator('#deck-next').click();
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-evidence svg').count(),1);
@@ -212,6 +214,12 @@ try {
     assert(await page.locator('#deck-next').isDisabled());
     await assertSlideFit();
     for(let i=0;i<8;i++){await page.locator('#deck-prev').click();await assertSlideFit();}
+    assert.equal(await deck.locator('[data-slide-kind]').count(),9);
+    assert.equal(await deck.locator('[data-slide-kind="ai"] .story-chat').count(),1);
+    assert.equal(await deck.locator('[data-slide-kind="strategy"] .story-timeline div').count(),3);
+    assert.equal(await deck.locator('[data-slide-kind="growth"] .story-metrics div').count(),3);
+    assert.equal(await deck.locator('[data-slide-kind="calling"] .story-panel').count(),2);
+    assert.equal(await deck.locator('[data-slide-kind="roadmap"] .story-metrics div').count(),3);
     assert(await page.locator('#deck-prev').isDisabled());
     assert(await deck.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Presentation overflows at '+width);
     await page.locator('#deck-close').click();
