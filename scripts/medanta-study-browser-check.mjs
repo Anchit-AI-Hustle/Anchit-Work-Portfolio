@@ -17,6 +17,11 @@ try {
     const response=await page.goto('http://localhost:8099/medanta-study/',{waitUntil:'domcontentloaded'});
     assert.equal(response.status(),200,'Case study route');
     assert.match(await page.title(),/Medanta Digital/);
+    const pageTheme=await page.evaluate(()=>({brand:getComputedStyle(document.documentElement).getPropertyValue('--brand').trim().toLowerCase(),hero:getComputedStyle(document.querySelector('header')).backgroundColor,accent:getComputedStyle(document.querySelector('.journey-card.primary')).backgroundColor}));
+    assert.equal(pageTheme.brand,'#f04e30','Case study shares the deck brand token');
+    assert.equal(pageTheme.hero,'rgb(38, 40, 43)','Case study charcoal hero');
+    assert.equal(pageTheme.accent,'rgb(255, 240, 235)','Flagship journey uses orange accent');
+
     assert.equal(await page.locator('#full-research').evaluate(e=>e.open),false,'Executive reading mode is default');
     assert.equal(await page.locator('#executive-visuals svg[role="img"]').count(),1);
     assert.equal(await page.locator('#journeys .visual-journey article').count(),8);
