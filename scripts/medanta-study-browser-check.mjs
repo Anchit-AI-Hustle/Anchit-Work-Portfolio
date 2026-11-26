@@ -165,11 +165,14 @@ try {
     assert.equal(await deck.locator('[data-deck-slide]').count(),9);
     assert.equal(await page.locator('#deck-count').innerText(),'1 / 9');
     assert(await page.locator('#deck-prev').isDisabled());
+    assert.equal(await deck.locator('[data-deck-slide]:visible .deck-card-icon').count(),3);
     await page.locator('#deck-next').click();
+    assert.equal(await deck.locator('[data-deck-slide]:visible .deck-evidence svg').count(),1);
     await page.locator('#deck-next').click();
     assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/Smart Hospital Visit/);
     await page.locator('#deck-next').click();
     assert(await deck.locator('#physical-demo #phys-next').isVisible());
+    assert.equal(await deck.locator('[data-deck-slide]:visible .deck-mini-screens figure').count(),3);
     await page.locator('#phys-reset').click();
     await page.locator('#phys-next').click();
     assert.match(await page.locator('#phys-screen').innerText(),/check|identity|payment/i);
