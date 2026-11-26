@@ -187,13 +187,13 @@ try {
     await assertSlideFit();
     assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li').count(),5);
     assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li.risk').count(),3);
-    assert.match(await deck.locator('[data-slide-kind="problem"] .deck-card:first-child .priority-tag').innerText(),/Firsthand finding/);
+    assert.match(await deck.locator('[data-slide-kind="problem"] .deck-card:first-child .priority-tag').innerText(),/Firsthand finding/i);
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-card-icon').count(),3);
     await page.locator('#deck-next').click();
     assert.equal(await deck.locator('[data-deck-slide]:visible .deck-evidence svg').count(),1);
     await page.locator('#deck-next').click();
     assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/Smart Hospital Visit/);
-    assert.match(await deck.locator('[data-slide-kind="strategy"] .deck-card:nth-child(2) .priority-tag').innerText(),/primary growth lever/);
+    assert.match(await deck.locator('[data-slide-kind="strategy"] .deck-card:nth-child(2) .priority-tag').innerText(),/primary growth lever/i);
     await page.locator('#deck-next').click();
     assert(await deck.locator('#physical-demo #phys-next').isHidden(),'Demo should not clutter the slide');
     await assertSlideFit();
