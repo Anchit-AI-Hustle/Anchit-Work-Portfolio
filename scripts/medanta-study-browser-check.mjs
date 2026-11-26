@@ -157,6 +157,42 @@ try {
     assert.equal(await page.locator('#visit-new-out').innerText(),'400');
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Visit companion overflows at '+width);
     assert.deepEqual(errors,[],'Uncaught JS errors at '+width);
+
+    // Executive presentation is a separate view and reuses the actual demo controls.
+    await page.locator('.hero-actions a[href="#presentation-deck"]').click();
+    const deck=page.locator('#presentation-deck');
+    await deck.waitFor({state:'visible'});
+    assert.equal(await deck.locator('[data-deck-slide]').count(),7);
+    assert.equal(await page.locator('#deck-count').innerText(),'1 / 7');
+    assert(await page.locator('#deck-prev').isDisabled());
+    await page.locator('#deck-next').click();
+    await page.locator('#deck-next').click();
+    assert.match(await deck.locator('[data-deck-slide]:visible').innerText(),/Smart Hospital Visit/);
+    await page.locator('#deck-next').click();
+    assert(await deck.locator('#physical-demo #phys-next').isVisible());
+    await page.locator('#phys-reset').click();
+    await page.locator('#phys-next').click();
+    assert.match(await page.locator('#phys-screen').innerText(),/check|identity|payment/i);
+    await page.locator('#deck-next').click();
+    assert(await deck.locator('#ai-consultation #ai-generate').isVisible());
+    await page.locator('#ai-scenario').selectOption('urgent');
+    await page.locator('#ai-generate').click();
+    assert.match(await page.locator('#ai-result').innerText(),/seek immediate human help/);
+    await page.locator('#deck-next').click();
+    await page.locator('#deck-next').click();
+    assert(await page.locator('#deck-next').isDisabled());
+    assert(await deck.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Presentation overflows at '+width);
+    await page.locator('#deck-close').click();
+    await deck.waitFor({state:'hidden'});
+    await page.locator('main #physical-demo').waitFor({state:'visible'});
+    assert.equal(await page.locator('main #ai-consultation').count(),1);
+    await page.goto('http://localhost:8099/medanta-study/#presentation-deck',{waitUntil:'domcontentloaded'});
+    await deck.waitFor({state:'visible'});
+    assert.equal(await page.locator('#deck-count').innerText(),'1 / 7');
+    await page.keyboard.press('Escape');
+    await deck.waitFor({state:'hidden'});
+    assert.deepEqual(errors,[],'Presentation JS errors at '+width);
+
     await page.close();
     console.log('PASS Medanta at '+width+'px: navigation, evidence, all demos, economics, no page overflow');
   }
