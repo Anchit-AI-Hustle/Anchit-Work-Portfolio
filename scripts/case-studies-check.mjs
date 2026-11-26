@@ -7,7 +7,7 @@ const read=(p)=>readFile(join(ROOT,p),'utf8');
 const html=await read('index.html');
 const hub=(html.match(/<section class="view" id="view-case-studies"[\s\S]*?<\/section>/)||[])[0];
 assert(hub,'Dedicated Case Studies view missing');
-assert.equal((hub.match(/class="case-studies-card"/g)||[]).length,6,'Six brand study cards');
+assert.equal((hub.match(/class="case-studies-card"/g)||[]).length,7,'Seven brand study cards');
 assert(html.includes('href="#case-studies" data-view="case-studies" aria-label="Case Studies"'),'Sidebar navigation missing');
 assert(html.includes("'experience','case-studies','projects'"),'SPA route is not registered');
 assert(html.includes("case-studies': 'Case Studies'"),'Narration/view label missing');
@@ -18,7 +18,8 @@ const routes=[
   ['Times Health+','/TimesHealth_Study','TimesHealth_Study/index.html'],
   ['PhysicsWallah','/pw-study','pw-study/index.html'],
   ['Lenskart','/lenskart-study','lenskart-study/index.html'],
-  ['Amar Ujala','/amar-ujala/study','amar-ujala/study.html']
+  ['Amar Ujala','/amar-ujala/study','amar-ujala/study.html'],
+  ['Medanta Digital','/medanta-study','medanta-study/index.html']
 ];
 for(const [brand,route,file] of routes){
  assert(hub.includes(brand),'Brand missing: '+brand);
@@ -27,9 +28,15 @@ for(const [brand,route,file] of routes){
 }
 for(const url of ['/radio-mirchi/platforms#gaana-ios-audit','/radio-mirchi/digital#india-own-app','/radio-mirchi/plan#gaana-90','/radio-mirchi/lab'])
  assert(hub.includes('href="'+url+'"'),'Related Mirchi chapter link missing: '+url);
+const medanta=await read('medanta-study/index.html');
+for(const id of ['presentation-deck','physical-demo','ai-consultation','leadership-plan']){
+ assert(hub.includes('href="/medanta-study#'+id+'"'),'Medanta deep link missing: '+id);
+ assert(medanta.includes('id="'+id+'"'),'Medanta destination missing: '+id);
+}
+assert(medanta.includes('href="#presentation-deck"'),'Presentation deck navigation missing');
 assert(hub.includes('independent research and product proposals'),'Studies must be clearly independent');
 const prep=await read('radio-mirchi-interview-prep.html');
 for(const id of ['executive-pitch','walkthrough','bar-raiser','metric-tree'])assert(prep.includes('id="'+id+'"'),'Interview prep missing '+id);
 const study=await read('radio-mirchi/plan.html');
 assert(study.includes('id="gaana-90"')&&study.includes('What I would do in the first 90 days'),'Case study plan needs the four-stage work');
-console.log('PASS: six brand studies, independent-research disclaimer, sidebar routing, deep links and interview guide.');
+console.log('PASS: seven brand studies, independent-research disclaimer, sidebar routing, deep links and interview guide.');
