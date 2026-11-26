@@ -182,7 +182,16 @@ try {
       });
       assert(reading.heading>=26,'Heading too small at '+width);
       assert(reading.minimum>=15,'Main copy too small at '+width+': '+reading.minimum);
-      assert.equal(reading.chrome,'rgb(23, 40, 62)','Neutral navy presentation chrome');
+      assert.equal(reading.chrome,'rgb(38, 40, 43)','Medanta charcoal presentation chrome');
+      const brand=await deck.evaluate(el=>getComputedStyle(el).getPropertyValue('--brand').trim().toLowerCase());
+      assert.equal(brand,'#f04e30','Public Medanta brand accent');
+      const contrast=await deck.locator('[data-deck-slide]:visible').evaluate(el=>{
+        const rgb=s=>s.match(/[\d.]+/g).slice(0,3).map(Number);
+        const lum=c=>rgb(c).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+        const ratio=(a,b)=>{let x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+        return ratio(getComputedStyle(el.querySelector('h2')).color,getComputedStyle(el).backgroundColor);
+      });
+      assert(contrast>=4.5,'Headline contrast below WCAG AA');
     };
     await assertSlideFit();
     assert.equal(await deck.locator('[data-deck-slide]:visible .story-steps li').count(),5);
