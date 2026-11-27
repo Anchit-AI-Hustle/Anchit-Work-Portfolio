@@ -92,6 +92,7 @@ const assets = [
   'pw-study',
   'radio-mirchi',
   'medanta-study',
+  'careers360-study',
   'radio-mirchi-interview-prep.html',
   'lenskart-study',
   'amar-ujala',
